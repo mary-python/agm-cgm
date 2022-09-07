@@ -2,7 +2,8 @@ import numpy as np
 from keras.utils import to_categorical
 import time
 import os
-import idx2numpy
+from PIL import Image
+from numpy import asarray
 
 # INITIALISING START TIME AND SEED FOR RANDOM SAMPLING
 startTime = time.perf_counter
@@ -18,9 +19,10 @@ def loadData():
     xList = []
     for file in os.listdir():
         if file.endswith('.jpg'):
-            dict = idx2numpy.convert_from_file(file)
-            im = dict.reshape((1, 65536))
-            xList.append(im)
+            img = Image.open(file)
+            dict = asarray(img)
+            vector = dict.reshape((1, 196608))
+            xList.append(vector)
 
     xTrain = np.array(xList)
     return xTrain
@@ -47,7 +49,7 @@ epsconst = epsset[1]
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
 dtaset = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05]
 dtaconst = dtaset[1]
-dset = [4096, 8192, 12288, 16384, 24576, 32768, 44008, 49152, 53248, 65536]
+dset = [12288, 24576, 36864, 49152, 73728, 98304, 132024, 147456, 159744, 196608]
 dconst = dset[9]
 nset = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 nconst = nset[8]
@@ -159,8 +161,8 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
         loopTime = time.perf_counter()
         varSum = 0
 
-        if (dchoice != 65536):
-            xTrainCrop = xTrainNew.reshape((int(28120055808/dchoice), dchoice))
+        if (dchoice != 196608):
+            xTrainCrop = xTrainNew.reshape((int(84360167424/dchoice), dchoice))
             xTrainNew = xTrainCrop
 
         mu = np.mean(xTrainNew, axis = 0)
