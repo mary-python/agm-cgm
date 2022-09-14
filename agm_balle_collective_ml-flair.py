@@ -173,7 +173,7 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
             xTrainNew = xTrainCrop
 
         mu = np.mean(xTrainNew, axis = 0)
-        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 5)):>26}")
+        datafile.write(f"\nmu: {str(np.round((sum(mu))/dchoice, 5)):>26}")
 
         noisyMu = [0]*dchoice
 
