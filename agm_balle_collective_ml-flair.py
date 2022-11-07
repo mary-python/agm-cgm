@@ -10,6 +10,9 @@ startTime = time.perf_counter
 print("\nStarting...")
 np.random.seed(3820672)
 
+# FOR ML-FLAIR THE NUMBER OF SMALL IMAGES IS LARGE
+smallImages = 429078
+
 # LOADING ML-FLAIR DATA BY GEEKSFORGEEKS
 def loadData():
     print("Loading data...")
@@ -18,7 +21,7 @@ def loadData():
     xList = []
 
     from progress.bar import FillingSquaresBar
-    bar = FillingSquaresBar(max=429077, suffix = '%(percent) d%% : %(elapsed)ds elapsed')
+    bar = FillingSquaresBar(max=smallImages-1, suffix = '%(percent) d%% : %(elapsed)ds elapsed')
  
     for file in os.listdir():
 
@@ -68,6 +71,8 @@ rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 R = len(rset)
 mseSum = 0
 mseList = list()
+maxDim = dset[9]
+maxArraySize = smallImages*maxDim
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -168,12 +173,14 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
         loopTime = time.perf_counter()
         varSum = 0
 
-        if (dchoice != 49152):
-            xTrainCrop = xTrainNew.reshape((int(21090041856/dchoice), dchoice))
+        if (dchoice != maxDim):
+            xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
             xTrainNew = xTrainCrop
 
         mu = np.mean(xTrainNew, axis = 0)
         datafile.write(f"\nmu: {str(np.round((sum(mu))/dchoice, 5)):>26}")
+        muSquares = [a**2 for a in mu]
+        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
         noisyMu = [0]*dchoice
 

@@ -62,6 +62,8 @@ rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 R = len(rset)
 mseSum = 0
 mseList = list()
+maxDim = dset[9]
+maxArraySize = nset[9]*maxDim
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -162,12 +164,14 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
         loopTime = time.perf_counter()
         varSum = 0
 
-        if (dchoice != 3072):
-            xTrainCrop = xTrainNew.reshape((int(153600000/dchoice), dchoice))
+        if (dchoice != maxDim):
+            xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
             xTrainNew = xTrainCrop
 
         mu = np.mean(xTrainNew, axis = 0)
         datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 5)):>26}")
+        muSquares = [a**2 for a in mu]
+        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
         noisyMu = [0]*dchoice
 
