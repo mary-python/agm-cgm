@@ -1,6 +1,11 @@
 import numpy as np
 import time
+import idx2numpy
 import os
+
+from math import exp, sqrt, log
+from numpy.random import normal
+from scipy.special import erf
 from PIL import Image
 from numpy import asarray
 
@@ -9,14 +14,83 @@ startTime = time.perf_counter
 print("\nStarting...")
 np.random.seed(3820672)
 
+# ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
+epsset = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+epsconst = epsset[1]
+
+# VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
+dtaset = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05]
+dtaconst = dtaset[1]
+
+dsetCifar = [128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072]
+dsetFashion = [147, 196, 245, 294, 392, 448, 490, 588, 672, 784]
+dsetFlair = [768, 1536, 2304, 3072, 4608, 6144, 8192, 9216, 9984, 12288]
+
+dset = [dsetCifar, dsetFashion, dsetFlair]
+dconst = maxDim = [arr[9] for arr in dset]
+
+nsetMost = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
+nsetFashion = [15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
+
+nset = [nsetMost, nsetFashion]
+nconst = maxNum = [arr[8] for arr in nset]
+
+pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[0])]
+GS = [float(sqrt(d))/n for d, n in pairsArr]
+maxArraySize = [d*n for d, n in pairsArr]
+
+# INITIALISING OTHER PARAMETERS/CONSTANTS
+parset = ['eps', 'dta', 'd', 'n']
+rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+R = len(rset)
+mseSum = 0
+mseList = list()
+
+# IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
+epsTheory = epsconst/2
+dtaTheory = dtaconst/2
+xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
+
 # FOR ML-FLAIR THE NUMBER OF SMALL IMAGES IS LARGE
 smallImages = 429078
-maxDim = 12288
-maxArraySize = smallImages*maxDim
+
+# ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
+def unpickle(file):
+    import pickle
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict
+
+# ADAPTATION OF LOADING AND SPLITTING FIVE FILES OF TRAINING DATA BY RHYTHM
+def loadCifar10():
+    for i in range(1, 6):
+        filename = 'data_batch_' + str(i)
+        dict = unpickle(filename)
+        xData = dict[b'data']
+
+        # CONCATENATE X AND Y DATA FROM ALL FILES INTO RELEVANT VARIABLE
+        if i == 1:
+            xTrain = xData
+        else:
+            xTrain = np.concatenate((xTrain, xData), axis=0)
+    return xTrain
+
+# LOADING AND SPLITTING CIFAR-100 DATA
+def loadCifar100():
+    filename = 'train'
+    dict = unpickle(filename)
+    xTrain = dict[b'data']
+    return xTrain
+
+# LOADING FASHION-MNIST DATA
+def loadFashion(maxNum, maxDim):
+    filename = 'train-images-idx3-ubyte'
+    dict = idx2numpy.convert_from_file(filename)
+    xTrain = dict.reshape((maxNum, maxDim))
+    return xTrain
 
 # LOADING ML-FLAIR DATA BY GEEKSFORGEEKS
-def loadData():
-    print("Loading data...")
+def loadFlair(maxDim):
     path = 'small_images'
     os.chdir(path)
     xList = []
@@ -45,51 +119,28 @@ def transformValues(x):
     return x
 
 # CALL ALL THE ABOVE METHODS
-xTrain = loadData()
-xTrainNew = transformValues(xTrain)
-xTrainSimple = np.full((smallImages, maxDim), 0.5)
+print("Loading data...")
+xTrainCifar10 = loadCifar10()
+xTrainCifar100 = loadCifar100()
+xTrainFashion = loadFashion(maxNum[1], maxDim[1])
+xTrainFlair = loadFlair(maxDim[2])
 
-# ADAPTATION OF ANALYTIC GAUSSIAN MECHANISM BY BALLE AND WANG
-from math import exp, sqrt, log
-from scipy.special import erf
-from numpy.random import normal
+xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
 
-# ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
-epsset = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
-epsconst = epsset[1]
-
-# VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
-dtaset = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05]
-dtaconst = dtaset[1]
-dset = [768, 1536, 2304, 3072, 4608, 6144, 8192, 9216, 9984, 12288]
-dconst = dset[9]
-nset = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
-nconst = nset[8]
-GS = float(sqrt(dconst))/nconst
-
-# INITIALISING OTHER PARAMETERS/CONSTANTS
-parset = ['eps', 'dta', 'd', 'n']
-rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-R = len(rset)
-mseSum = 0
-mseList = list()
-
-# IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
-epsTheory = epsconst/2
-dtaTheory = dtaconst/2
-xiTheory = (2*dconst*log(1.25/dtaTheory))/((nconst**2)*(epsTheory**2))
+xTrainNew = [transformValues(data) for data in xTrain]
+xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
 def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
     if np.all(element == 0.5 for element in xTrainChoice):
-        datafile = open("flair_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("c10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     else:
-        datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("c10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
     datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
 
-    def calibrateAGM(eps, dta, GS, tol = 1.e-12):
+    def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
         Arguments:
         eps : target epsilon (eps > 0)
@@ -157,7 +208,7 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
             uInf, uSup = doublingTrick(predicateStopDT, 0.0, 1.0)
             uFinal = binarySearch(predicateStopBS, predicateLeftBS, uInf, uSup)
             alpha = functionAlpha(uFinal)
-    
+
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
@@ -165,7 +216,7 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
-    sigma = calibrateAGM(epschoice, dtachoice, GS, tol = 1.e-12)
+    sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
     datafile.write(f"\n\nsigma from AGM: {round(sigma, 4):>13}")
@@ -178,11 +229,12 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
         varSum = 0
 
         if (dchoice != maxDim):
-            xTrainCrop = xTrainChoice.reshape((int(maxArraySize/dchoice), dchoice))
+            xTrainCrop = xTrainChoice.reshape(
+                (int(maxArraySize/dchoice), dchoice))
             xTrainChoice = xTrainCrop
 
-        mu = np.mean(xTrainChoice, axis = 0)
-        datafile.write(f"\nmu: {str(np.round((sum(mu))/dchoice, 5)):>26}")
+        mu = np.mean(xTrainChoice, axis=0)
+        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 5)):>26}")
         muSquares = [a**2 for a in mu]
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
@@ -196,7 +248,7 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
-            noisySigma = np.subtract(xTrainChoice[j], noisyMu)  
+            noisySigma = np.subtract(xTrainChoice[j], noisyMu)
         datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 4):>14}")
 
         # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
@@ -212,9 +264,9 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
             varSum += sum(doubleNoisyVar)
             bracket = np.subtract(noisyMu, twiceNoisySigma)
             outside = np.multiply(bracket, noisyMu)
-            mse = np.add(outside, xi2)          
+            mse = np.add(outside, xi2)
             mseSum += sum(mse)
-        
+
         mseList.append(mseSum/nchoice)
 
         datafile.write(f"\nvar + twice noise: {round(varSum/nchoice, 4):>11}")
@@ -247,54 +299,84 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
     datafile.write("\nPercentages comparing AGM and classic GM")
     datafile.write(f"\n\ndifference between mse: {round(percdiff, 8)}%")
 
-def runLoopVaryEps():
+def runLoopVaryEps(dataIndex, maxDim, maxNum):
     for eps in epsset:
         print(f"\nProcessing the main loop for the value eps = {eps}.")
         runLoop(xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
 
-def runLoopVaryDta():
+def runLoopVaryDta(dataIndex, maxDim, maxNum):
     for dta in dtaset:
         print(f"\nProcessing the main loop for the value dta = {dta}.")
         runLoop(xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
-def runLoopVaryD():
+def runLoopVaryD(dataIndex, maxDim, maxNum):
     for d in dset:
         print(f"\nProcessing the main loop for the value d = {d}.")
         runLoop(xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
-def runLoopVaryN():
+def runLoopVaryN(dataIndex, maxDim, maxNum):
     for n in nset:
-        print(f"\nProcessing the main loop for the value n = {n}.")
+        print(f"\nSimple case for the value n = {n}.")
         runLoop(xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
 
-def simpleVaryEps():
+def simpleVaryEps(dataIndex, maxDim, maxNum):
     for eps in epsset:
         print(f"\nSimple case for the value eps = {eps}.")
         runLoop(xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
 
-def simpleVaryDta():
+def simpleVaryDta(dataIndex, maxDim, maxNum):
     for dta in dtaset:
         print(f"\nSimple case for the value dta = {dta}.")
         runLoop(xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
 
-def simpleVaryD():
+def simpleVaryD(dataIndex, maxDim, maxNum):
     for d in dset:
         print(f"\nSimple case for the value d = {d}.")
         runLoop(xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
 
-def simpleVaryN():
+def simpleVaryN(dataIndex, maxDim, maxNum):
     for n in nset:
         print(f"\nProcessing the main loop for the value n = {n}.")
         runLoop(xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
-runLoopVaryEps()
-runLoopVaryDta()
-runLoopVaryD()
-runLoopVaryN()
+runLoopVaryEps(0, 50000, 3072)
+runLoopVaryDta(0, 50000, 3072)
+runLoopVaryD(0, 50000, 3072)
+runLoopVaryN(0, 50000, 3072)
 
-simpleVaryEps()
-simpleVaryDta()
-simpleVaryD()
-simpleVaryN()
+runLoopVaryEps(1, 50000, 3072)
+runLoopVaryDta(1, 50000, 3072)
+runLoopVaryD(1, 50000, 3072)
+runLoopVaryN(1, 50000, 3072)
+
+runLoopVaryEps(2, 60000, 784)
+runLoopVaryDta(2, 60000, 784)
+runLoopVaryD(2, 60000, 784)
+runLoopVaryN(2, 60000, 784)
+
+runLoopVaryEps(3, 429078, 12288)
+runLoopVaryDta(3, 429078, 12288)
+runLoopVaryD(3, 429078, 12288)
+runLoopVaryN(3, 429078, 12288)
+
+simpleVaryEps(0, 50000, 3072)
+simpleVaryDta(0, 50000, 3072)
+simpleVaryD(0, 50000, 3072)
+simpleVaryN(0, 50000, 3072)
+
+simpleVaryEps(1, 50000, 3072)
+simpleVaryDta(1, 50000, 3072)
+simpleVaryD(1, 50000, 3072)
+simpleVaryN(1, 50000, 3072)
+
+simpleVaryEps(2, 60000, 784)
+simpleVaryDta(2, 60000, 784)
+simpleVaryD(2, 60000, 784)
+simpleVaryN(2, 60000, 784)
+
+simpleVaryEps(3, 429078, 12288)
+simpleVaryDta(3, 429078, 12288)
+simpleVaryD(3, 429078, 12288)
+simpleVaryN(3, 429078, 12288)
 
 print("Finished.\n")

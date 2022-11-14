@@ -1,3 +1,6 @@
+from numpy.random import normal
+from scipy.special import erf
+from math import exp, sqrt, log
 import numpy as np
 import time
 
@@ -10,7 +13,7 @@ np.random.seed(3820672)
 def unpickle(file):
     import pickle
     with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding = 'bytes')
+        dict = pickle.load(fo, encoding='bytes')
     return dict
 
 # ADAPTATION OF LOADING AND SPLITTING FIVE FILES OF TRAINING DATA BY RHYTHM
@@ -25,7 +28,7 @@ def loadData():
         if i == 1:
             xTrain = xData
         else:
-            xTrain = np.concatenate((xTrain, xData), axis = 0)
+            xTrain = np.concatenate((xTrain, xData), axis=0)
     return xTrain
 
 # ADAPTATION OF TRANSFORMATION OF LABEL INDICES TO ONE-HOT ENCODED VECTORS AND IMAGES TO 3072-DIMENSIONAL VECTORS BY HADHAZI
@@ -37,11 +40,9 @@ def transformValues(x):
 # CALL ALL THE ABOVE METHODS
 xTrain = loadData()
 xTrainNew = transformValues(xTrain)
+xTrainSimple = np.full((50000, 3072), 0.5)
 
 # ADAPTATION OF ANALYTIC GAUSSIAN MECHANISM BY BALLE AND WANG
-from math import exp, sqrt, log
-from scipy.special import erf
-from numpy.random import normal
 
 # ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
 epsset = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
@@ -70,13 +71,17 @@ epsTheory = epsconst/2
 dtaTheory = dtaconst/2
 xiTheory = (2*dconst*log(1.25/dtaTheory))/((nconst**2)*(epsTheory**2))
 
-def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
-    datafile = open("c10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+    if np.all(element == 0.5 for element in xTrainChoice):
+        datafile = open("c10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+    else:
+        datafile = open("c10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+
     datafile.write("Statistics from Theory and Binary Search in AGM")
     datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
 
-    def calibrateAGM(eps, dta, GS, tol = 1.e-12):
+    def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
         Arguments:
         eps : target epsilon (eps > 0)
@@ -144,7 +149,7 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
             uInf, uSup = doublingTrick(predicateStopDT, 0.0, 1.0)
             uFinal = binarySearch(predicateStopBS, predicateLeftBS, uInf, uSup)
             alpha = functionAlpha(uFinal)
-    
+
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
@@ -152,23 +157,24 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
-    sigma = calibrateAGM(epschoice, dtachoice, GS, tol = 1.e-12)
+    sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
     datafile.write(f"\n\nsigma from AGM: {round(sigma, 4):>13}")
     datafile.write(f"\nsquare: {round(sigma**2, 8):>25}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(xTrainNew, dchoice, sigma, nchoice, mseSum):
+    def computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum):
 
         loopTime = time.perf_counter()
         varSum = 0
 
         if (dchoice != maxDim):
-            xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
-            xTrainNew = xTrainCrop
+            xTrainCrop = xTrainChoice.reshape(
+                (int(maxArraySize/dchoice), dchoice))
+            xTrainChoice = xTrainCrop
 
-        mu = np.mean(xTrainNew, axis = 0)
+        mu = np.mean(xTrainChoice, axis=0)
         datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 5)):>26}")
         muSquares = [a**2 for a in mu]
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
@@ -183,7 +189,7 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
-            noisySigma = np.subtract(xTrainNew[j], noisyMu)  
+            noisySigma = np.subtract(xTrainChoice[j], noisyMu)
         datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 4):>14}")
 
         # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
@@ -199,9 +205,9 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
             varSum += sum(doubleNoisyVar)
             bracket = np.subtract(noisyMu, twiceNoisySigma)
             outside = np.multiply(bracket, noisyMu)
-            mse = np.add(outside, xi2)          
+            mse = np.add(outside, xi2)
             mseSum += sum(mse)
-        
+
         mseList.append(mseSum/nchoice)
 
         datafile.write(f"\nvar + twice noise: {round(varSum/nchoice, 4):>11}")
@@ -211,7 +217,7 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
         datafile.write(f"\ncalibration: {round(casetime, 2):>15} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
-    computeMSE(xTrainNew, dchoice, sigma, nchoice, mseSum)
+    computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum)
     print("Computing MSE...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
@@ -221,7 +227,7 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
     datafile.write(f"\nsquare: {round(classicSigma**2, 8):>22}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
-    computeMSE(xTrainNew, dchoice, classicSigma, nchoice, mseSum)
+    computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseSum)
 
     mseA = mseList.pop(0)
     mseB = mseList.pop(0)
@@ -237,26 +243,51 @@ def runLoop(index, var, epschoice, dtachoice, dchoice, nchoice):
 def runLoopVaryEps():
     for eps in epsset:
         print(f"\nProcessing the main loop for the value eps = {eps}.")
-        runLoop(0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
 
 def runLoopVaryDta():
     for dta in dtaset:
         print(f"\nProcessing the main loop for the value dta = {dta}.")
-        runLoop(1, dta, epsconst, dta, dconst, nconst)
+        runLoop(xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
 def runLoopVaryD():
     for d in dset:
         print(f"\nProcessing the main loop for the value d = {d}.")
-        runLoop(2, d, epsconst, dtaconst, d, nconst)
+        runLoop(xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
 def runLoopVaryN():
     for n in nset:
+        print(f"\nSimple case for the value n = {n}.")
+        runLoop(xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
+
+def simpleVaryEps():
+    for eps in epsset:
+        print(f"\nSimple case for the value eps = {eps}.")
+        runLoop(xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
+
+def simpleVaryDta():
+    for dta in dtaset:
+        print(f"\nSimple case for the value dta = {dta}.")
+        runLoop(xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
+
+def simpleVaryD():
+    for d in dset:
+        print(f"\nSimple case for the value d = {d}.")
+        runLoop(xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
+
+def simpleVaryN():
+    for n in nset:
         print(f"\nProcessing the main loop for the value n = {n}.")
-        runLoop(3, n, epsconst, dtaconst, dconst, n)
+        runLoop(xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
 runLoopVaryEps()
 runLoopVaryDta()
 runLoopVaryD()
 runLoopVaryN()
+
+simpleVaryEps()
+simpleVaryDta()
+simpleVaryD()
+simpleVaryN()
 
 print("Finished.\n")
