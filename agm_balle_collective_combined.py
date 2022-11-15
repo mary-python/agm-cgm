@@ -33,7 +33,8 @@ nsetMost = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 nsetFashion = [15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
 
 nset = [nsetMost, nsetFashion]
-nconst = maxNum = [arr[8] for arr in nset]
+nconst = [arr[8] for arr in nset]
+maxNum = [arr[9] for arr in nset]
 
 pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[0])]
 GS = [float(sqrt(d))/n for d, n in pairsArr]
@@ -126,19 +127,40 @@ xTrainFashion = loadFashion(maxNum[1], maxDim[1])
 xTrainFlair = loadFlair(maxDim[2])
 
 xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
-
 xTrainNew = [transformValues(data) for data in xTrain]
 xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
-def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
-    if np.all(element == 0.5 for element in xTrainChoice):
-        datafile = open("c10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+    if dataIndex == 0:
+        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+            datafile = open("cifar10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        else:
+            datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+    elif dataIndex == 1:
+        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+            datafile = open("cifar100_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        else:
+            datafile = open("cifar100_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+    elif dataIndex == 2:
+        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+            datafile = open("fashion_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        else:
+            datafile = open("fashion_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     else:
-        datafile = open("c10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+            datafile = open("flair_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        else:
+            datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
-    datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
+
+    if dataIndex == 0 or dataIndex == 1:
+        datafile.write(f"\n\nxiTheory: {round(xiTheory[0], 7):>21}")
+    elif dataIndex == 2:
+        datafile.write(f"\n\nxiTheory: {round(xiTheory[1], 7):>21}")
+    else:
+        datafile.write(f"\n\nxiTheory: {round(xiTheory[2], 7):>21}")
 
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
@@ -212,7 +234,13 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        sigma = alpha*GS/sqrt(2.0*eps)
+        if dataIndex == 0 or dataIndex == 1:
+            sigma = alpha*GS[0]/sqrt(2.0*eps)
+        elif dataIndex == 2:
+            sigma = alpha*GS[1]/sqrt(2.0*eps)
+        else:
+            sigma = alpha*GS[2]/sqrt(2.0*eps)
+
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -229,14 +257,20 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
         varSum = 0
 
         if (dchoice != maxDim):
-            xTrainCrop = xTrainChoice.reshape(
-                (int(maxArraySize/dchoice), dchoice))
-            xTrainChoice = xTrainCrop
+            if dataIndex == 0 or dataIndex == 1:
+                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[0]/dchoice), dchoice))
+            elif dataIndex == 2:
+                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[1]/dchoice), dchoice))
+            else:
+                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[2]/dchoice), dchoice))
 
-        mu = np.mean(xTrainChoice, axis=0)
-        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 5)):>26}")
+            xTrainChoice[dataIndex] = xTrainCrop
+
+        
+        mu = np.mean(xTrainChoice[dataIndex], axis=0)
+        datafile.write(f"\nmu: {str(np.round((sum(mu))/dchoice, 5)):>26}")
         muSquares = [a**2 for a in mu]
-        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
+        datafile.write(f"\nsum of squares: {str(np.round((sum(muSquares))/dchoice, 5)):>14}")
 
         noisyMu = [0]*dchoice
 
@@ -248,7 +282,7 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
-            noisySigma = np.subtract(xTrainChoice[j], noisyMu)
+            noisySigma = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
         datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 4):>14}")
 
         # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
@@ -272,6 +306,10 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
         datafile.write(f"\nvar + twice noise: {round(varSum/nchoice, 4):>11}")
         datafile.write(f"\nmse: {round(mseSum/nchoice, 4):>26}")
 
+        # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
+
+        # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
+
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 2):>15} seconds\n")
 
@@ -280,7 +318,13 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
     print("Computing MSE...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    classicSigma = (GS*sqrt(2*log(1.25/dtachoice)))/epschoice
+    if dataIndex == 0 or dataIndex == 1:
+        classicSigma = (GS[0]*sqrt(2*log(1.25/dtachoice)))/epschoice
+    elif dataIndex == 2:
+        classicSigma = (GS[1]*sqrt(2*log(1.25/dtachoice)))/epschoice
+    else:
+        classicSigma = (GS[2]*sqrt(2*log(1.25/dtachoice)))/epschoice
+    
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 4)}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 8):>22}")
@@ -288,6 +332,7 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
     computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseSum)
 
+    # EXPERIMENT 2: AGM VS CGM
     mseA = mseList.pop(0)
     mseB = mseList.pop(0)
     msediff = abs(mseB - mseA)
@@ -299,84 +344,76 @@ def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
     datafile.write("\nPercentages comparing AGM and classic GM")
     datafile.write(f"\n\ndifference between mse: {round(percdiff, 8)}%")
 
-def runLoopVaryEps(dataIndex, maxDim, maxNum):
+    # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
+
+def runLoopVaryEps(dataIndex):
     for eps in epsset:
         print(f"\nProcessing the main loop for the value eps = {eps}.")
-        runLoop(xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
 
-def runLoopVaryDta(dataIndex, maxDim, maxNum):
+def runLoopVaryDta(dataIndex):
     for dta in dtaset:
         print(f"\nProcessing the main loop for the value dta = {dta}.")
-        runLoop(xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
-def runLoopVaryD(dataIndex, maxDim, maxNum):
+def runLoopVaryD(dataIndex):
     for d in dset:
         print(f"\nProcessing the main loop for the value d = {d}.")
-        runLoop(xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
-def runLoopVaryN(dataIndex, maxDim, maxNum):
+def runLoopVaryN(dataIndex):
     for n in nset:
         print(f"\nSimple case for the value n = {n}.")
-        runLoop(xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
 
-def simpleVaryEps(dataIndex, maxDim, maxNum):
+def simpleVaryEps(dataIndex):
     for eps in epsset:
         print(f"\nSimple case for the value eps = {eps}.")
-        runLoop(xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
 
-def simpleVaryDta(dataIndex, maxDim, maxNum):
+def simpleVaryDta(dataIndex):
     for dta in dtaset:
         print(f"\nSimple case for the value dta = {dta}.")
-        runLoop(xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
 
-def simpleVaryD(dataIndex, maxDim, maxNum):
+def simpleVaryD(dataIndex):
     for d in dset:
         print(f"\nSimple case for the value d = {d}.")
-        runLoop(xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
 
-def simpleVaryN(dataIndex, maxDim, maxNum):
+def simpleVaryN(dataIndex):
     for n in nset:
         print(f"\nProcessing the main loop for the value n = {n}.")
-        runLoop(xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
-runLoopVaryEps(0, 50000, 3072)
-runLoopVaryDta(0, 50000, 3072)
-runLoopVaryD(0, 50000, 3072)
-runLoopVaryN(0, 50000, 3072)
+# EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
+for i in range(4):
+    runLoopVaryEps(i)
+    runLoopVaryDta(i)
+    runLoopVaryD(i)
+    runLoopVaryN(i)
 
-runLoopVaryEps(1, 50000, 3072)
-runLoopVaryDta(1, 50000, 3072)
-runLoopVaryD(1, 50000, 3072)
-runLoopVaryN(1, 50000, 3072)
+# COMPARISON WITH SIMPLE DATASETS WITH ALL VALUES EQUAL TO 0.5
+for i in range(4):
+    simpleVaryEps(i)
+    simpleVaryDta(i)
+    simpleVaryD(i)
+    simpleVaryN(i)
 
-runLoopVaryEps(2, 60000, 784)
-runLoopVaryDta(2, 60000, 784)
-runLoopVaryD(2, 60000, 784)
-runLoopVaryN(2, 60000, 784)
+# EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
-runLoopVaryEps(3, 429078, 12288)
-runLoopVaryDta(3, 429078, 12288)
-runLoopVaryD(3, 429078, 12288)
-runLoopVaryN(3, 429078, 12288)
+# BASELINE SETTING FOR BASIC AND ADVANCED APPLICATIONS
+# BIG OR SMALL COST? DRAW A CONCLUSION
 
-simpleVaryEps(0, 50000, 3072)
-simpleVaryDta(0, 50000, 3072)
-simpleVaryD(0, 50000, 3072)
-simpleVaryN(0, 50000, 3072)
+# EXPERIMENT 4: WHAT IS THE COST OF A FEDERATED SETTING?
 
-simpleVaryEps(1, 50000, 3072)
-simpleVaryDta(1, 50000, 3072)
-simpleVaryD(1, 50000, 3072)
-simpleVaryN(1, 50000, 3072)
+# COMPARE TO CENTRALISED SETTING AND CONCLUDE IN SOME / ALL APPLICATIONS AS IN 3
+# NOT SURE HOW TO DO THIS YET, LOOK AT FEDACS / FEDPROX ETC.
 
-simpleVaryEps(2, 60000, 784)
-simpleVaryDta(2, 60000, 784)
-simpleVaryD(2, 60000, 784)
-simpleVaryN(2, 60000, 784)
+# EXPERIMENT 5: VECTOR ALLOCATIONS TESTING ROBUSTNESS OF FEDERATED CASE
 
-simpleVaryEps(3, 429078, 12288)
-simpleVaryDta(3, 429078, 12288)
-simpleVaryD(3, 429078, 12288)
-simpleVaryN(3, 429078, 12288)
+# DIFFERENT LEVELS OF HETEROGENEITY
+# DO THESE LEVELS AFFECT THE METHOD? HYPOTHESIS: NOT MUCH
+# MEANS NOTHING IN CENTRALISED CASE BECAUSE SERVER HAS ALL DATA
 
 print("Finished.\n")

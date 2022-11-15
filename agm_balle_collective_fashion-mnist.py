@@ -61,9 +61,9 @@ xiTheory = (2*dconst*log(1.25/dtaTheory))/((nconst**2)*(epsTheory**2))
 def runLoop(xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
     if np.all(element == 0.5 for element in xTrainChoice):
-        datafile = open("fm_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("fashion_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     else:
-        datafile = open("fm_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("fashion_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
     datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
