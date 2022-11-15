@@ -130,7 +130,7 @@ xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
 xTrainNew = [transformValues(data) for data in xTrain]
 xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
-def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
     if dataIndex == 0:
         if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
@@ -154,13 +154,7 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
             datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
-
-    if dataIndex == 0 or dataIndex == 1:
-        datafile.write(f"\n\nxiTheory: {round(xiTheory[0], 7):>21}")
-    elif dataIndex == 2:
-        datafile.write(f"\n\nxiTheory: {round(xiTheory[1], 7):>21}")
-    else:
-        datafile.write(f"\n\nxiTheory: {round(xiTheory[2], 7):>21}")
+    datafile.write(f"\n\nxiTheory: {round(xiTheory[varIndex], 7):>21}")
 
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
@@ -234,13 +228,7 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        if dataIndex == 0 or dataIndex == 1:
-            sigma = alpha*GS[0]/sqrt(2.0*eps)
-        elif dataIndex == 2:
-            sigma = alpha*GS[1]/sqrt(2.0*eps)
-        else:
-            sigma = alpha*GS[2]/sqrt(2.0*eps)
-
+        sigma = alpha*GS[varIndex]/sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -256,43 +244,36 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
         loopTime = time.perf_counter()
         varSum = 0
 
-        if (dchoice != maxDim):
-            if dataIndex == 0 or dataIndex == 1:
-                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[0]/dchoice), dchoice))
-            elif dataIndex == 2:
-                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[1]/dchoice), dchoice))
-            else:
-                xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[2]/dchoice), dchoice))
-
+        if (dchoice[varIndex] != maxDim[varIndex]):
+            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice[varIndex]), dchoice[varIndex]))
             xTrainChoice[dataIndex] = xTrainCrop
-
         
         mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\nmu: {str(np.round((sum(mu))/dchoice, 5)):>26}")
+        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice[varIndex], 5)):>26}")
         muSquares = [a**2 for a in mu]
-        datafile.write(f"\nsum of squares: {str(np.round((sum(muSquares))/dchoice, 5)):>14}")
+        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice[varIndex], 5)):>14}")
 
-        noisyMu = [0]*dchoice
+        noisyMu = [0]*dchoice[varIndex]
 
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
-        for i in range(0, dchoice):
+        for i in range(0, dchoice[varIndex]):
             xi1 = normal(0, sigma**2)
             noisyMu[i] = mu[i] + xi1
-        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice, 5):>18}")
+        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice[varIndex], 5):>18}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
-        for j in range(0, nchoice):
+        for j in range(0, nchoice[nIndex]):
             noisySigma = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
-        datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 4):>14}")
+        datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice[nIndex], 4):>14}")
 
         # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
         twiceNoisySigma = np.multiply(noisySigma, 2)
         noisyVar = np.power(noisySigma, 2)
-        datafile.write(f"\nsigma + twice noise: {round((sum(twiceNoisySigma))/nchoice, 4):>8}")
-        datafile.write(f"\nvar + noise: {round((sum(noisyVar))/nchoice, 6):>18}")
+        datafile.write(f"\nsigma + twice noise: {round((sum(twiceNoisySigma))/nchoice[nIndex], 4):>8}")
+        datafile.write(f"\nvar + noise: {round((sum(noisyVar))/nchoice[nIndex], 6):>18}")
 
         # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING MSE USING VARIABLES DEFINED ABOVE
-        for j in range(0, nchoice):
+        for j in range(0, nchoice[nIndex]):
             xi2 = normal(0, sigma**2)
             doubleNoisyVar = noisyVar + xi2
             varSum += sum(doubleNoisyVar)
@@ -301,10 +282,10 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
             mse = np.add(outside, xi2)
             mseSum += sum(mse)
 
-        mseList.append(mseSum/nchoice)
+        mseList.append(mseSum/nchoice[nIndex])
 
-        datafile.write(f"\nvar + twice noise: {round(varSum/nchoice, 4):>11}")
-        datafile.write(f"\nmse: {round(mseSum/nchoice, 4):>26}")
+        datafile.write(f"\nvar + twice noise: {round(varSum/nchoice[nIndex], 4):>11}")
+        datafile.write(f"\nmse: {round(mseSum/nchoice[nIndex], 4):>26}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
 
@@ -318,13 +299,7 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
     print("Computing MSE...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    if dataIndex == 0 or dataIndex == 1:
-        classicSigma = (GS[0]*sqrt(2*log(1.25/dtachoice)))/epschoice
-    elif dataIndex == 2:
-        classicSigma = (GS[1]*sqrt(2*log(1.25/dtachoice)))/epschoice
-    else:
-        classicSigma = (GS[2]*sqrt(2*log(1.25/dtachoice)))/epschoice
-    
+    classicSigma = (GS[varIndex]*sqrt(2*log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 4)}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 8):>22}")
@@ -346,59 +321,87 @@ def runLoop(dataIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, 
 
     # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
-def runLoopVaryEps(dataIndex):
+def runLoopVaryEps(dataIndex, varIndex, nIndex):
     for eps in epsset:
         print(f"\nProcessing the main loop for the value eps = {eps}.")
-        runLoop(dataIndex, xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
 
-def runLoopVaryDta(dataIndex):
+def runLoopVaryDta(dataIndex, varIndex, nIndex):
     for dta in dtaset:
         print(f"\nProcessing the main loop for the value dta = {dta}.")
-        runLoop(dataIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
-def runLoopVaryD(dataIndex):
+def runLoopVaryD(dataIndex, varIndex, nIndex):
     for d in dset:
         print(f"\nProcessing the main loop for the value d = {d}.")
-        runLoop(dataIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
-def runLoopVaryN(dataIndex):
+def runLoopVaryN(dataIndex, varIndex, nIndex):
     for n in nset:
         print(f"\nSimple case for the value n = {n}.")
-        runLoop(dataIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
 
-def simpleVaryEps(dataIndex):
+def simpleVaryEps(dataIndex, varIndex, nIndex):
     for eps in epsset:
         print(f"\nSimple case for the value eps = {eps}.")
-        runLoop(dataIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
 
-def simpleVaryDta(dataIndex):
+def simpleVaryDta(dataIndex, varIndex, nIndex):
     for dta in dtaset:
         print(f"\nSimple case for the value dta = {dta}.")
-        runLoop(dataIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
 
-def simpleVaryD(dataIndex):
+def simpleVaryD(dataIndex, varIndex, nIndex):
     for d in dset:
         print(f"\nSimple case for the value d = {d}.")
-        runLoop(dataIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
 
-def simpleVaryN(dataIndex):
+def simpleVaryN(dataIndex, varIndex, nIndex):
     for n in nset:
         print(f"\nProcessing the main loop for the value n = {n}.")
-        runLoop(dataIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-for i in range(4):
-    runLoopVaryEps(i)
-    runLoopVaryDta(i)
-    runLoopVaryD(i)
-    runLoopVaryN(i)
+    runLoopVaryEps(0, 0, 0)
+    runLoopVaryDta(0, 0, 0)
+    runLoopVaryD(0, 0, 0)
+    runLoopVaryN(0, 0, 0)
+
+    runLoopVaryEps(1, 0, 0)
+    runLoopVaryDta(1, 0, 0)
+    runLoopVaryD(1, 0, 0)
+    runLoopVaryN(1, 0, 0)
+
+    runLoopVaryEps(2, 1, 1)
+    runLoopVaryDta(2, 1, 1)
+    runLoopVaryD(2, 1, 1)
+    runLoopVaryN(2, 1, 1)
+
+    runLoopVaryEps(3, 2, 0)
+    runLoopVaryDta(3, 2, 0)
+    runLoopVaryD(3, 2, 0)
+    runLoopVaryN(3, 2, 0)
 
 # COMPARISON WITH SIMPLE DATASETS WITH ALL VALUES EQUAL TO 0.5
-for i in range(4):
-    simpleVaryEps(i)
-    simpleVaryDta(i)
-    simpleVaryD(i)
-    simpleVaryN(i)
+    simpleVaryEps(0, 0, 0)
+    simpleVaryDta(0, 0, 0)
+    simpleVaryD(0, 0, 0)
+    simpleVaryN(0, 0, 0)
+
+    simpleVaryEps(1, 0, 0)
+    simpleVaryDta(1, 0, 0)
+    simpleVaryD(1, 0, 0)
+    simpleVaryN(1, 0, 0)
+
+    simpleVaryEps(2, 1, 1)
+    simpleVaryDta(2, 1, 1)
+    simpleVaryD(2, 1, 1)
+    simpleVaryN(2, 1, 1)
+
+    simpleVaryEps(3, 0, 0)
+    simpleVaryDta(3, 0, 0)
+    simpleVaryD(3, 0, 0)
+    simpleVaryN(3, 0, 0)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
