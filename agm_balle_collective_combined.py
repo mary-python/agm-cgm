@@ -38,7 +38,8 @@ maxNum = [arr[9] for arr in nset]
 
 pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[0])]
 GS = [float(sqrt(d))/n for d, n in pairsArr]
-maxArraySize = [d*n for d, n in pairsArr]
+maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[0])]
+maxArraySize = [d*n for d, n in maxPairsArr]
 
 # INITIALISING OTHER PARAMETERS/CONSTANTS
 parset = ['eps', 'dta', 'd', 'n']
@@ -332,12 +333,12 @@ def runLoopVaryDta(dataIndex, varIndex, nIndex):
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
 def runLoopVaryD(dataIndex, varIndex, nIndex):
-    for d in dset[varIndex]:
+    for d in dset:
         print(f"\nProcessing the main loop for the value d = {d}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
 def runLoopVaryN(dataIndex, varIndex, nIndex):
-    for n in nset[nIndex]:
+    for n in nset:
         print(f"\nSimple case for the value n = {n}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
 
@@ -352,12 +353,12 @@ def simpleVaryDta(dataIndex, varIndex, nIndex):
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
 
 def simpleVaryD(dataIndex, varIndex, nIndex):
-    for d in dset[varIndex]:
+    for d in dset:
         print(f"\nSimple case for the value d = {d}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
 
 def simpleVaryN(dataIndex, varIndex, nIndex):
-    for n in nset[nIndex]:
+    for n in nset:
         print(f"\nProcessing the main loop for the value n = {n}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
