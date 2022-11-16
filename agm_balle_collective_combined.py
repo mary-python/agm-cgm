@@ -332,12 +332,12 @@ def runLoopVaryDta(dataIndex, varIndex, nIndex):
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
 
 def runLoopVaryD(dataIndex, varIndex, nIndex):
-    for d in dset:
+    for d in dset[varIndex]:
         print(f"\nProcessing the main loop for the value d = {d}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
 
 def runLoopVaryN(dataIndex, varIndex, nIndex):
-    for n in nset:
+    for n in nset[nIndex]:
         print(f"\nSimple case for the value n = {n}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
 
@@ -352,12 +352,12 @@ def simpleVaryDta(dataIndex, varIndex, nIndex):
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
 
 def simpleVaryD(dataIndex, varIndex, nIndex):
-    for d in dset:
+    for d in dset[varIndex]:
         print(f"\nSimple case for the value d = {d}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
 
 def simpleVaryN(dataIndex, varIndex, nIndex):
-    for n in nset:
+    for n in nset[nIndex]:
         print(f"\nProcessing the main loop for the value n = {n}.")
         runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
 
