@@ -26,13 +26,13 @@ dsetCifar = [128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072]
 dsetFashion = [147, 196, 245, 294, 392, 448, 490, 588, 672, 784]
 dsetFlair = [768, 1536, 2304, 3072, 4608, 6144, 8192, 9216, 9984, 12288]
 
-dset = [dsetCifar, dsetFashion, dsetFlair]
+dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconst = maxDim = [arr[9] for arr in dset]
 
 nsetMost = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 nsetFashion = [15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
 
-nset = [nsetMost, nsetFashion]
+nset = np.array([nsetMost, nsetFashion], dtype=object)
 nconst = [arr[8] for arr in nset]
 maxNum = [arr[9] for arr in nset]
 
@@ -45,9 +45,10 @@ maxArraySize = [d*n for d, n in maxPairsArr]
 parset = ['eps', 'dta', 'd', 'n']
 rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 R = len(rset)
-mseSum = 0
-mseList1 = list()
-mseList2 = list()
+mseESum = 0
+mseTSum = 0
+mseEList = list()
+mseTList = list()
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -132,29 +133,27 @@ xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
 xTrainNew = [transformValues(data) for data in xTrain]
 xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
+os.chdir('..')
+
 def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
 
-    # RETURN FROM SMALL IMAGES FOLDER TO ORIGINAL DIRECTORY
-    owd = os.getcwd
-    os.chdir(owd)
-
     if dataIndex == 0:
-        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+        if np.array_equal(xTrainChoice, xTrainSimple):
             datafile = open("cifar10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
         else:
             datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     elif dataIndex == 1:
-        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+        if np.array_equal(xTrainChoice, xTrainSimple):
             datafile = open("cifar100_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
         else:
             datafile = open("cifar100_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     elif dataIndex == 2:
-        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+        if np.array_equal(xTrainChoice, xTrainSimple):
             datafile = open("fashion_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
         else:
             datafile = open("fashion_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     else:
-        if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
+        if np.array_equal(xTrainChoice, xTrainSimple):
             datafile = open("flair_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
         else:
             datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
@@ -241,21 +240,18 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>11}")
-    datafile.write(f"\nsquare: {round(sigma**2, 10):>21}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>14}")
+    datafile.write(f"\nsquare: {round(sigma**2, 10):>28}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum):
+    def computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseESum, mseTSum):
 
         loopTime = time.perf_counter()
-        varSum = 0
-
-        if (dchoice != maxDim[varIndex]):
-            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
-            xTrainChoice[dataIndex] = xTrainCrop
+        xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
+        xTrainChoice[dataIndex] = xTrainCrop
         
         mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 8)):>22}")
+        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 8)):>30}")
         muSquares = [a**2 for a in mu]
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
@@ -265,61 +261,54 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
         for i in range(0, dchoice):
             xi1 = normal(0, sigma**2)
             noisyMu[i] = mu[i] + xi1
-        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice, 8):>14}")
+        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice, 8):>21}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
-            noisySigma = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
-        datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 8):>10}")
+            trueDiff = np.subtract(xTrainChoice[dataIndex][j], mu)
+            noisyDiff = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
+            trueDisp = np.power(trueDiff, 2)
+            noisyVar = np.power(noisyDiff, 2)
+            xi2 = normal(0, sigma**2)
+            noisyDisp = noisyVar + xi2
+            mseESum += sum(noisyDisp)
 
-        # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
-        twiceNoisySigma = np.multiply(noisySigma, 2)
-        noisyVar = np.power(noisySigma, 2)
-        datafile.write(f"\nsigma + twice noise: {round((sum(twiceNoisySigma))/nchoice, 8):>4}")
-        datafile.write(f"\nvar + noise: {round((sum(noisyVar))/nchoice, 6):>18}")
+            # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
+            doubleTrueDiff = 2*trueDiff
+            bracket = np.subtract(xi1, doubleTrueDiff)
+            multiply = np.multiply(xi1, bracket)
+            mseTheoretical = np.add(multiply, xi2)
+            mseTSum += sum(mseTheoretical)
+
+        datafile.write(f"\ntrue dispersion: {round((sum(trueDisp))/nchoice, 8):>7}")
+        datafile.write(f"\nnoisy dispersion: {round((sum(noisyDisp))/nchoice, 8):>6}")
+        mseEList.append(mseESum/nchoice)
+        mseTList.append(mseTSum/nchoice)
 
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
-        trueDisp = np.subtract(xTrainChoice[dataIndex][j], mu)
-        mseEmpirical1 = np.subtract(twiceNoisySigma, trueDisp)
-        mseEmpirical2 = np.subtract(noisyVar, trueDisp)
-        datafile.write(f"\n\ncomparison mse: {round((sum(mseEmpirical1))/nchoice, 8):>10}")
-        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical2))/nchoice, 10):>12}")
-        mseList1.append((sum(mseEmpirical2))/nchoice)
-
-        # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING MSE USING VARIABLES DEFINED ABOVE
-        for j in range(0, nchoice):
-            xi2 = normal(0, sigma**2)
-            doubleNoisyVar = noisyVar + xi2
-            varSum += sum(doubleNoisyVar)
-            bracket = np.subtract(noisyMu, twiceNoisySigma)
-            outside = np.multiply(bracket, noisyMu)
-            mseTheoretical = np.add(outside, xi2)
-            mseSum += sum(mseTheoretical)
-
-        mseList2.append(mseSum/nchoice)
-
-        datafile.write(f"\n\nvar + twice noise: {round(varSum/nchoice, 2):>12}")
-        datafile.write(f"\ntheoretical mse: {round(mseSum/nchoice, 4):>14}")
+        mseEmpirical = np.subtract(noisyDisp, trueDisp)
+        datafile.write(f"\n\nempirical mse: {round((sum(mseEmpirical))/nchoice, 8):>20}")
+        datafile.write(f"\ntheoretical mse: {round(mseTheoretical/nchoice, 4):>18}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
 
         # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
         casetime = time.perf_counter() - loopTime
-        datafile.write(f"\ncalibration: {round(casetime, 2):>15} seconds\n")
+        datafile.write(f"\ncalibration: {round(casetime, 2):>18} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
-    computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum)
+    computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseESum, mseTSum)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
     classicSigma = (GS[varIndex]*sqrt(2*log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
-    datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 4)}")
-    datafile.write(f"\nsquare: {round(classicSigma**2, 8):>22}")
+    datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>10}")
+    datafile.write(f"\nsquare: {round(classicSigma**2, 10):>24}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
-    computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseSum)
+    computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseESum, mseTSum)
 
     # EXPERIMENT 2: AGM VS CGM
     def agmVScgm(mseList):
@@ -334,10 +323,10 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
         return percdiff
     
     datafile.write("\nPercentages comparing AGM and classic GM")
-    percdiff1 = agmVScgm(mseList1)
-    datafile.write(f"\n\nempirical mse difference: {round(percdiff1, 8)}%")
-    percdiff2 = agmVScgm(mseList2)
-    datafile.write(f"\ntheoretical mse difference: {round(percdiff2, 8)}%")
+    percdiff1 = agmVScgm(mseEList)
+    datafile.write(f"\n\nempirical mse difference: {round(percdiff1, 8):>4}%")
+    percdiff2 = agmVScgm(mseTList)
+    datafile.write(f"\ntheoretical mse difference: {round(percdiff2, 8):>2}%")
 
     # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
