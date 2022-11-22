@@ -129,7 +129,7 @@ xTrainCifar100 = loadCifar100()
 xTrainFashion = loadFashion(maxNum[1], maxDim[1])
 xTrainFlair = loadFlair(maxDim[2])
 
-xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
+xTrain = np.array([xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair], dtype=object)
 xTrainNew = [transformValues(data) for data in xTrain]
 xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
@@ -288,7 +288,7 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
         mseEmpirical = np.subtract(noisyDisp, trueDisp)
         datafile.write(f"\n\nempirical mse: {round((sum(mseEmpirical))/nchoice, 8):>20}")
-        datafile.write(f"\ntheoretical mse: {round(mseTheoretical/nchoice, 4):>18}")
+        datafile.write(f"\ntheoretical mse: {round((sum(mseTheoretical))/nchoice, 4):>18}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
 
