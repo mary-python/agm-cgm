@@ -46,7 +46,8 @@ parset = ['eps', 'dta', 'd', 'n']
 rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 R = len(rset)
 mseSum = 0
-mseList = list()
+mseList1 = list()
+mseList2 = list()
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -131,7 +132,11 @@ xTrain = [xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair]
 xTrainNew = [transformValues(data) for data in xTrain]
 xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
-def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
+
+    # RETURN FROM SMALL IMAGES FOLDER TO ORIGINAL DIRECTORY
+    owd = os.getcwd
+    os.chdir(owd)
 
     if dataIndex == 0:
         if np.all(element == 0.5 for element in xTrainChoice[dataIndex]):
@@ -236,8 +241,8 @@ def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dt
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 4):>13}")
-    datafile.write(f"\nsquare: {round(sigma**2, 8):>25}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>11}")
+    datafile.write(f"\nsquare: {round(sigma**2, 10):>21}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
     def computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum):
@@ -245,48 +250,56 @@ def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dt
         loopTime = time.perf_counter()
         varSum = 0
 
-        if (dchoice[varIndex] != maxDim[varIndex]):
-            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice[varIndex]), dchoice[varIndex]))
+        if (dchoice != maxDim[varIndex]):
+            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
             xTrainChoice[dataIndex] = xTrainCrop
         
         mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice[varIndex], 5)):>26}")
+        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 8)):>22}")
         muSquares = [a**2 for a in mu]
-        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice[varIndex], 5)):>14}")
+        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
-        noisyMu = [0]*dchoice[varIndex]
+        noisyMu = [0]*dchoice
 
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
-        for i in range(0, dchoice[varIndex]):
+        for i in range(0, dchoice):
             xi1 = normal(0, sigma**2)
             noisyMu[i] = mu[i] + xi1
-        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice[varIndex], 5):>18}")
+        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice, 8):>14}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
-        for j in range(0, nchoice[nIndex]):
+        for j in range(0, nchoice):
             noisySigma = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
-        datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice[nIndex], 4):>14}")
+        datafile.write(f"\nsigma + noise: {round((sum(noisySigma))/nchoice, 8):>10}")
 
         # PREPARING EXPRESSION OF DISPERSION FOR ADDITION OF SECOND NOISE TERM
         twiceNoisySigma = np.multiply(noisySigma, 2)
         noisyVar = np.power(noisySigma, 2)
-        datafile.write(f"\nsigma + twice noise: {round((sum(twiceNoisySigma))/nchoice[nIndex], 4):>8}")
-        datafile.write(f"\nvar + noise: {round((sum(noisyVar))/nchoice[nIndex], 6):>18}")
+        datafile.write(f"\nsigma + twice noise: {round((sum(twiceNoisySigma))/nchoice, 8):>4}")
+        datafile.write(f"\nvar + noise: {round((sum(noisyVar))/nchoice, 6):>18}")
+
+        # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
+        trueDisp = np.subtract(xTrainChoice[dataIndex][j], mu)
+        mseEmpirical1 = np.subtract(twiceNoisySigma, trueDisp)
+        mseEmpirical2 = np.subtract(noisyVar, trueDisp)
+        datafile.write(f"\n\ncomparison mse: {round((sum(mseEmpirical1))/nchoice, 8):>10}")
+        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical2))/nchoice, 10):>12}")
+        mseList1.append((sum(mseEmpirical2))/nchoice)
 
         # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING MSE USING VARIABLES DEFINED ABOVE
-        for j in range(0, nchoice[nIndex]):
+        for j in range(0, nchoice):
             xi2 = normal(0, sigma**2)
             doubleNoisyVar = noisyVar + xi2
             varSum += sum(doubleNoisyVar)
             bracket = np.subtract(noisyMu, twiceNoisySigma)
             outside = np.multiply(bracket, noisyMu)
-            mse = np.add(outside, xi2)
-            mseSum += sum(mse)
+            mseTheoretical = np.add(outside, xi2)
+            mseSum += sum(mseTheoretical)
 
-        mseList.append(mseSum/nchoice[nIndex])
+        mseList2.append(mseSum/nchoice)
 
-        datafile.write(f"\nvar + twice noise: {round(varSum/nchoice[nIndex], 4):>11}")
-        datafile.write(f"\nmse: {round(mseSum/nchoice[nIndex], 4):>26}")
+        datafile.write(f"\n\nvar + twice noise: {round(varSum/nchoice, 2):>12}")
+        datafile.write(f"\ntheoretical mse: {round(mseSum/nchoice, 4):>14}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
 
@@ -297,7 +310,7 @@ def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dt
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
     computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseSum)
-    print("Computing MSE...")
+    print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
     classicSigma = (GS[varIndex]*sqrt(2*log(1.25/dtachoice)))/epschoice
@@ -309,58 +322,64 @@ def runLoop(dataIndex, varIndex, nIndex, xTrainChoice, index, var, epschoice, dt
     computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseSum)
 
     # EXPERIMENT 2: AGM VS CGM
-    mseA = mseList.pop(0)
-    mseB = mseList.pop(0)
-    msediff = abs(mseB - mseA)
-    print(msediff)
-    decdiff = abs(msediff/mseB)
-    print(decdiff)
-    percdiff = decdiff*100
-    print(percdiff)
+    def agmVScgm(mseList):
+        mseA = mseList.pop(0)
+        mseB = mseList.pop(0)
+        msediff = abs(mseB - mseA)
+        print(msediff)
+        decdiff = abs(msediff/mseB)
+        print(decdiff)
+        percdiff = decdiff*100
+        print(percdiff)
+        return percdiff
+    
     datafile.write("\nPercentages comparing AGM and classic GM")
-    datafile.write(f"\n\ndifference between mse: {round(percdiff, 8)}%")
+    percdiff1 = agmVScgm(mseList1)
+    datafile.write(f"\n\nempirical mse difference: {round(percdiff1, 8)}%")
+    percdiff2 = agmVScgm(mseList2)
+    datafile.write(f"\ntheoretical mse difference: {round(percdiff2, 8)}%")
 
     # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
 def runLoopVaryEps(dataIndex, varIndex, nIndex):
     for eps in epsset:
         print(f"\nProcessing the main loop for the value eps = {eps}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, varIndex, xTrainNew, 0, eps, eps, dtaconst, dconst[varIndex], nconst[nIndex])
 
 def runLoopVaryDta(dataIndex, varIndex, nIndex):
     for dta in dtaset:
         print(f"\nProcessing the main loop for the value dta = {dta}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, varIndex, xTrainNew, 1, dta, epsconst, dta, dconst[varIndex], nconst[nIndex])
 
 def runLoopVaryD(dataIndex, varIndex, nIndex):
-    for d in dset:
+    for d in dset[varIndex]:
         print(f"\nProcessing the main loop for the value d = {d}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, varIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst[nIndex])
 
 def runLoopVaryN(dataIndex, varIndex, nIndex):
-    for n in nset:
+    for n in nset[nIndex]:
         print(f"\nSimple case for the value n = {n}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, varIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst[varIndex], n)
 
 def simpleVaryEps(dataIndex, varIndex, nIndex):
     for eps in epsset:
         print(f"\nSimple case for the value eps = {eps}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst, nconst)
+        runLoop(dataIndex, varIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst[varIndex], nconst[nIndex])
 
 def simpleVaryDta(dataIndex, varIndex, nIndex):
     for dta in dtaset:
         print(f"\nSimple case for the value dta = {dta}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 1, dta, epsconst, dta, dconst, nconst)
+        runLoop(dataIndex, varIndex, xTrainSimple, 1, dta, epsconst, dta, dconst[varIndex], nconst[nIndex])
 
 def simpleVaryD(dataIndex, varIndex, nIndex):
-    for d in dset:
+    for d in dset[varIndex]:
         print(f"\nSimple case for the value d = {d}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst)
+        runLoop(dataIndex, varIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst[nIndex])
 
 def simpleVaryN(dataIndex, varIndex, nIndex):
-    for n in nset:
+    for n in nset[nIndex]:
         print(f"\nProcessing the main loop for the value n = {n}.")
-        runLoop(dataIndex, varIndex, nIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst, n)
+        runLoop(dataIndex, varIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst[varIndex], n)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
 runLoopVaryEps(0, 0, 0)
