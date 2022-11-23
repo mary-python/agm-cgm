@@ -24,29 +24,28 @@ dtaconst = dtaset[1]
 
 dsetCifar = [128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072]
 dsetFashion = [147, 196, 245, 294, 392, 448, 490, 588, 672, 784]
-dsetFlair = [768, 1536, 2304, 3072, 4608, 6144, 8192, 9216, 9984, 12288]
+dsetFlair = [768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288]
 
 dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconst = maxDim = [arr[9] for arr in dset]
 
-nsetMost = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
+nsetCifar = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 nsetFashion = [15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
+nsetFlair = [25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000]
 
-nset = np.array([nsetMost, nsetFashion], dtype=object)
+nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
 nconst = [arr[8] for arr in nset]
 maxNum = [arr[9] for arr in nset]
 
-pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[0])]
+pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
 GS = [float(sqrt(d))/n for d, n in pairsArr]
-maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[0])]
+maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
 maxArraySize = [d*n for d, n in maxPairsArr]
 
 # INITIALISING OTHER PARAMETERS/CONSTANTS
 parset = ['eps', 'dta', 'd', 'n']
 rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 R = len(rset)
-mseESum = 0
-mseTSum = 0
 mseEList = list()
 mseTList = list()
 
@@ -54,9 +53,6 @@ mseTList = list()
 epsTheory = epsconst/2
 dtaTheory = dtaconst/2
 xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
-
-# FOR ML-FLAIR THE NUMBER OF SMALL IMAGES IS LARGE
-smallImages = 429078
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -87,31 +83,30 @@ def loadCifar100():
     return xTrain
 
 # LOADING FASHION-MNIST DATA
-def loadFashion(maxNum, maxDim):
+def loadFashion():
     filename = 'train-images-idx3-ubyte'
     dict = idx2numpy.convert_from_file(filename)
-    xTrain = dict.reshape((maxNum, maxDim))
+    xTrain = dict.reshape((maxNum[1], maxDim[1]))
     return xTrain
 
 # LOADING ML-FLAIR DATA BY GEEKSFORGEEKS
-def loadFlair(maxDim):
+def loadFlair():
     path = 'small_images'
     os.chdir(path)
     xList = []
+    count = 0
 
-    from progress.bar import FillingSquaresBar
-    bar = FillingSquaresBar(max=smallImages-1, suffix = '%(percent) d%% : %(elapsed)ds elapsed')
- 
+    from alive_progress import alive_bar
     for file in os.listdir():
-
-        if file.endswith('.jpg'):
-            img = Image.open(file)
-            dict = asarray(img)
-            vector = dict.reshape((1, maxDim))
-            xList.append(vector)
-        
-        bar.next()
-    bar.finish()
+        with alive_bar(maxNum[2]) as bar:
+            while count < maxNum[2]:
+                img = Image.open(file)
+                dict = asarray(img)
+                vector = dict.reshape((1, maxDim[2]))
+                xList.append(vector)
+                count += 1
+                bar()
+        break
 
     xTrain = np.array(xList)
     return xTrain
@@ -123,40 +118,27 @@ def transformValues(x):
     return x
 
 # CALL ALL THE ABOVE METHODS
-print("Loading data...")
+print("Loading data...\n")
 xTrainCifar10 = loadCifar10()
 xTrainCifar100 = loadCifar100()
-xTrainFashion = loadFashion(maxNum[1], maxDim[1])
-xTrainFlair = loadFlair(maxDim[2])
+xTrainFashion = loadFashion()
+xTrainFlair = loadFlair()
 
 xTrain = np.array([xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair], dtype=object)
 xTrainNew = [transformValues(data) for data in xTrain]
-xTrainSimple = [np.full((n, d), 0.5) for d, n in pairsArr]
 
 os.chdir('..')
 
-def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice, dchoice, nchoice):
 
     if dataIndex == 0:
-        if np.array_equal(xTrainChoice, xTrainSimple):
-            datafile = open("cifar10_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
-        else:
-            datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     elif dataIndex == 1:
-        if np.array_equal(xTrainChoice, xTrainSimple):
-            datafile = open("cifar100_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
-        else:
-            datafile = open("cifar100_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("cifar100_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     elif dataIndex == 2:
-        if np.array_equal(xTrainChoice, xTrainSimple):
-            datafile = open("fashion_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
-        else:
-            datafile = open("fashion_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("fashion_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
     else:
-        if np.array_equal(xTrainChoice, xTrainSimple):
-            datafile = open("flair_simple_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
-        else:
-            datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+        datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
     datafile.write(f"\n\nxiTheory: {round(xiTheory[varIndex], 7):>21}")
@@ -240,28 +222,37 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>14}")
-    datafile.write(f"\nsquare: {round(sigma**2, 10):>28}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>15}")
+    datafile.write(f"\nsquare: {round(sigma**2, 10):>27}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseESum, mseTSum):
+    def computeMSE(sigma):
 
         loopTime = time.perf_counter()
-        xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
+        mseESum = 0
+        mseTSum = 0
+
+        if index == 2:
+            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
+        else:
+            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
         xTrainChoice[dataIndex] = xTrainCrop
         
         mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 8)):>30}")
+        datafile.write(f"\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
         muSquares = [a**2 for a in mu]
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
 
         noisyMu = [0]*dchoice
+        xiSum1 = 0
+        xiSum2 = 0
 
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
         for i in range(0, dchoice):
             xi1 = normal(0, sigma**2)
             noisyMu[i] = mu[i] + xi1
-        datafile.write(f"\nmu + noise: {round((sum(noisyMu))/dchoice, 8):>21}")
+            xiSum1 += xi1
+        datafile.write(f"\nnoise 1: {round(xiSum1/dchoice, 8):>22}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
@@ -271,6 +262,7 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
             noisyVar = np.power(noisyDiff, 2)
             xi2 = normal(0, sigma**2)
             noisyDisp = noisyVar + xi2
+            xiSum2 += xi2
             mseESum += sum(noisyDisp)
 
             # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
@@ -280,137 +272,84 @@ def runLoop(dataIndex, varIndex, xTrainChoice, index, var, epschoice, dtachoice,
             mseTheoretical = np.add(multiply, xi2)
             mseTSum += sum(mseTheoretical)
 
-        datafile.write(f"\ntrue dispersion: {round((sum(trueDisp))/nchoice, 8):>7}")
-        datafile.write(f"\nnoisy dispersion: {round((sum(noisyDisp))/nchoice, 8):>6}")
+        datafile.write(f"\n\ntrue dispersion: {round((sum(trueDisp))/nchoice, 8):>16}")
+        datafile.write(f"\nnoise 2: {round(xiSum2/nchoice, 8):>18}")
         mseEList.append(mseESum/nchoice)
         mseTList.append(mseTSum/nchoice)
 
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
-        mseEmpirical = np.subtract(noisyDisp, trueDisp)
-        datafile.write(f"\n\nempirical mse: {round((sum(mseEmpirical))/nchoice, 8):>20}")
-        datafile.write(f"\ntheoretical mse: {round((sum(mseTheoretical))/nchoice, 4):>18}")
+        diffET = np.subtract(noisyDisp, trueDisp)
+        squaredDiffET = np.power(diffET, 2)
+        mseEmpirical = np.sqrt(squaredDiffET)
+        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/nchoice, 10):>18}")
+        datafile.write(f"\ntheoretical mse: {round((sum(mseTheoretical))/nchoice, 10):>17}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
 
         # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
         casetime = time.perf_counter() - loopTime
-        datafile.write(f"\ncalibration: {round(casetime, 2):>18} seconds\n")
+        datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
-    computeMSE(xTrainChoice, dchoice, sigma, nchoice, mseESum, mseTSum)
+    computeMSE(sigma)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
     classicSigma = (GS[varIndex]*sqrt(2*log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
-    datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>10}")
-    datafile.write(f"\nsquare: {round(classicSigma**2, 10):>24}")
+    datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
+    datafile.write(f"\nsquare: {round(classicSigma**2, 10):>28}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
-    computeMSE(xTrainChoice, dchoice, classicSigma, nchoice, mseESum, mseTSum)
+    computeMSE(classicSigma)
 
     # EXPERIMENT 2: AGM VS CGM
     def agmVScgm(mseList):
         mseA = mseList.pop(0)
         mseB = mseList.pop(0)
-        msediff = abs(mseB - mseA)
-        print(msediff)
-        decdiff = abs(msediff/mseB)
-        print(decdiff)
-        percdiff = decdiff*100
-        print(percdiff)
-        return percdiff
+        msediff = float(mseB)/float(mseA)
+        return msediff
     
     datafile.write("\nPercentages comparing AGM and classic GM")
-    percdiff1 = agmVScgm(mseEList)
-    datafile.write(f"\n\nempirical mse difference: {round(percdiff1, 8):>4}%")
-    percdiff2 = agmVScgm(mseTList)
-    datafile.write(f"\ntheoretical mse difference: {round(percdiff2, 8):>2}%")
+    msediff1 = agmVScgm(mseEList)
+    datafile.write(f"\n\nempirical mse comparison: {round(msediff1, 8):>10}x")
+    msediff2 = agmVScgm(mseTList)
+    datafile.write(f"\ntheoretical mse comparison: {round(msediff2, 8):>4}x")
 
     # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
 
-def runLoopVaryEps(dataIndex, varIndex, nIndex):
+def runLoopVaryEps(dataIndex, varIndex, index):
     for eps in epsset:
-        print(f"\nProcessing the main loop for the value eps = {eps}.")
-        runLoop(dataIndex, varIndex, xTrainNew, 0, eps, eps, dtaconst, dconst[varIndex], nconst[nIndex])
+        print(f"\nProcessing dataset {dataIndex} for the value eps = {eps}.")
+        runLoop(dataIndex, varIndex, index, xTrainNew, eps, eps, dtaconst, dconst[varIndex], nconst[varIndex])
 
-def runLoopVaryDta(dataIndex, varIndex, nIndex):
+def runLoopVaryDta(dataIndex, varIndex, index):
     for dta in dtaset:
-        print(f"\nProcessing the main loop for the value dta = {dta}.")
-        runLoop(dataIndex, varIndex, xTrainNew, 1, dta, epsconst, dta, dconst[varIndex], nconst[nIndex])
+        print(f"\nProcessing dataset {dataIndex} for the value dta = {dta}.")
+        runLoop(dataIndex, varIndex, index, xTrainNew, dta, epsconst, dta, dconst[varIndex], nconst[varIndex])
 
-def runLoopVaryD(dataIndex, varIndex, nIndex):
+def runLoopVaryD(dataIndex, varIndex,index):
     for d in dset[varIndex]:
-        print(f"\nProcessing the main loop for the value d = {d}.")
-        runLoop(dataIndex, varIndex, xTrainNew, 2, d, epsconst, dtaconst, d, nconst[nIndex])
+        print(f"\nProcessing dataset {dataIndex} for the value d = {d}.")
+        runLoop(dataIndex, varIndex, index, xTrainNew, d, epsconst, dtaconst, d, nconst[varIndex])
 
-def runLoopVaryN(dataIndex, varIndex, nIndex):
-    for n in nset[nIndex]:
-        print(f"\nSimple case for the value n = {n}.")
-        runLoop(dataIndex, varIndex, xTrainNew, 3, n, epsconst, dtaconst, dconst[varIndex], n)
-
-def simpleVaryEps(dataIndex, varIndex, nIndex):
-    for eps in epsset:
-        print(f"\nSimple case for the value eps = {eps}.")
-        runLoop(dataIndex, varIndex, xTrainSimple, 0, eps, eps, dtaconst, dconst[varIndex], nconst[nIndex])
-
-def simpleVaryDta(dataIndex, varIndex, nIndex):
-    for dta in dtaset:
-        print(f"\nSimple case for the value dta = {dta}.")
-        runLoop(dataIndex, varIndex, xTrainSimple, 1, dta, epsconst, dta, dconst[varIndex], nconst[nIndex])
-
-def simpleVaryD(dataIndex, varIndex, nIndex):
-    for d in dset[varIndex]:
-        print(f"\nSimple case for the value d = {d}.")
-        runLoop(dataIndex, varIndex, xTrainSimple, 2, d, epsconst, dtaconst, d, nconst[nIndex])
-
-def simpleVaryN(dataIndex, varIndex, nIndex):
-    for n in nset[nIndex]:
-        print(f"\nProcessing the main loop for the value n = {n}.")
-        runLoop(dataIndex, varIndex, xTrainSimple, 3, n, epsconst, dtaconst, dconst[varIndex], n)
+def runLoopVaryN(dataIndex, varIndex, index):
+    for n in nset[varIndex]:
+        print(f"\nProcessing dataset {dataIndex} for the value n = {n}.")
+        runLoop(dataIndex, varIndex, index, xTrainNew, n, epsconst, dtaconst, dconst[varIndex], n)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
 runLoopVaryEps(0, 0, 0)
-runLoopVaryDta(0, 0, 0)
-runLoopVaryD(0, 0, 0)
-runLoopVaryN(0, 0, 0)
+runLoopVaryDta(0, 0, 1)
+runLoopVaryD(0, 0, 2)
+runLoopVaryN(0, 0, 3)
 
-runLoopVaryEps(1, 0, 0)
-runLoopVaryDta(1, 0, 0)
-runLoopVaryD(1, 0, 0)
-runLoopVaryN(1, 0, 0)
-
-runLoopVaryEps(2, 1, 1)
-runLoopVaryDta(2, 1, 1)
-runLoopVaryD(2, 1, 1)
-runLoopVaryN(2, 1, 1)
-
-runLoopVaryEps(3, 2, 0)
-runLoopVaryDta(3, 2, 0)
-runLoopVaryD(3, 2, 0)
-runLoopVaryN(3, 2, 0)
-
-# COMPARISON WITH SIMPLE DATASETS WITH ALL VALUES EQUAL TO 0.5
-simpleVaryEps(0, 0, 0)
-simpleVaryDta(0, 0, 0)
-simpleVaryD(0, 0, 0)
-simpleVaryN(0, 0, 0)
-
-simpleVaryEps(1, 0, 0)
-simpleVaryDta(1, 0, 0)
-simpleVaryD(1, 0, 0)
-simpleVaryN(1, 0, 0)
-
-simpleVaryEps(2, 1, 1)
-simpleVaryDta(2, 1, 1)
-simpleVaryD(2, 1, 1)
-simpleVaryN(2, 1, 1)
-
-simpleVaryEps(3, 0, 0)
-simpleVaryDta(3, 0, 0)
-simpleVaryD(3, 0, 0)
-simpleVaryN(3, 0, 0)
+for i in range(1, 4):
+    runLoopVaryEps(i, i-1, 0)
+    runLoopVaryDta(i, i-1, 1)
+    runLoopVaryD(i, i-1, 2)
+    runLoopVaryN(i, i-1, 3)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
