@@ -284,9 +284,23 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
         datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/nchoice, 10):>18}")
         datafile.write(f"\ntheoretical mse: {round((sum(mseTheoretical))/nchoice, 10):>17}")
 
-        # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS
+        # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
-        # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
+        # 95% CONFIDENCE INTERVAL USING SIGMA AND RELEVANT Z-SCORE
+        confInt = (7.84*(sqrt(6))*(sigma**2))/(sqrt(nchoice))
+        datafile.write(f"\n95% confidence interval: \u00B1 {confInt}")
+
+        # WITHIN-VECTOR ERROR FOR EACH D-DIM VECTOR IS ITS VARIANCE
+        # WEIGHTED MEAN IS RECIPROCAL OF WITHIN-VECTOR ERROR
+        # ADD NOISE TO WEIGHTED MEAN TO GET NOISY WEIGHTED MEAN
+        # COMPUTE Q' THEN ADD SECOND NOISE TERM TO GET Q''
+        # COMPUTE EMPIRICAL AND THEORETICAL MEANS
+        # COMPUTE 95% CONFIDENCE INTERVALS
+
+        # COMPUTE I^2'' USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
+        # ADD THIRD NOISE TERM TO GET I^2'''
+        # COMPUTE EMPIRICAL AND THEORETICAL MEANS
+        # COMPUTE 95% CONFIDENCE INTERVALS
 
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
@@ -317,7 +331,7 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
     msediff2 = agmVScgm(mseTList)
     datafile.write(f"\ntheoretical mse comparison: {round(msediff2, 8):>4}x")
 
-    # EXTENSION TO Q, I^2 AND CONFIDENCE INTERVALS
+    # COLLECT SIMILAR LISTS IN COMPUTEMSE FOR Q AND I^2 THEN WRITE COMPARISONS HERE
 
 def runLoopVaryEps(dataIndex, varIndex, index):
     for eps in epsset:
