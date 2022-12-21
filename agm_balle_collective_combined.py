@@ -236,20 +236,24 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
             xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
         xTrainChoice[dataIndex] = xTrainCrop
         
-        mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
-        muSquares = [a**2 for a in mu]
-        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")
-
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
-        wVector = np.var(xTrainChoice[dataIndex], axis=0)
-        datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/dchoice, 8)):>18}")
-        weight = np.divide(1, wVector)
-        wMult = np.multiply(weight, xTrainChoice[dataIndex], axis=0)
-        wMu = np.multiply(sum(wMult), sum(weight), axis=0)
-        datafile.write(f"\nweighted mean: {str(round((sum(wMu))/dchoice, 8)):>18}")
-        wMuSquares = [a**2 for a in wMu]
-        datafile.write(f"\nsum of squares: {str(round((sum(wMuSquares))/dchoice, 5)):>14}")
+        wVector = np.var(xTrainChoice[dataIndex], axis=1)
+        datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 8)):>18}")
+        weight = [1/term for term in wVector]
+
+        # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
+        wxTrainChoice = np.empty([nchoice, dchoice])
+        for j in range(0, nchoice):
+            wxTrainChoice[j] = [(weight[j])*term for term in xTrainChoice[dataIndex][j]]
+
+        mu = np.mean(xTrainChoice[dataIndex], axis=0)
+        wMu = np.mean(wxTrainChoice[dataIndex], axis=0)
+        datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
+        datafile.write(f"\nweighted mu: {str(np.round((np.sum(wMu))/dchoice, 8)):>20}")
+        muSquares = [a**2 for a in mu]
+        wMuSquares = [np.power(a, 2) for a in wMu]
+        datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")   
+        datafile.write(f"\nsum of w squares: {str(round((sum(wMuSquares))/dchoice, 5)):>12}")
 
         noisyMu = [0]*dchoice
         wNoisyMu = [0]*dchoice
@@ -281,15 +285,15 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
             # INCORPORATING WEIGHTS FOR STATISTICS ON Q
             trueDisp = np.power(trueDiff, 2)
             wTrueDisp = np.power(wTrueDiff, 2)
-            weightedTrueDisp = np.multiply(weight, wTrueDisp)
+            weightedTrueDisp = [(weight[j])*term for term in wTrueDisp]
             noisyVar = np.power(noisyDiff, 2)
             wNoisyVar = np.power(wNoisyDiff, 2)
-            weightedNoisyVar = np.multiply(weight, wNoisyVar)
+            weightedNoisyVar = [(weight[j])*term for term in wNoisyVar]
 
             xi2 = normal(0, sigma**2)
             noisyDisp = noisyVar + xi2
             noisyQ = weightedNoisyVar + xi2
-            xiSum2[j] += xi2
+            xiSum2 += xi2
 
             mseEList[j] = sum(noisyDisp)
             trueEList[j] = sum(trueDisp)
@@ -303,12 +307,12 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
             wBracket = np.subtract(xi1, wDoubleTrueDiff)
             multiply = np.multiply(xi1, bracket)
             wMultiply = np.multiply(xi1, wBracket)
-            weightedMult = np.multiply(weight, wMultiply)
+            weightedMult = [(weight[j])*term for term in wMultiply]
 
             mseTheoretical = np.add(multiply, xi2)
             mseQTheoretical = np.add(weightedMult, xi2)
-            mseTList[j] += sum(mseTheoretical)
-            mseQTList[j] += sum(mseQTheoretical)
+            mseTList[j] = sum(mseTheoretical)
+            mseQTList[j] = sum(mseQTheoretical)
 
         datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/nchoice, 8):>16}")
         datafile.write(f"\ntrue q: {round((sum(trueEList))/nchoice, 8):>25}")
