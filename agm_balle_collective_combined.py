@@ -239,19 +239,19 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
         wVector = np.var(xTrainChoice[dataIndex], axis=1)
         datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 8)):>18}")
-        weight = [1/term for term in wVector]
+        weight = [np.divide(1, term) for term in wVector]
 
         # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
         wxTrainChoice = np.empty([nchoice, dchoice])
         for j in range(0, nchoice):
-            wxTrainChoice[j] = [(weight[j])*term for term in xTrainChoice[dataIndex][j]]
+            wxTrainChoice[j] = [np.multiply(weight[j], term) for term in xTrainChoice[dataIndex][j]]
 
         mu = np.mean(xTrainChoice[dataIndex], axis=0)
         wMu = np.mean(wxTrainChoice[dataIndex], axis=0)
         datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
-        datafile.write(f"\nweighted mu: {str(np.round((np.sum(wMu))/dchoice, 8)):>20}")
+        datafile.write(f"\nweighted mu: {str(round((sum(wMu))/dchoice, 8)):>20}")
         muSquares = [a**2 for a in mu]
-        wMuSquares = [np.power(a, 2) for a in wMu]
+        wMuSquares = [a**2 for a in wMu]
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")   
         datafile.write(f"\nsum of w squares: {str(round((sum(wMuSquares))/dchoice, 5)):>12}")
 
