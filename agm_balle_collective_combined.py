@@ -15,44 +15,64 @@ print("\nStarting...")
 np.random.seed(3820672)
 
 # ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
-epsset = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+epsset = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
 epsconst = epsset[1]
 
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
-dtaset = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05]
+dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05])
 dtaconst = dtaset[1]
 
-dsetCifar = [128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072]
-dsetFashion = [147, 196, 245, 294, 392, 448, 490, 588, 672, 784]
-dsetFlair = [768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288]
+dsetCifar = np.array([128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072])
+dsetFashion = np.array([147, 196, 245, 294, 392, 448, 490, 588, 672, 784])
+dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
-dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
-dconst = maxDim = [arr[9] for arr in dset]
+# dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
+dconstCifar = maxDimCifar = dsetCifar[9]
+dconstFashion = maxDimFashion = dsetFashion[9]
+dconstFlair = maxDimFlair = dsetFashion[9]
 
-nsetCifar = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
-nsetFashion = [15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000]
-nsetFlair = [25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000]
+nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000])
+nsetFashion = np.array([15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000])
+nsetFlair = np.array([25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000])
 
-nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
-nconst = [arr[8] for arr in nset]
-maxNum = [arr[9] for arr in nset]
+# nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
+nconstCifar = nsetCifar[8]
+nconstFashion = nsetFashion[8]
+nconstFlair = nsetFlair[8]
 
-pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
-GS = [float(sqrt(d))/n for d, n in pairsArr]
-maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
-maxArraySize = [d*n for d, n in maxPairsArr]
+maxNumCifar = nsetCifar[9]
+maxNumFashion = nsetFashion[9]
+maxNumFlair = nsetFlair[9]
+
+# pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
+# GS = [float(sqrt(d))/n for d, n in pairsArr]
+
+GSCifar = float(sqrt(dconstCifar))/nconstCifar
+GSFashion = float(sqrt(dconstFashion))/nconstFashion
+GSFlair = float(sqrt(dconstFlair))/nconstFlair
+
+# maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
+# maxArraySize = [d*n for d, n in maxPairsArr]
+
+maxArraySizeCifar = dconstCifar*nconstCifar
+maxArraySizeFashion = dconstFashion*nconstFashion
+maxArraySizeFlair = dconstFlair*nconstFlair
 
 # INITIALISING OTHER PARAMETERS/CONSTANTS
-parset = ['eps', 'dta', 'd', 'n']
-rset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+parset = np.array(['eps', 'dta', 'd', 'n'])
+rset = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 R = len(rset)
-mseEList = list()
-mseTList = list()
+mseEList = np.zeros(nconstFlair)
+mseTList = np.zeros(nconstFlair)
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
 dtaTheory = dtaconst/2
-xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
+
+# xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
+xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
+xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
+xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -70,46 +90,50 @@ def loadCifar10():
 
         # CONCATENATE X AND Y DATA FROM ALL FILES INTO RELEVANT VARIABLE
         if i == 1:
-            xTrain = xData
+            xTrainCifar10 = xData
         else:
-            xTrain = np.concatenate((xTrain, xData), axis=0)
-    return xTrain
+            xTrainCifar10 = np.concatenate((xTrainCifar10, xData), axis=0)
+    return xTrainCifar10
 
 # LOADING AND SPLITTING CIFAR-100 DATA
 def loadCifar100():
     filename = 'train'
     dict = unpickle(filename)
-    xTrain = dict[b'data']
-    return xTrain
+    xData = dict[b'data']
+
+    names = np.array(['id,', 'data'])
+    formats = np.array(['f8,', 'f8'])
+    dtype = dict(names = names, formats = formats)
+    xTrainCifar100 = np.array(list(xData.items()), dtype = dtype)
+    return xTrainCifar100
 
 # LOADING FASHION-MNIST DATA
 def loadFashion():
     filename = 'train-images-idx3-ubyte'
     dict = idx2numpy.convert_from_file(filename)
-    xTrain = dict.reshape((maxNum[1], maxDim[1]))
-    return xTrain
+    xTrainFashion = dict.reshape((maxNumFashion, maxDimFashion))
+    return xTrainFashion
 
 # LOADING ML-FLAIR DATA BY GEEKSFORGEEKS
 def loadFlair():
     path = 'small_images'
     os.chdir(path)
-    xList = []
+    xTrainFlair = np.zeros(maxNumFlair, maxDimFlair)
     count = 0
 
     from alive_progress import alive_bar
     for file in os.listdir():
-        with alive_bar(maxNum[2]) as bar:
-            while count < maxNum[2]:
+        with alive_bar(maxNumFlair) as bar:
+            while count < maxNumFlair:
                 img = Image.open(file)
                 dict = asarray(img)
-                vector = dict.reshape((1, maxDim[2]))
-                xList.append(vector)
+                vector = dict.reshape((1, maxDimFlair))
+                np.append(xTrainFlair, vector, axis=0)
                 count += 1
                 bar()
         break
 
-    xTrain = np.array(xList)
-    return xTrain
+    return xTrainFlair
 
 # ADAPTATION OF TRANSFORMATION OF LABEL INDICES TO ONE-HOT ENCODED VECTORS AND IMAGES TO 3072-DIMENSIONAL VECTORS BY HADHAZI
 def transformValues(x):
@@ -124,12 +148,15 @@ xTrainCifar100 = loadCifar100()
 xTrainFashion = loadFashion()
 xTrainFlair = loadFlair()
 
-xTrain = np.array([xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair], dtype=object)
-xTrainNew = [transformValues(data) for data in xTrain]
+# xTrain = np.array([xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair], dtype=object)
+xTrainNewCifar10 = transformValues(xTrainCifar10)
+xTrainNewCifar100 = transformValues(xTrainCifar100)
+xTrainNewFashion = transformValues(xTrainFashion)
+xTrainNewFlair = transformValues(xTrainFlair)
 
 os.chdir('..')
 
-def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice, dchoice, nchoice):
+def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize, xiTheory):
 
     if dataIndex == 0:
         datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
@@ -141,7 +168,7 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
         datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Theory and Binary Search in AGM")
-    datafile.write(f"\n\nxiTheory: {round(xiTheory[varIndex], 7):>21}")
+    datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
 
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
@@ -215,7 +242,7 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        sigma = alpha*GS[varIndex]/sqrt(2.0*eps)
+        sigma = alpha*GS/sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -226,50 +253,52 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
     datafile.write(f"\nsquare: {round(sigma**2, 10):>27}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(sigma):
+    def computeMSE(xTrainNew, sigma):
 
         loopTime = time.perf_counter()
 
         if index == 2:
-            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
+            xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
         else:
-            xTrainCrop = xTrainChoice[dataIndex].reshape((int(maxArraySize[varIndex]/dchoice), dchoice))
-        xTrainChoice[dataIndex] = xTrainCrop
+            xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
+        xTrainNew = xTrainCrop
         
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
-        wVector = np.var(xTrainChoice[dataIndex], axis=1)
+        wVector = np.var(xTrainNew, axis=1)
         datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 8)):>18}")
-        weight = [1/term for term in wVector]
+
+        weight = np.zeros(dchoice)
+        for j in range(0, nchoice):
+            weight[j] = 1.0/(wVector[j])
 
         # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
-        wxTrainChoice = np.empty([nchoice, dchoice])
+        wxTrainNew = np.zeros(nchoice, dchoice)
         for j in range(0, nchoice):
-            for i in range(0, dchoice):
-                wxTrainChoice[j, i] = [(weight[j])*term for term in xTrainChoice[dataIndex][j, i]]
+            wxTrainNew[j] = (weight[j])*(xTrainNew[j])
 
-        print(wxTrainChoice)
-        mu = np.mean(xTrainChoice[dataIndex], axis=0)
-        wMu = np.mean(wxTrainChoice[dataIndex], axis=0)
+        print(wxTrainNew)
+        mu = np.mean(xTrainNew, axis=0)
+        wMu = np.mean(wxTrainNew, axis=0)
         print(mu)
         print(wMu)
         datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
         datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 8)):>20}")
-        muSquares = [a**2 for a in mu]
-        wMuSquares = [a**2 for a in wMu]
+        muSquares = np.power(mu, 2)
+        wMuSquares = np.power(wMu, 2)
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")   
-        datafile.write(f"\nsum of w squares: {str(round((sum(wMuSquares))/dchoice, 5)):>12}")
+        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 5)):>12}")
 
-        noisyMu = [0]*dchoice
-        wNoisyMu = [0]*dchoice
+        noisyMu = np.zeros(dchoice)
+        wNoisyMu = np.zeros(dchoice)
         xiSum1 = 0
         xiSum2 = 0
 
-        mseEList = list()
-        trueEList = list()
-        mseQEList = list()
-        trueQEList = list()
-        mseTList = list()
-        mseQTList = list()
+        mseEList = np.zeros(nchoice)
+        trueEList = np.zeros(nchoice)
+        mseQEList = np.zeros(nchoice)
+        trueQEList = np.zeros(nchoice)
+        mseTList = np.zeros(nchoice)
+        mseQTList = np.zeros(nchoice)
 
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
         for i in range(0, dchoice):
@@ -281,18 +310,18 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
-            trueDiff = np.subtract(xTrainChoice[dataIndex][j], mu)
-            wTrueDiff = np.subtract(xTrainChoice[dataIndex][j], wMu)
-            noisyDiff = np.subtract(xTrainChoice[dataIndex][j], noisyMu)
-            wNoisyDiff = np.subtract(xTrainChoice[dataIndex][j], wNoisyMu)
+            trueDiff = np.subtract(xTrainNew[j], mu)
+            wTrueDiff = np.subtract(xTrainNew[j], wMu)
+            noisyDiff = np.subtract(xTrainNew[j], noisyMu)
+            wNoisyDiff = np.subtract(xTrainNew[j], wNoisyMu)
 
             # INCORPORATING WEIGHTS FOR STATISTICS ON Q
             trueDisp = np.power(trueDiff, 2)
             wTrueDisp = np.power(wTrueDiff, 2)
-            weightedTrueDisp = [(weight[j])*term for term in wTrueDisp]
+            weightedTrueDisp = (weight[j])*(wTrueDisp)
             noisyVar = np.power(noisyDiff, 2)
             wNoisyVar = np.power(wNoisyDiff, 2)
-            weightedNoisyVar = [(weight[j])*term for term in wNoisyVar]
+            weightedNoisyVar = (weight[j])*(wNoisyVar)
 
             xi2 = normal(0, sigma**2)
             noisyDisp = noisyVar + xi2
@@ -311,7 +340,7 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
             wBracket = np.subtract(xi1, wDoubleTrueDiff)
             multiply = np.multiply(xi1, bracket)
             wMultiply = np.multiply(xi1, wBracket)
-            weightedMult = [(weight[j])*term for term in wMultiply]
+            weightedMult = (weight[j])*(wMultiply)
 
             mseTheoretical = np.add(multiply, xi2)
             mseQTheoretical = np.add(weightedMult, xi2)
@@ -369,17 +398,17 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
         datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
-    computeMSE(sigma)
+    computeMSE(xTrainNew, sigma)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    classicSigma = (GS[varIndex]*sqrt(2*log(1.25/dtachoice)))/epschoice
+    classicSigma = (GS*sqrt(2*log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 10):>28}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
-    computeMSE(classicSigma)
+    computeMSE(xTrainNew, classicSigma)
 
     # EXPERIMENT 2: AGM VS CGM
     def agmVScgm(mseList):
@@ -396,37 +425,50 @@ def runLoop(dataIndex, varIndex, index, xTrainChoice, var, epschoice, dtachoice,
 
     # COLLECT SIMILAR LISTS IN COMPUTEMSE FOR Q AND I^2 THEN WRITE COMPARISONS HERE
 
-def runLoopVaryEps(dataIndex, varIndex, index):
-    for eps in epsset:
+def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+
+    for eps in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value eps = {eps}.")
-        runLoop(dataIndex, varIndex, index, xTrainNew, eps, eps, dtaconst, dconst[varIndex], nconst[varIndex])
+        runLoop(dataIndex, index, eps, eps, dtaconst, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory)
 
-def runLoopVaryDta(dataIndex, varIndex, index):
-    for dta in dtaset:
+def runLoopVaryDta(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+
+    for dta in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value dta = {dta}.")
-        runLoop(dataIndex, varIndex, index, xTrainNew, dta, epsconst, dta, dconst[varIndex], nconst[varIndex])
+        runLoop(dataIndex, index, dta, epsconst, dta, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory)
 
-def runLoopVaryD(dataIndex, varIndex,index):
-    for d in dset[varIndex]:
+def runLoopVaryD(dataIndex, index, varset, dset, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+
+    for d in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value d = {d}.")
-        runLoop(dataIndex, varIndex, index, xTrainNew, d, epsconst, dtaconst, d, nconst[varIndex])
+        runLoop(dataIndex, index, d, epsconst, dtaconst, d, nconst, xTrainNew, GS, maxArraySize, xiTheory)
 
-def runLoopVaryN(dataIndex, varIndex, index):
-    for n in nset[varIndex]:
+def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArraySize, xiTheory):
+
+    for n in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value n = {n}.")
-        runLoop(dataIndex, varIndex, index, xTrainNew, n, epsconst, dtaconst, dconst[varIndex], n)
+        runLoop(dataIndex, index, n, epsconst, dtaconst, dconst, n, xTrainNew, GS, maxArraySize, xiTheory)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-runLoopVaryEps(0, 0, 0)
-runLoopVaryDta(0, 0, 1)
-runLoopVaryD(0, 0, 2)
-runLoopVaryN(0, 0, 3)
+runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
 
-for i in range(1, 4):
-    runLoopVaryEps(i, i-1, 0)
-    runLoopVaryDta(i, i-1, 1)
-    runLoopVaryD(i, i-1, 2)
-    runLoopVaryN(i, i-1, 3)
+runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryDta(1, 0, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryD(1, 0, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryN(1, 0, dconstCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+
+runLoopVaryEps(2, 1, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
+runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
+runLoopVaryD(2, 1, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
+runLoopVaryN(2, 1, dconstFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
+
+runLoopVaryEps(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
+runLoopVaryDta(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
+runLoopVaryD(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
+runLoopVaryN(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
