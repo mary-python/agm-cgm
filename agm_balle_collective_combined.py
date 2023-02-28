@@ -3,7 +3,7 @@ import time
 import idx2numpy
 import os
 
-from math import exp, sqrt, log
+# from math import exp, sqrt, log
 from numpy.random import normal
 from scipy.special import erf
 from PIL import Image
@@ -16,40 +16,40 @@ np.random.seed(3820672)
 
 # ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
 epsset = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5])
-epsconst = epsset[1]
+epsconst = float(epsset[1])
 
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
 dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05])
-dtaconst = dtaset[1]
+dtaconst = float(dtaset[1])
 
 dsetCifar = np.array([128, 256, 512, 768, 1024, 1280, 1536, 2048, 2560, 3072])
 dsetFashion = np.array([147, 196, 245, 294, 392, 448, 490, 588, 672, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
-dconstCifar = maxDimCifar = dsetCifar[9]
-dconstFashion = maxDimFashion = dsetFashion[9]
-dconstFlair = maxDimFlair = dsetFashion[9]
+dconstCifar = maxDimCifar = int(dsetCifar[9])
+dconstFashion = maxDimFashion = int(dsetFashion[9])
+dconstFlair = maxDimFlair = int(dsetFlair[9])
 
 nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000])
 nsetFashion = np.array([15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000])
 nsetFlair = np.array([25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000])
 
 # nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
-nconstCifar = nsetCifar[8]
-nconstFashion = nsetFashion[8]
-nconstFlair = nsetFlair[8]
+nconstCifar = int(nsetCifar[8])
+nconstFashion = int(nsetFashion[8])
+nconstFlair = int(nsetFlair[8])
 
-maxNumCifar = nsetCifar[9]
-maxNumFashion = nsetFashion[9]
-maxNumFlair = nsetFlair[9]
+maxNumCifar = int(nsetCifar[9])
+maxNumFashion = int(nsetFashion[9])
+maxNumFlair = int(nsetFlair[9])
 
 # pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
 # GS = [float(sqrt(d))/n for d, n in pairsArr]
 
-GSCifar = float(sqrt(dconstCifar))/nconstCifar
-GSFashion = float(sqrt(dconstFashion))/nconstFashion
-GSFlair = float(sqrt(dconstFlair))/nconstFlair
+GSCifar = float(np.sqrt(dconstCifar))/nconstCifar
+GSFashion = float(np.sqrt(dconstFashion))/nconstFashion
+GSFlair = float(np.sqrt(dconstFlair))/nconstFlair
 
 # maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
 # maxArraySize = [d*n for d, n in maxPairsArr]
@@ -70,9 +70,9 @@ epsTheory = epsconst/2
 dtaTheory = dtaconst/2
 
 # xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
-xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
-xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
-xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
+xiTheoryCifar = (2*dconstCifar*np.log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
+xiTheoryFashion = (2*dconstFashion*np.log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
+xiTheoryFlair = (2*dconstFlair*np.log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -101,10 +101,13 @@ def loadCifar100():
     dict = unpickle(filename)
     xData = dict[b'data']
 
-    names = np.array(['id,', 'data'])
-    formats = np.array(['f8,', 'f8'])
-    dtype = dict(names = names, formats = formats)
-    xTrainCifar100 = np.array(list(xData.items()), dtype = dtype)
+    # names = np.array(['id,', 'data'])
+    # formats = np.array(['f8,', 'f8'])
+    # dtype = dict(names = names, formats = formats)
+    # dtype = {'id,': 'f8,', 'data': 'f8'}
+    # xTrainCifar100 = np.array(list(xData.items()), dtype = dtype)
+
+    xTrainCifar100 = xData
     return xTrainCifar100
 
 # LOADING FASHION-MNIST DATA
@@ -118,7 +121,7 @@ def loadFashion():
 def loadFlair():
     path = 'small_images'
     os.chdir(path)
-    xTrainFlair = np.zeros(maxNumFlair, maxDimFlair)
+    xTrainFlair = np.zeros((maxNumFlair, maxDimFlair))
     count = 0
 
     from alive_progress import alive_bar
@@ -128,7 +131,8 @@ def loadFlair():
                 img = Image.open(file)
                 dict = asarray(img)
                 vector = dict.reshape((1, maxDimFlair))
-                np.append(xTrainFlair, vector, axis=0)
+                # np.append(xTrainFlair, vector, axis=0)
+                xTrainFlair[count] = vector
                 count += 1
                 bar()
         break
@@ -184,15 +188,15 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         # DEFINE GAUSSIAN CUMULATIVE DISTRIBUTION FUNCTION PHI WHERE ERF IS STANDARD ERROR FUNCTION
         def Phi(t):
-            return 0.5*(1.0 + erf(float(t)/sqrt(2.0)))
+            return 0.5*(1.0 + erf(float(t)/np.sqrt(2.0)))
 
         # VALUE V STAR IS LARGEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseA(eps, u):
-            return Phi(sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
+            return Phi(np.sqrt(eps*u)) - np.exp(eps)*Phi(-np.sqrt(eps*(u+2.0)))
 
         # VALUE U STAR IS SMALLEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseB(eps, u):
-            return Phi(-sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
+            return Phi(-np.sqrt(eps*u)) - np.exp(eps)*Phi(-np.sqrt(eps*(u+2.0)))
 
         # IF INF AND SUP NOT LARGE ENOUGH THEN TRY DOUBLE NEXT TIME
         def doublingTrick(predicateStop, uInf, uSup):
@@ -225,13 +229,13 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
                 predicateStopDT = lambda u : caseA(eps, u) >= dta
                 functionDta = lambda u : caseA(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) > dta
-                functionAlpha = lambda u : sqrt(1.0 + u/2.0) - sqrt(u/2.0)
+                functionAlpha = lambda u : np.sqrt(1.0 + u/2.0) - np.sqrt(u/2.0)
 
             else:
                 predicateStopDT = lambda u : caseB(eps, u) <= dta
                 functionDta = lambda u : caseB(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) < dta
-                functionAlpha = lambda u : sqrt(1.0 + u/2.0) + sqrt(u/2.0)
+                functionAlpha = lambda u : np.sqrt(1.0 + u/2.0) + np.sqrt(u/2.0)
 
             predicateStopBS = lambda u : abs(functionDta(u) - dta) <= tol
 
@@ -242,7 +246,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        sigma = alpha*GS/sqrt(2.0*eps)
+        sigma = alpha*GS/np.sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -387,9 +391,9 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
-        confInt = (7.84*(sqrt(6))*(sigma**2))/(sqrt(nchoice))
-        qConfInt = sum((7.84*weight*(sqrt(6))*(sigma**2))/(sqrt(nchoice)))
-        iSquaredConfInt = sum((7.84*(sqrt(2*(nchoice-1))))/(3*(sqrt(35*weight*nchoice))*(sigma**2)))
+        confInt = (7.84*(np.sqrt(6))*(sigma**2))/(np.sqrt(nchoice))
+        qConfInt = sum((7.84*weight*(np.sqrt(6))*(sigma**2))/(np.sqrt(nchoice)))
+        iSquaredConfInt = sum((7.84*(np.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {confInt}")
         datafile.write(f"\n95% CI for q: \u00B1 {qConfInt}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {iSquaredConfInt}")
@@ -402,7 +406,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    classicSigma = (GS*sqrt(2*log(1.25/dtachoice)))/epschoice
+    classicSigma = (GS*np.sqrt(2*np.log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 10):>28}")
