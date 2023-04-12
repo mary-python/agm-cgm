@@ -3,7 +3,7 @@ import time
 import idx2numpy
 import os
 
-# from math import exp, sqrt, log
+from math import exp, sqrt, log
 from numpy.random import normal
 from scipy.special import erf
 from PIL import Image
@@ -47,9 +47,9 @@ maxNumFlair = int(nsetFlair[9])
 # pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
 # GS = [float(sqrt(d))/n for d, n in pairsArr]
 
-GSCifar = float(np.sqrt(dconstCifar))/nconstCifar
-GSFashion = float(np.sqrt(dconstFashion))/nconstFashion
-GSFlair = float(np.sqrt(dconstFlair))/nconstFlair
+GSCifar = float(sqrt(dconstCifar))/nconstCifar
+GSFashion = float(sqrt(dconstFashion))/nconstFashion
+GSFlair = float(sqrt(dconstFlair))/nconstFlair
 
 # maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
 # maxArraySize = [d*n for d, n in maxPairsArr]
@@ -70,9 +70,9 @@ epsTheory = epsconst/2
 dtaTheory = dtaconst/2
 
 # xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
-xiTheoryCifar = (2*dconstCifar*np.log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
-xiTheoryFashion = (2*dconstFashion*np.log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
-xiTheoryFlair = (2*dconstFlair*np.log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
+xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
+xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
+xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -188,15 +188,15 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         # DEFINE GAUSSIAN CUMULATIVE DISTRIBUTION FUNCTION PHI WHERE ERF IS STANDARD ERROR FUNCTION
         def Phi(t):
-            return 0.5*(1.0 + erf(float(t)/np.sqrt(2.0)))
+            return 0.5*(1.0 + erf(float(t)/sqrt(2.0)))
 
         # VALUE V STAR IS LARGEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseA(eps, u):
-            return Phi(np.sqrt(eps*u)) - np.exp(eps)*Phi(-np.sqrt(eps*(u+2.0)))
+            return Phi(sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
 
         # VALUE U STAR IS SMALLEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseB(eps, u):
-            return Phi(-np.sqrt(eps*u)) - np.exp(eps)*Phi(-np.sqrt(eps*(u+2.0)))
+            return Phi(-sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
 
         # IF INF AND SUP NOT LARGE ENOUGH THEN TRY DOUBLE NEXT TIME
         def doublingTrick(predicateStop, uInf, uSup):
@@ -229,13 +229,13 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
                 predicateStopDT = lambda u : caseA(eps, u) >= dta
                 functionDta = lambda u : caseA(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) > dta
-                functionAlpha = lambda u : np.sqrt(1.0 + u/2.0) - np.sqrt(u/2.0)
+                functionAlpha = lambda u : sqrt(1.0 + u/2.0) - sqrt(u/2.0)
 
             else:
                 predicateStopDT = lambda u : caseB(eps, u) <= dta
                 functionDta = lambda u : caseB(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) < dta
-                functionAlpha = lambda u : np.sqrt(1.0 + u/2.0) + np.sqrt(u/2.0)
+                functionAlpha = lambda u : sqrt(1.0 + u/2.0) + sqrt(u/2.0)
 
             predicateStopBS = lambda u : abs(functionDta(u) - dta) <= tol
 
@@ -246,7 +246,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        sigma = alpha*GS/np.sqrt(2.0*eps)
+        sigma = alpha*GS/sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -391,9 +391,9 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
-        confInt = (7.84*(np.sqrt(6))*(sigma**2))/(np.sqrt(nchoice))
-        qConfInt = sum((7.84*weight*(np.sqrt(6))*(sigma**2))/(np.sqrt(nchoice)))
-        iSquaredConfInt = sum((7.84*(np.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
+        confInt = (7.84*(sqrt(6))*(sigma**2))/(sqrt(nchoice))
+        qConfInt = sum((7.84*weight*(sqrt(6))*(sigma**2))/(sqrt(nchoice)))
+        iSquaredConfInt = sum((7.84*(sqrt(2*(nchoice-1))))/(3*(sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {confInt}")
         datafile.write(f"\n95% CI for q: \u00B1 {qConfInt}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {iSquaredConfInt}")
@@ -406,7 +406,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    classicSigma = (GS*np.sqrt(2*np.log(1.25/dtachoice)))/epschoice
+    classicSigma = (GS*sqrt(2*log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 10):>28}")
