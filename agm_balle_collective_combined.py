@@ -70,9 +70,9 @@ epsTheory = epsconst/2
 dtaTheory = dtaconst/2
 
 # xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
-xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
-xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
-xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
+# xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
+# xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
+# xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -160,7 +160,7 @@ xTrainNewFlair = transformValues(xTrainFlair)
 
 os.chdir('..')
 
-def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize, xiTheory):
+def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize):
 
     if dataIndex == 0:
         datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
@@ -171,8 +171,8 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     else:
         datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
-    datafile.write("Statistics from Theory and Binary Search in AGM")
-    datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
+    datafile.write("Statistics from Binary Search in AGM")
+    # datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
 
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
@@ -429,50 +429,50 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
     # COLLECT SIMILAR LISTS IN COMPUTEMSE FOR Q AND I^2 THEN WRITE COMPARISONS HERE
 
-def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
 
     for eps in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value eps = {eps}.")
-        runLoop(dataIndex, index, eps, eps, dtaconst, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory)
+        runLoop(dataIndex, index, eps, eps, dtaconst, dconst, nconst, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryDta(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+def runLoopVaryDta(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
 
     for dta in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value dta = {dta}.")
-        runLoop(dataIndex, index, dta, epsconst, dta, dconst, nconst, xTrainNew, GS, maxArraySize, xiTheory)
+        runLoop(dataIndex, index, dta, epsconst, dta, dconst, nconst, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryD(dataIndex, index, varset, dset, nconst, xTrainNew, GS, maxArraySize, xiTheory):
+def runLoopVaryD(dataIndex, index, varset, dset, nconst, xTrainNew, GS, maxArraySize):
 
     for d in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value d = {d}.")
-        runLoop(dataIndex, index, d, epsconst, dtaconst, d, nconst, xTrainNew, GS, maxArraySize, xiTheory)
+        runLoop(dataIndex, index, d, epsconst, dtaconst, d, nconst, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArraySize, xiTheory):
+def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArraySize):
 
     for n in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value n = {n}.")
-        runLoop(dataIndex, index, n, epsconst, dtaconst, dconst, n, xTrainNew, GS, maxArraySize, xiTheory)
+        runLoop(dataIndex, index, n, epsconst, dtaconst, dconst, n, xTrainNew, GS, maxArraySize)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryDta(1, 0, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryD(1, 0, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
-runLoopVaryN(1, 0, dconstCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar, xiTheoryCifar)
+runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryDta(1, 0, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryD(1, 0, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryN(1, 0, dconstCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(2, 1, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
-runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
-runLoopVaryD(2, 1, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
-runLoopVaryN(2, 1, dconstFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion, xiTheoryFashion)
+runLoopVaryEps(2, 1, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryD(2, 1, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryN(2, 1, dconstFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
-runLoopVaryEps(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
-runLoopVaryDta(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
-runLoopVaryD(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
-runLoopVaryN(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair, xiTheoryFlair)
+runLoopVaryEps(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryDta(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryD(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryN(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
