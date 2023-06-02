@@ -1,11 +1,11 @@
-import numpy as np
 import time
+import numpy as np
 import idx2numpy
 import os
 
-from math import exp, sqrt, log
+from math import erf
+from mpmath import exp, sqrt, log
 from numpy.random import normal
-from scipy.special import erf
 from PIL import Image
 from numpy import asarray
 
@@ -351,8 +351,8 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             mseTList[j] = sum(mseTheoretical)
             mseQTList[j] = sum(mseQTheoretical)
 
-        datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/nchoice, 8):>16}")
-        datafile.write(f"\ntrue q: {round((sum(trueEList))/nchoice, 8):>25}")
+        datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/(nchoice*dchoice), 8):>16}")
+        datafile.write(f"\ntrue q: {round((sum(trueEList))/(nchoice*dchoice), 8):>25}")
         datafile.write(f"\nnoise 2: {round(xiSum2/nchoice, 8):>18}")
 
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
@@ -362,10 +362,10 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         squaredDiffQELists = np.power(diffQELists, 2)
         mseEmpirical = np.sqrt(squaredDiffELists)
         mseQEmpirical = np.sqrt(squaredDiffQELists)
-        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/nchoice, 10):>18}")
-        datafile.write(f"\ntheoretical mse: {round((sum(mseTList))/nchoice, 10):>17}")
-        datafile.write(f"\nempirical q: {round((sum(mseQEmpirical))/nchoice, 10):>20}")
-        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/nchoice, 10):>19}")
+        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/(nchoice*dchoice), 10):>18}")
+        datafile.write(f"\ntheoretical mse: {round((sum(mseTList))/(nchoice*dchoice), 10):>17}")
+        datafile.write(f"\nempirical q: {round((sum(mseQEmpirical))/(nchoice*dchoice), 10):>20}")
+        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/(nchoice*dchoice), 10):>19}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
         iSquaredPrep = np.divide(nchoice-1, mseQEList)
@@ -386,7 +386,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         mseTISquaredPrep = np.divide(nchoice-1, mseQTList)
         mseTISquared = np.subtract(1, mseTISquaredPrep)
         datafile.write(f"\nempirical isquared: {round(sum(mseEISquared), 10):>13}")
-        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/nchoice, 10):>12}")
+        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/(nchoice*dchoice), 10):>12}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
