@@ -54,9 +54,9 @@ GSFlair = float(sqrt(dconstFlair))/nconstFlair
 # maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
 # maxArraySize = [d*n for d, n in maxPairsArr]
 
-maxArraySizeCifar = dconstCifar*nconstCifar
-maxArraySizeFashion = dconstFashion*nconstFashion
-maxArraySizeFlair = dconstFlair*nconstFlair
+maxArraySizeCifar = dconstCifar*maxNumCifar
+maxArraySizeFashion = dconstFashion*maxNumFashion
+maxArraySizeFlair = dconstFlair*maxNumFlair
 
 # INITIALISING OTHER PARAMETERS/CONSTANTS
 parset = np.array(['eps', 'dta', 'd', 'n'])
@@ -271,12 +271,12 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         wVector = np.var(xTrainNew, axis=1)
         datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 8)):>18}")
 
-        weight = np.zeros(dchoice)
+        weight = np.zeros(nchoice)
         for j in range(0, nchoice):
             weight[j] = 1.0/(wVector[j])
 
         # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
-        wxTrainNew = np.zeros(nchoice, dchoice)
+        wxTrainNew = np.zeros((nchoice, dchoice))
         for j in range(0, nchoice):
             wxTrainNew[j] = (weight[j])*(xTrainNew[j])
 
@@ -372,13 +372,13 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
         iSquared = np.subtract(1, iSquaredPrep)
         trueISquared = np.subtract(1, trueISquaredPrep)
-        datafile.write(f"isquared: {round(sum(iSquared), 8):>17}")
-        datafile.write(f"true isquared: {round(sum(trueISquared), 8):>12}")
+        datafile.write(f"\nisquared: {round(sum(iSquared), 8):>17}")
+        datafile.write(f"\ntrue isquared: {round(sum(trueISquared), 8):>12}")
 
         # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
         xi3 = normal(0, sigma**2)
         noisyISquared = iSquared + xi3
-        datafile.write(f"noise 3: {round(xi3, 8):>18}")
+        datafile.write(f"\nnoise 3: {round(xi3, 8):>18}")
 
         diffEISquared = np.subtract(noisyISquared, trueISquared)
         squaredDEIS = np.power(diffEISquared, 2)
@@ -433,25 +433,25 @@ def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxA
 
     for eps in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value eps = {eps}.")
-        runLoop(dataIndex, index, eps, eps, dtaconst, dconst, nconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, eps, dconst, nconst, eps, dtaconst, xTrainNew, GS, maxArraySize)
 
 def runLoopVaryDta(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
 
     for dta in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value dta = {dta}.")
-        runLoop(dataIndex, index, dta, epsconst, dta, dconst, nconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, dta, dconst, nconst, epsconst, dta, xTrainNew, GS, maxArraySize)
 
 def runLoopVaryD(dataIndex, index, varset, dset, nconst, xTrainNew, GS, maxArraySize):
 
     for d in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value d = {d}.")
-        runLoop(dataIndex, index, d, epsconst, dtaconst, d, nconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, d, d, nconst, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
 def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArraySize):
 
     for n in varset:
         print(f"\nProcessing dataset {dataIndex+1} for the value n = {n}.")
-        runLoop(dataIndex, index, n, epsconst, dtaconst, dconst, n, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, n, dconst, n, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
 runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
@@ -460,19 +460,19 @@ runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar,
 runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 
 runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryDta(1, 0, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryD(1, 0, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryN(1, 0, dconstCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryDta(1, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryD(1, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryN(1, 3, dconstCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(2, 1, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryEps(2, 0, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryD(2, 1, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryN(2, 1, dconstFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryD(2, 2, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryN(2, 3, dconstFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
-runLoopVaryEps(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryDta(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryD(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryN(3, 2, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryEps(3, 0, epsset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryN(3, 3, dconstFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
