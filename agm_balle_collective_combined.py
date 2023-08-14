@@ -2,9 +2,9 @@ import time
 import numpy as np
 import idx2numpy
 import os
+import mpmath as mp
 
 from math import erf
-from mpmath import exp, sqrt, log
 from numpy.random import normal
 from PIL import Image
 from numpy import asarray
@@ -47,9 +47,9 @@ maxNumFlair = int(nsetFlair[9])
 # pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
 # GS = [float(sqrt(d))/n for d, n in pairsArr]
 
-GSCifar = float(sqrt(dconstCifar))/nconstCifar
-GSFashion = float(sqrt(dconstFashion))/nconstFashion
-GSFlair = float(sqrt(dconstFlair))/nconstFlair
+GSCifar = float(mp.sqrt(dconstCifar))/nconstCifar
+GSFashion = float(mp.sqrt(dconstFashion))/nconstFashion
+GSFlair = float(mp.sqrt(dconstFlair))/nconstFlair
 
 # maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
 # maxArraySize = [d*n for d, n in maxPairsArr]
@@ -62,8 +62,10 @@ maxArraySizeFlair = dconstFlair*maxNumFlair
 parset = np.array(['eps', 'dta', 'd', 'n'])
 rset = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 R = len(rset)
-mseEList = np.zeros(nconstFlair)
-mseTList = np.zeros(nconstFlair)
+compareEListA = np.zeros(maxNumFlair)
+compareEListB = np.zeros(maxNumFlair)
+compareTListA = np.zeros(maxNumFlair)
+compareTListB = np.zeros(maxNumFlair)
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -188,15 +190,15 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         # DEFINE GAUSSIAN CUMULATIVE DISTRIBUTION FUNCTION PHI WHERE ERF IS STANDARD ERROR FUNCTION
         def Phi(t):
-            return 0.5*(1.0 + erf(float(t)/sqrt(2.0)))
+            return 0.5*(1.0 + erf(float(t)/mp.sqrt(2.0)))
 
         # VALUE V STAR IS LARGEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseA(eps, u):
-            return Phi(sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
+            return Phi(mp.sqrt(eps*u)) - mp.exp(eps)*Phi(-mp.sqrt(eps*(u+2.0)))
 
         # VALUE U STAR IS SMALLEST SUCH THAT THIS EXPRESSION IS LESS THAN OR EQUAL TO DTA
         def caseB(eps, u):
-            return Phi(-sqrt(eps*u)) - exp(eps)*Phi(-sqrt(eps*(u+2.0)))
+            return Phi(-mp.sqrt(eps*u)) - mp.exp(eps)*Phi(-mp.sqrt(eps*(u+2.0)))
 
         # IF INF AND SUP NOT LARGE ENOUGH THEN TRY DOUBLE NEXT TIME
         def doublingTrick(predicateStop, uInf, uSup):
@@ -229,13 +231,13 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
                 predicateStopDT = lambda u : caseA(eps, u) >= dta
                 functionDta = lambda u : caseA(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) > dta
-                functionAlpha = lambda u : sqrt(1.0 + u/2.0) - sqrt(u/2.0)
+                functionAlpha = lambda u : mp.sqrt(1.0 + u/2.0) - mp.sqrt(u/2.0)
 
             else:
                 predicateStopDT = lambda u : caseB(eps, u) <= dta
                 functionDta = lambda u : caseB(eps, u)
                 predicateLeftBS = lambda u : functionDta(u) < dta
-                functionAlpha = lambda u : sqrt(1.0 + u/2.0) + sqrt(u/2.0)
+                functionAlpha = lambda u : mp.sqrt(1.0 + u/2.0) + mp.sqrt(u/2.0)
 
             predicateStopBS = lambda u : abs(functionDta(u) - dta) <= tol
 
@@ -246,7 +248,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         casetime = time.perf_counter() - loopTime
         datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
 
-        sigma = alpha*GS/sqrt(2.0*eps)
+        sigma = alpha*GS/mp.sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
@@ -257,7 +259,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     datafile.write(f"\nsquare: {round(sigma**2, 10):>27}")
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(xTrainNew, sigma):
+    def computeMSE(xTrainNew, sigma, index):
 
         loopTime = time.perf_counter()
 
@@ -280,11 +282,8 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         for j in range(0, nchoice):
             wxTrainNew[j] = (weight[j])*(xTrainNew[j])
 
-        print(wxTrainNew)
         mu = np.mean(xTrainNew, axis=0)
         wMu = np.mean(wxTrainNew, axis=0)
-        print(mu)
-        print(wMu)
         datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 8)):>29}")
         datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 8)):>20}")
         muSquares = np.power(mu, 2)
@@ -346,10 +345,19 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             wMultiply = np.multiply(xi1, wBracket)
             weightedMult = (weight[j])*(wMultiply)
 
-            mseTheoretical = np.add(multiply, xi2)
-            mseQTheoretical = np.add(weightedMult, xi2)
+            errorTheoretical = np.add(multiply, xi2)
+            errorQTheoretical = np.add(weightedMult, xi2)
+            mseTheoretical = np.power(errorTheoretical, 2)
+            mseQTheoretical = np.power(errorQTheoretical, 2)
             mseTList[j] = sum(mseTheoretical)
             mseQTList[j] = sum(mseQTheoretical)
+
+        if index == 0:
+            compareEListA = mseEList
+            compareTListA = mseTList
+        else:
+            compareEListB = mseEList
+            compareTListB = mseTList
 
         datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/(nchoice*dchoice), 8):>16}")
         datafile.write(f"\ntrue q: {round((sum(trueEList))/(nchoice*dchoice), 8):>25}")
@@ -391,9 +399,9 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
-        confInt = (7.84*(sqrt(6))*(sigma**2))/(sqrt(nchoice))
-        qConfInt = sum((7.84*weight*(sqrt(6))*(sigma**2))/(sqrt(nchoice)))
-        iSquaredConfInt = sum((7.84*(sqrt(2*(nchoice-1))))/(3*(sqrt(35*weight*nchoice))*(sigma**2)))
+        confInt = (7.84*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice))
+        qConfInt = sum((7.84*weight*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice)))        
+        iSquaredConfInt = sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {confInt}")
         datafile.write(f"\n95% CI for q: \u00B1 {qConfInt}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {iSquaredConfInt}")
@@ -402,30 +410,26 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
-    computeMSE(xTrainNew, sigma)
+    computeMSE(xTrainNew, sigma, 0)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
-    classicSigma = (GS*sqrt(2*log(1.25/dtachoice)))/epschoice
+    classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
     datafile.write(f"\nsquare: {round(classicSigma**2, 10):>28}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
-    computeMSE(xTrainNew, classicSigma)
+    computeMSE(xTrainNew, classicSigma, 1)
 
     # EXPERIMENT 2: AGM VS CGM
-    def agmVScgm(mseList):
-        mseA = mseList.pop(0)
-        mseB = mseList.pop(0)
-        msediff = float(mseB)/float(mseA)
-        return msediff
-    
     datafile.write("\nPercentages comparing AGM and classic GM")
-    msediff1 = agmVScgm(mseEList)
-    datafile.write(f"\n\nempirical mse comparison: {round(msediff1, 8):>10}x")
-    msediff2 = agmVScgm(mseTList)
-    datafile.write(f"\ntheoretical mse comparison: {round(msediff2, 8):>4}x")
+    msediff1 = np.subtract(compareEListB, compareEListA)
+    sumdiff1 = sum(msediff1)
+    datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 8):>10}x")
+    msediff2 = np.subtract(compareTListB, compareTListA)
+    sumdiff2 = sum(msediff2)
+    datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 8):>4}x")
 
     # COLLECT SIMILAR LISTS IN COMPUTEMSE FOR Q AND I^2 THEN WRITE COMPARISONS HERE
 
