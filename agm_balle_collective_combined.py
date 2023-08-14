@@ -345,10 +345,8 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             wMultiply = np.multiply(xi1, wBracket)
             weightedMult = (weight[j])*(wMultiply)
 
-            errorTheoretical = np.add(multiply, xi2)
-            errorQTheoretical = np.add(weightedMult, xi2)
-            mseTheoretical = np.power(errorTheoretical, 2)
-            mseQTheoretical = np.power(errorQTheoretical, 2)
+            mseTheoretical = np.add(multiply, xi2)
+            mseQTheoretical = np.add(weightedMult, xi2)
             mseTList[j] = sum(mseTheoretical)
             mseQTList[j] = sum(mseQTheoretical)
 
