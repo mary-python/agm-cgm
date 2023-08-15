@@ -22,7 +22,7 @@ epsconst = float(epsset[1])
 dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05])
 dtaconst = float(dtaset[1])
 
-dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1728, 2048, 2304, 2560, 3072])
+dsetCifar = np.array([384, 512, 768, 1024, 1280, 1536, 1875, 2048, 2560, 3072])
 dsetFashion = np.array([147, 196, 245, 294, 392, 448, 490, 588, 672, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
@@ -422,10 +422,10 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
     # EXPERIMENT 2: AGM VS CGM
     datafile.write("\nPercentages comparing AGM and classic GM")
-    msediff1 = np.divide(compareEListB, compareEListA)
+    msediff1 = np.subtract(compareEListB, compareEListA)
     sumdiff1 = sum(msediff1)
     datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 8):>6}x")
-    msediff2 = np.divide(compareTListB, compareTListA)
+    msediff2 = np.subtract(compareTListB, compareTListA)
     sumdiff2 = sum(msediff2)
     datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 8):>4}x")
 
