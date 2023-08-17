@@ -285,11 +285,11 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         mu = np.mean(xTrainNew, axis=0)
         wMu = np.mean(wxTrainNew, axis=0)
         datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 6)):>29}")
-        datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 4)):>20}")
+        datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 4)):>18}")
         muSquares = np.power(mu, 2)
         wMuSquares = np.power(wMu, 2)
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")   
-        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 2)):>12}")
+        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 2)):>10}")
 
         noisyMu = np.zeros(dchoice)
         wNoisyMu = np.zeros(dchoice)
@@ -370,29 +370,29 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         mseQEmpirical = np.sqrt(squaredDiffQELists)
         datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/(nchoice*dchoice), 8):>20}")
         datafile.write(f"\ntheoretical mse: {round((sum(mseTList))/(nchoice*dchoice), 8):>16}")
-        datafile.write(f"\nempirical q: {round((sum(mseQEmpirical))/(nchoice*dchoice), 8):>18}")
-        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/(nchoice*dchoice), 6):>20}")
+        datafile.write(f"\nempirical q: {round((sum(mseQEmpirical))/(nchoice*dchoice), 8):>22}")
+        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/(nchoice*dchoice), 6):>17}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
         iSquaredPrep = np.divide(nchoice-1, mseQEList)
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
         iSquared = np.subtract(1, iSquaredPrep)
         trueISquared = np.subtract(1, trueISquaredPrep)
-        datafile.write(f"\nisquared: {round(sum(iSquared), 8):>24}")
-        datafile.write(f"\ntrue isquared: {round(sum(trueISquared), 8):>17}")
+        datafile.write(f"\nisquared: {round(sum(iSquared)):>24}")
+        datafile.write(f"\ntrue isquared: {round(sum(trueISquared)):>17}")
 
         # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
         xi3 = normal(0, sigma**2)
         noisyISquared = iSquared + xi3
-        datafile.write(f"\nnoise 3: {round(xi3, 8):>24}")
+        datafile.write(f"\nnoise 3: {round(xi3, 8):>28}")
 
         diffEISquared = np.subtract(noisyISquared, trueISquared)
         squaredDEIS = np.power(diffEISquared, 2)
         mseEISquared = np.sqrt(squaredDEIS)
         mseTISquaredPrep = np.divide(nchoice-1, mseQTList)
         mseTISquared = np.subtract(1, mseTISquaredPrep)
-        datafile.write(f"\nempirical isquared: {round(sum(mseEISquared), 4):>15}")
-        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/(nchoice*dchoice), 4):>13}")
+        datafile.write(f"\nempirical isquared: {round(sum(mseEISquared), 4):>10}")
+        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/(nchoice*dchoice), 4):>8}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
@@ -401,11 +401,11 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         qConfInt = sum((7.84*weight*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice)))        
         iSquaredConfInt = sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {round(confInt, 8)}")
-        datafile.write(f"\n95% CI for q: \u00B1 {round(qConfInt, 4):>8}")
+        datafile.write(f"\n95% CI for q: \u00B1 {round(qConfInt, 4):>15}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
         casetime = time.perf_counter() - loopTime
-        datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
+        datafile.write(f"\n\ncalibration: {round(casetime, 2):>18} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
     computeMSE(xTrainNew, sigma, 0)
