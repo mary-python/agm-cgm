@@ -24,7 +24,7 @@ dtaconst = float(dtaset[1])
 
 dsetCifar = np.array([384, 512, 768, 1024, 1280, 1536, 1875, 2048, 2560, 3072])
 dsetFashion = np.array([147, 196, 245, 294, 392, 448, 490, 588, 672, 784])
-dsetFlair = np.array([768, 1536, 2304, 3072, 3840, 4800, 6144, 7680, 8192, 9375])
+dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconstCifar = maxDimCifar = int(dsetCifar[9])
