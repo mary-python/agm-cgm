@@ -63,9 +63,13 @@ parset = np.array(['eps', 'dta', 'd', 'n'])
 rset = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 R = len(rset)
 compareEListA = np.zeros(maxNumFlair)
+compareQEListA = np.zeros(maxNumFlair)
 compareEListB = np.zeros(maxNumFlair)
+compareQEListB = np.zeros(maxNumFlair)
 compareTListA = np.zeros(maxNumFlair)
+compareQTListA = np.zeros(maxNumFlair)
 compareTListB = np.zeros(maxNumFlair)
+compareQTListB = np.zeros(maxNumFlair)
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
@@ -332,8 +336,10 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             xiSum2 += xi2
 
             mseEList[j] = sum(noisyDisp)
+            print(mseEList[j])
             trueEList[j] = sum(trueDisp)
             mseQEList[j] = sum(noisyQ)
+            print(mseQEList[j])
             trueQEList[j] = sum(weightedTrueDisp)
 
             # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
@@ -348,14 +354,36 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             mseTheoretical = np.add(multiply, xi2)
             mseQTheoretical = np.add(weightedMult, xi2)
             mseTList[j] = sum(mseTheoretical)
+            print(mseTList[j])
             mseQTList[j] = sum(mseQTheoretical)
+            print(mseQTList[j])
 
         if index == 0:
             compareEListA = mseEList
+            compareQEListA = mseQEList
             compareTListA = mseTList
+            compareQTListA = mseQTList
         else:
             compareEListB = mseEList
+            compareQEListB = mseQEList
             compareTListB = mseTList
+            compareQTListB = mseQTList
+
+        print(mseEList)
+        print(compareEListA)
+        print(compareEListB)
+
+        print(mseTList)
+        print(compareTListA)
+        print(compareTListB)
+
+        print(mseQEList)
+        print(compareQEListA)
+        print(compareQEListB)
+
+        print(mseQTList)
+        print(compareQTListA)
+        print(compareQTListB)
 
         datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/(nchoice*dchoice), 8):>16}")
         datafile.write(f"\ntrue q: {round((sum(trueQEList))/(nchoice*dchoice), 8):>25}")
@@ -423,13 +451,19 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     # EXPERIMENT 2: AGM VS CGM
     datafile.write("\nPercentages comparing AGM and classic GM")
     msediff1 = np.subtract(compareEListB, compareEListA)
+    mseqdiff1 = np.subtract(compareQEListB, compareQEListA)
     sumdiff1 = sum(msediff1)
+    sumqdiff1 = sum(mseqdiff1)
     datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 8):>6}x")
+    datafile.write(f"\n\nempirical q comparison: {round(sumqdiff1, 8):>8}x")
     msediff2 = np.subtract(compareTListB, compareTListA)
+    mseqdiff2 = np.subtract(compareQTListB, compareQTListA)
     sumdiff2 = sum(msediff2)
+    sumqdiff2 = sum(mseqdiff2)
     datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 8):>4}x")
+    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 8):>6}x")
 
-    # COLLECT SIMILAR LISTS IN COMPUTEMSE FOR Q AND I^2 THEN WRITE COMPARISONS HERE
+    # COMPUTE SIMILAR LISTS IN COMPUTEMSE FOR I^2 (USING FORMULA IN TERMS OF Q) THEN WRITE COMPARISONS HERE
 
 def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
 
