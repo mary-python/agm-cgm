@@ -297,11 +297,11 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         xiSum2 = 0
 
         mseEList = np.zeros(nchoice)
-        trueEList = np.zeros(nchoice)
+        trueEList = np.zeros(nchoice, dtype = np.int64)
         mseQEList = np.zeros(nchoice)
-        trueQEList = np.zeros(nchoice)
-        mseTList = np.zeros(nchoice)
-        mseQTList = np.zeros(nchoice)
+        trueQEList = np.zeros(nchoice, dtype = np.int64)
+        mseTList = np.zeros(nchoice, dtype = np.int64)
+        mseQTList = np.zeros(nchoice, dtype = np.int64)
 
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
         for i in range(0, dchoice):
@@ -358,7 +358,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             compareTListB = mseTList
 
         datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/(nchoice*dchoice), 8):>16}")
-        datafile.write(f"\ntrue q: {round((sum(trueEList))/(nchoice*dchoice), 8):>25}")
+        datafile.write(f"\ntrue q: {round((sum(trueQEList))/(nchoice*dchoice), 8):>25}")
         datafile.write(f"\nnoise 2: {round(xiSum2/nchoice, 8):>22}")
 
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
