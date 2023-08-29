@@ -359,15 +359,15 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             print(mseQTList[j])
 
         if index == 0:
-            compareEListA = mseEList
-            compareQEListA = mseQEList
-            compareTListA = mseTList
-            compareQTListA = mseQTList
+            np.copyto(compareEListA, mseEList)
+            np.copyto(compareQEListA, mseQEList)
+            np.copyto(compareTListA, mseTList)
+            np.copyto(compareQTListA, mseQTList)
         else:
-            compareEListB = mseEList
-            compareQEListB = mseQEList
-            compareTListB = mseTList
-            compareQTListB = mseQTList
+            np.copyto(compareEListB, mseEList)
+            np.copyto(compareQEListB, mseQEList)
+            np.copyto(compareTListB, mseTList)
+            np.copyto(compareQTListB, mseQTList)
 
         print(mseEList)
         print(compareEListA)
