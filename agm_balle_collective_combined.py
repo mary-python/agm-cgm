@@ -337,10 +337,8 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             xiSum2 += xi2
 
             mseEList[j] = sum(noisyDisp)
-            print(mseEList[j])
             trueEList[j] = sum(trueDisp)
             mseQEList[j] = sum(noisyQ)
-            print(mseQEList[j])
             trueQEList[j] = sum(weightedTrueDisp)
 
             # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
@@ -355,9 +353,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             mseTheoretical = np.add(multiply, xi2)
             mseQTheoretical = np.add(weightedMult, xi2)
             mseTList[j] = sum(mseTheoretical)
-            print(mseTList[j])
             mseQTList[j] = sum(mseQTheoretical)
-            print(mseQTList[j])
 
         if index == 0:
             np.copyto(compareEListA, mseEList)
@@ -369,22 +365,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             np.copyto(compareQEListB, mseQEList)
             np.copyto(compareTListB, mseTList)
             np.copyto(compareQTListB, mseQTList)
-
-        print(mseEList)
-        print(compareEListA)
-        print(compareEListB)
-
-        print(mseTList)
-        print(compareTListA)
-        print(compareTListB)
-
-        print(mseQEList)
-        print(compareQEListA)
-        print(compareQEListB)
-
-        print(mseQTList)
-        print(compareQTListA)
-        print(compareQTListB)
 
         datafile.write(f"\ntrue dispersion: {round((sum(trueEList))/(nchoice*dchoice), 8):>16}")
         datafile.write(f"\ntrue q: {round((sum(trueQEList))/(nchoice*dchoice), 8):>25}")
@@ -455,14 +435,14 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     mseqdiff1 = np.subtract(compareQEListB, compareQEListA)
     sumdiff1 = sum(msediff1)
     sumqdiff1 = sum(mseqdiff1)
-    datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 8):>6}x")
-    datafile.write(f"\n\nempirical q comparison: {round(sumqdiff1, 8):>8}x")
+    datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4):>6}x")
+    datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 2):>8}x")
     msediff2 = np.subtract(compareTListB, compareTListA)
     mseqdiff2 = np.subtract(compareQTListB, compareQTListA)
     sumdiff2 = sum(msediff2)
     sumqdiff2 = sum(mseqdiff2)
-    datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 8):>4}x")
-    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 8):>6}x")
+    datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
+    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 2):>6}x")
 
     # COMPUTE SIMILAR LISTS IN COMPUTEMSE FOR I^2 (USING FORMULA IN TERMS OF Q) THEN WRITE COMPARISONS HERE
 
