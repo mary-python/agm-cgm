@@ -22,13 +22,13 @@ epsconst = float(epsset[1])
 dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05])
 dtaconst = float(dtaset[1])
 
-dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2304, 2592, 3072])
-dsetFashion = np.array([147, 196, 245, 294, 392, 448, 490, 588, 672, 784])
+dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
+dsetFashion = np.array([600, 625, 640, 672, 700, 735, 750, 768, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconstCifar = maxDimCifar = int(dsetCifar[9])
-dconstFashion = maxDimFashion = int(dsetFashion[9])
+dconstFashion = maxDimFashion = int(dsetFashion[8])
 dconstFlair = maxDimFlair = int(dsetFlair[9])
 
 nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000])
@@ -251,7 +251,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>15}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>13}")
     datafile.write(f"\nsquare: {round(sigma**2, 10):>27}")
         
     compareEListA = np.zeros(nchoice)
@@ -276,7 +276,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
         wVector = np.var(xTrainNew, axis=1)
-        datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 6)):>18}")
+        datafile.write(f"\nwithin-vector: {str(round((sum(wVector))/nchoice, 6)):>16}")
 
         weight = np.zeros(nchoice)
         for j in range(0, nchoice):
@@ -289,12 +289,12 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         mu = np.mean(xTrainNew, axis=0)
         wMu = np.mean(wxTrainNew, axis=0)
-        datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 6)):>29}")
-        datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 4)):>18}")
+        datafile.write(f"\n\nmu: {str(round((sum(mu))/dchoice, 6)):>27}")
+        datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 4)):>16}")
         muSquares = np.power(mu, 2)
         wMuSquares = np.power(wMu, 2)
         datafile.write(f"\nsum of squares: {str(round((sum(muSquares))/dchoice, 5)):>14}")   
-        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 2)):>10}")
+        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 2)):>8}")
 
         noisyMu = np.zeros(dchoice)
         wNoisyMu = np.zeros(dchoice)
@@ -314,7 +314,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             noisyMu[i] = mu[i] + xi1
             wNoisyMu[i] = wMu[i] + xi1
             xiSum1 += xi1
-        datafile.write(f"\n\nnoise 1: {round(xiSum1/dchoice, 8):>22}")
+        datafile.write(f"\n\nnoise 1: {round(xiSum1/dchoice, 8):>21}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
@@ -377,31 +377,31 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         squaredDiffQELists = np.power(diffQELists, 2)
         mseEmpirical = np.sqrt(squaredDiffELists)
         mseQEmpirical = np.sqrt(squaredDiffQELists)
-        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/(nchoice*dchoice), 8):>20}")
-        datafile.write(f"\ntheoretical mse: {round((sum(mseTList))/(nchoice*dchoice), 10):>16}")
-        datafile.write(f"\nempirical q: {round(sum((mseQEmpirical))/(nchoice*dchoice), 8):>22}")
-        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/(nchoice*dchoice), 6):>17}")
+        datafile.write(f"\nempirical mse: {round((sum(mseEmpirical))/(nchoice*dchoice), 8):>18}")
+        datafile.write(f"\ntheoretical mse: {round((sum(mseTList))/(nchoice*dchoice), 10):>14}")
+        datafile.write(f"\nempirical q: {round(sum((mseQEmpirical))/(nchoice*dchoice), 8):>20}")
+        datafile.write(f"\ntheoretical q: {round((sum(mseQTList))/(nchoice*dchoice), 6):>16}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
         iSquaredPrep = np.divide(nchoice-1, mseQEList)
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
         iSquared = np.subtract(1, iSquaredPrep)
         trueISquared = np.subtract(1, trueISquaredPrep)
-        datafile.write(f"\nisquared: {round(sum(iSquared)):>24}")
-        datafile.write(f"\ntrue isquared: {round(sum(trueISquared)):>17}")
+        datafile.write(f"\nisquared: {round(sum(iSquared)):>19}")
+        datafile.write(f"\ntrue isquared: {round(sum(trueISquared)):>14}")
 
         # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
         xi3 = normal(0, sigma**2)
         noisyISquared = iSquared + xi3
-        datafile.write(f"\nnoise 3: {round(xi3, 8):>28}")
+        datafile.write(f"\nnoise 3: {round(xi3, 8):>24}")
 
         diffEISquared = np.subtract(noisyISquared, trueISquared)
         squaredDEIS = np.power(diffEISquared, 2)
         mseEISquared = np.sqrt(squaredDEIS)
         mseTISquaredPrep = np.divide(nchoice-1, mseQTList)
         mseTISquared = np.subtract(1, mseTISquaredPrep)
-        datafile.write(f"\nempirical isquared: {round(sum(mseEISquared), 4):>10}")
-        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/(nchoice*dchoice), 4):>8}")
+        datafile.write(f"\nempirical isquared: {round(sum(mseEISquared), 4):>9}")
+        datafile.write(f"\ntheoretical isquared: {round((sum(mseTISquared))/(nchoice*dchoice), 4):>7}")
 
         # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
 
@@ -414,7 +414,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
         casetime = time.perf_counter() - loopTime
-        datafile.write(f"\n\ncalibration: {round(casetime, 2):>18} seconds\n")
+        datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
     computeMSE(xTrainNew, sigma, 0)
@@ -475,25 +475,25 @@ def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArray
         runLoop(dataIndex, index, n, dconst, n, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+# runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+# runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+# runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+# runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryDta(1, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryD(1, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryN(1, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+# runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+# runLoopVaryDta(1, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+# runLoopVaryD(1, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+# runLoopVaryN(1, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(2, 0, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+# runLoopVaryEps(2, 0, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+# runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 runLoopVaryD(2, 2, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryN(2, 3, nsetFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+# runLoopVaryN(2, 3, nsetFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
-runLoopVaryEps(3, 0, epsset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryN(3, 3, nsetFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+# runLoopVaryEps(3, 0, epsset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+# runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+# runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+# runLoopVaryN(3, 3, nsetFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
 
