@@ -23,12 +23,12 @@ dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.
 dtaconst = float(dtaset[1])
 
 dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
-dsetFashion = np.array([784])
+dsetFashion = np.array([392, 480, 490, 500, 512, 525, 560, 588, 672, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconstCifar = maxDimCifar = int(dsetCifar[9])
-dconstFashion = maxDimFashion = int(dsetFashion[0])
+dconstFashion = maxDimFashion = int(dsetFashion[9])
 dconstFlair = maxDimFlair = int(dsetFlair[9])
 
 nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000])
