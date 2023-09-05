@@ -23,7 +23,7 @@ dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.
 dtaconst = float(dtaset[1])
 
 dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
-dsetFashion = np.array([392, 480, 490, 500, 512, 525, 560, 588, 672, 784])
+dsetFashion = np.array([392, 525, 588, 600, 625, 640, 672, 700, 735, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
