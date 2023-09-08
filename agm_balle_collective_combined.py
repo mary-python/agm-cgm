@@ -24,7 +24,7 @@ dtaconst = float(dtaset[1])
 
 dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
 dsetFashion = np.array([392, 525, 588, 600, 625, 640, 672, 700, 735, 784])
-dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288])
+dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288], dtype = np.int64)
 
 # dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconstCifar = maxDimCifar = int(dsetCifar[9])
@@ -33,7 +33,7 @@ dconstFlair = maxDimFlair = int(dsetFlair[9])
 
 nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000])
 nsetFashion = np.array([15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000])
-nsetFlair = np.array([25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000])
+nsetFlair = np.array([25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000], dtype = np.int64)
 
 # nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
 nconstCifar = int(nsetCifar[8])
@@ -487,12 +487,12 @@ def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArray
 
 # runLoopVaryEps(2, 0, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 # runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryD(2, 2, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+# runLoopVaryD(2, 2, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 # runLoopVaryN(2, 3, nsetFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
 # runLoopVaryEps(3, 0, epsset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 # runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-# runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 # runLoopVaryN(3, 3, nsetFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
