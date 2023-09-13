@@ -10,7 +10,7 @@ from PIL import Image
 from numpy import asarray
 
 # INITIALISING START TIME AND SEED FOR RANDOM SAMPLING
-startTime = time.perf_counter
+startTime = time.perf_counter()
 print("\nStarting...")
 np.random.seed(3820672)
 
