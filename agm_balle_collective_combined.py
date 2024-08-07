@@ -35,7 +35,6 @@ nsetCifar = np.array([5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 450
 nsetFashion = np.array([15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000])
 nsetFlair = np.array([25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000, 225000, 250000], dtype = np.int64)
 
-# nset = np.array([nsetCifar, nsetFashion, nsetFlair], dtype=object)
 nconstCifar = int(nsetCifar[8])
 nconstFashion = int(nsetFashion[8])
 nconstFlair = int(nsetFlair[8])
@@ -44,15 +43,9 @@ maxNumCifar = int(nsetCifar[9])
 maxNumFashion = int(nsetFashion[9])
 maxNumFlair = int(nsetFlair[9])
 
-# pairsArr = [(dconst[0], nconst[0]), (dconst[1], nconst[1]), (dconst[2], nconst[2])]
-# GS = [float(sqrt(d))/n for d, n in pairsArr]
-
 GSCifar = float(mp.sqrt(dconstCifar))/nconstCifar
 GSFashion = float(mp.sqrt(dconstFashion))/nconstFashion
 GSFlair = float(mp.sqrt(dconstFlair))/nconstFlair
-
-# maxPairsArr = [(dconst[0], maxNum[0]), (dconst[1], maxNum[1]), (dconst[2], maxNum[2])]
-# maxArraySize = [d*n for d, n in maxPairsArr]
 
 maxArraySizeCifar = dconstCifar*maxNumCifar
 maxArraySizeFashion = dconstFashion*maxNumFashion
@@ -66,11 +59,6 @@ R = len(rset)
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
 epsTheory = epsconst/2
 dtaTheory = dtaconst/2
-
-# xiTheory = [(2*d*log(1.25/dtaTheory))/((n**2)*(epsTheory**2)) for d, n in pairsArr]
-# xiTheoryCifar = (2*dconstCifar*log(1.25/dtaTheory))/((nconstCifar**2)*(epsTheory**2))
-# xiTheoryFashion = (2*dconstFashion*log(1.25/dtaTheory))/((nconstFashion**2)*(epsTheory**2))
-# xiTheoryFlair = (2*dconstFlair*log(1.25/dtaTheory))/((nconstFlair**2)*(epsTheory**2))
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
 def unpickle(file):
@@ -98,13 +86,6 @@ def loadCifar100():
     filename = 'train'
     dict = unpickle(filename)
     xData = dict[b'data']
-
-    # names = np.array(['id,', 'data'])
-    # formats = np.array(['f8,', 'f8'])
-    # dtype = dict(names = names, formats = formats)
-    # dtype = {'id,': 'f8,', 'data': 'f8'}
-    # xTrainCifar100 = np.array(list(xData.items()), dtype = dtype)
-
     xTrainCifar100 = xData
     return xTrainCifar100
 
@@ -150,7 +131,6 @@ xTrainCifar100 = loadCifar100()
 xTrainFashion = loadFashion()
 xTrainFlair = loadFlair()
 
-# xTrain = np.array([xTrainCifar10, xTrainCifar100, xTrainFashion, xTrainFlair], dtype=object)
 xTrainNewCifar10 = transformValues(xTrainCifar10)
 xTrainNewCifar100 = transformValues(xTrainCifar100)
 xTrainNewFashion = transformValues(xTrainFashion)
@@ -252,7 +232,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
     datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>13}")
-    datafile.write(f"\nsquare: {round(sigma**2, 10):>27}")
         
     compareEListA = np.zeros(nchoice)
     compareQEListA = np.zeros(nchoice)
@@ -276,8 +255,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
         wVector = np.var(xTrainNew, axis=1)
-        datafile.write(f"\nwithin-vector: {str(round((np.sum(wVector))/nchoice, 6)):>16}")
-
         weight = np.zeros(nchoice)
         for j in range(0, nchoice):
             weight[j] = 1.0/(wVector[j])
@@ -289,12 +266,10 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         mu = np.mean(xTrainNew, axis=0)
         wMu = np.mean(wxTrainNew, axis=0)
-        datafile.write(f"\n\nmu: {str(round((np.sum(mu))/dchoice, 6)):>27}")
-        datafile.write(f"\nweighted mu: {str(round((np.sum(wMu))/dchoice, 4)):>16}")
-        muSquares = np.power(mu, 2)
-        wMuSquares = np.power(wMu, 2)
-        datafile.write(f"\nsum of squares: {str(round((np.sum(muSquares))/dchoice, 5)):>14}")   
-        datafile.write(f"\nsum of w squares: {str(round((np.sum(wMuSquares))/dchoice, 2)):>8}")
+        meanMu = (np.sum(mu))/dchoice
+        weightedMu = (np.sum(wMu))/dchoice
+        datafile.write(f"\nmean mu: {str(round(meanMu, 6)):>22}")
+        datafile.write(f"\nweighted mu: {str(round(weightedMu, 4)):>16}")
 
         noisyMu = np.zeros(dchoice)
         wNoisyMu = np.zeros(dchoice)
@@ -314,7 +289,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             noisyMu[i] = mu[i] + xi1
             wNoisyMu[i] = wMu[i] + xi1
             xiSum1 += xi1
-        datafile.write(f"\n\nnoise 1: {round(xiSum1/dchoice, 8):>21}")
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
@@ -350,12 +324,12 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             wMultiply = np.multiply(xi1, wBracket)
             weightedMult = (weight[j])*(wMultiply)
 
-            mseTheoretical = np.add(multiply, xi2)
-            mseQTheoretical = np.add(weightedMult, xi2)
-            mseTheoreticalSquared = np.power(mseTheoretical, 2)
-            mseQTheoreticalSquared = np.power(mseQTheoretical, 2)
-            mseTList[j] = np.sum(mseTheoreticalSquared)
-            mseQTList[j] = np.sum(mseQTheoreticalSquared)
+            extraTerm = np.add(multiply, xi2)
+            wExtraTerm = np.add(weightedMult, xi2)
+            extraTermSquared = np.power(extraTerm, 2)
+            wExtraTermSquared = np.power(wExtraTerm, 2)
+            mseTList[j] = np.sum(extraTermSquared)
+            mseQTList[j] = np.sum(wExtraTermSquared)
 
         if index == 0:
             np.copyto(compareEListA, mseEList)
@@ -368,56 +342,53 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             np.copyto(compareTListB, mseTList)
             np.copyto(compareQTListB, mseQTList)
 
-        datafile.write(f"\ntrue dispersion: {round((np.sum(trueEList))/(nchoice*dchoice), 8):>16}")
-        datafile.write(f"\ntrue q: {round((np.sum(trueQEList))/(nchoice*dchoice), 8):>25}")
-        datafile.write(f"\nnoise 2: {round(xiSum2/nchoice, 8):>22}")
+        trueDispersion = (np.sum(trueEList))/(nchoice*dchoice)
+        trueQ = (np.sum(trueQEList))/(nchoice*dchoice)    
 
         # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
         diffELists = np.subtract(mseEList, trueEList)
         diffQELists = np.subtract(mseQEList, trueQEList)
         squaredDiffELists = np.power(diffELists, 2)
         squaredDiffQELists = np.power(diffQELists, 2)
-        mseEmpirical = np.sqrt(squaredDiffELists)
-        mseQEmpirical = np.sqrt(squaredDiffQELists)
-        datafile.write(f"\nempirical mse: {round((np.sum(mseEmpirical))/(nchoice*dchoice), 8):>18}")
-        datafile.write(f"\ntheoretical mse: {round((np.sum(mseTList))/(nchoice*dchoice), 10):>14}")
-        datafile.write(f"\nempirical q: {round(np.sum((mseQEmpirical))/(nchoice*dchoice), 8):>20}")
-        datafile.write(f"\ntheoretical q: {round((np.sum(mseQTList))/(nchoice*dchoice), 6):>16}")
+        mseEmpirical = (np.sum(squaredDiffELists))/(nchoice*dchoice)
+        mseQEmpirical = (np.sum(squaredDiffQELists))/(nchoice*dchoice)
+        mseTheoretical = (np.sum(mseTList))/(nchoice*dchoice)
+        mseQTheoretical = (np.sum(mseQTList))/(nchoice*dchoice)
+
+        datafile.write(f"\n\ntrue dispersion: {round(trueDispersion, 8):>16}")
+        datafile.write(f"\nempirical mse: {round(mseEmpirical, 8):>18}")
+        datafile.write(f"\ntheoretical mse: {round(mseTheoretical, 10):>14}")
+        datafile.write(f"\n\ntrue q: {round(trueQ):>25}")
+        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 8):>20}")
+        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 6):>16}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
-        iSquaredPrep = np.divide(nchoice-1, mseQEList)
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
-        iSquared = np.subtract(1, iSquaredPrep)
         trueISquared = np.subtract(1, trueISquaredPrep)
-        datafile.write(f"\nisquared: {round(np.sum(iSquared), 10):>19}")
-        datafile.write(f"\ntrue isquared: {round(np.sum(trueISquared), 10):>14}")
+        iSquaredPrep = np.divide(nchoice-1, mseQEList)
+        iSquared = np.subtract(1, iSquaredPrep)
 
         # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
         xi3 = normal(0, sigma**2)
         noisyISquared = iSquared + xi3
-        datafile.write(f"\nnoise 3: {round(xi3, 8):>24}")
-
         diffEISquared = np.subtract(noisyISquared, trueISquared)
         squaredDEIS = np.power(diffEISquared, 2)
-        mseEISquared = np.sqrt(squaredDEIS)
+        mseISquaredEmpirical = (np.sum(squaredDEIS))/(nchoice*dchoice)
+        diffTISquaredPrep = np.divide(nchoice-1, mseQTList)
+        diffTISquared = np.subtract(1, diffTISquaredPrep)
+        squaredDTIS = np.power(diffTISquared, 2)
+        mseISquaredTheoretical = (np.sum(squaredDTIS))/(nchoice*dchoice)
 
-        # AVOID DIVIDE BY ZERO ERRORS
-        # with np.errstate(divide='ignore'):
-
-        mseTISquaredPrep = np.divide(nchoice-1, mseQTList)
-        mseTISquared = np.subtract(1, mseTISquaredPrep)
-        mseTISquaredSquared = np.power(mseTISquared, 2)
-        datafile.write(f"\nempirical isquared: {round(np.sum(mseEISquared), 4):>9}")
-        datafile.write(f"\ntheoretical isquared: {round((np.sum(mseTISquaredSquared))/(nchoice*dchoice), 4):>7}")
-
-        # COMPARISON / CONSOLIDATION OF THEORETICAL RESULTS IF GRAPHS NOT ADEQUATE
+        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared), 6):>18}")
+        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 4):>9}")
+        datafile.write(f"\ntheoretical mse: {round(mseISquaredTheoretical):>7}")
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
         confInt = (7.84*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice))
         qConfInt = np.sum((7.84*weight*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice)))        
         iSquaredConfInt = np.sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {round(confInt, 8)}")
-        datafile.write(f"\n95% CI for q: \u00B1 {round(qConfInt, 4):>15}")
+        datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 4)}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
         casetime = time.perf_counter() - loopTime
@@ -438,16 +409,16 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
     # EXPERIMENT 2: AGM VS CGM
     datafile.write("\nPercentages comparing AGM and classic GM")
-    comparelists1 = np.subtract(compareEListA, compareEListB)
-    compareqlists1 = np.subtract(compareQEListA, compareQEListB)
-    sumdiff1 = np.sum(comparelists1)
-    sumqdiff1 = np.sum(compareqlists1)
+    comparelists1 = np.divide(compareEListA, compareEListB)
+    compareqlists1 = np.divide(compareQEListA, compareQEListB)
+    sumdiff1 = abs(np.mean(comparelists1))
+    sumqdiff1 = abs(np.mean(compareqlists1))
     datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4):>6}x")
     datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 2):>8}x")
-    comparelists2 = np.subtract(compareTListA, compareTListB)
-    compareqlists2 = np.subtract(compareQTListA, compareQTListB)
-    sumdiff2 = np.sum(comparelists2)
-    sumqdiff2 = np.sum(compareqlists2)
+    comparelists2 = np.divide(compareTListA, compareTListB)
+    compareqlists2 = np.divide(compareQTListA, compareQTListB)
+    sumdiff2 = abs(np.mean(comparelists2))
+    sumqdiff2 = abs(np.mean(compareqlists2))
     datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
     datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 2):>6}x")
 
@@ -498,17 +469,18 @@ runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, 
 runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryN(3, 3, nsetFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
-# EXPERIMENT 3: WHAT IS THE COST OF PRIVACY?
-
-# WHAT IS THE ABSOLUTE DIFFERENCE AND MSE BETWEEN TRUE AND NOISY DISPERSION?
-# BIG OR SMALL COST COMPARED TO SIZE OF DISPERSION? DRAW A CONCLUSION
-# EXTEND TO Q, I SQUARED AND CONFIDENCE INTERVALS
-
-# EXPERIMENT 4: WHAT IS THE COST OF A DISTRIBUTED SETTING?
+# EXPERIMENT 3: WHAT IS THE COST OF A DISTRIBUTED SETTING?
 
 # HYPOTHESIS: (CLOSE TO) ZERO COST, TO MATCH THEORY
-# COMPARE TO CENTRALISED SETTING AND CONCLUDE IN SOME / ALL APPLICATIONS AS IN 3
-# TRY ADDING PRIVACY TO BOTH, THEN REPEAT COST OF PRIVACY EXPERIMENTS
+# COMPARE TO CENTRALISED SETTING
+# APPLY TO DISPERSION, Q, I SQUARED AND CONFIDENCE INTERVALS
+
+# EXPERIMENT 4: WHAT IS THE COST OF PRIVACY?
+
+# IN BOTH DISTRIBUTED AND CENTRALISED SETTINGS
+# WHAT IS THE ABSOLUTE DIFFERENCE BETWEEN TRUE AND NOISY DISPERSION?
+# BIG OR SMALL COST COMPARED TO SIZE OF DISPERSION? DRAW A CONCLUSION
+# EXTEND TO Q, I SQUARED AND CONFIDENCE INTERVALS
 
 # EXPERIMENT 5: VECTOR ALLOCATIONS TESTING ROBUSTNESS OF DISTRIBUTED CASE
 
