@@ -231,7 +231,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>13}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>15}")
         
     compareEListA = np.zeros(nchoice)
     compareQEListA = np.zeros(nchoice)
@@ -356,11 +356,11 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         mseQTheoretical = (np.sum(mseQTList))/(nchoice*dchoice)
 
         datafile.write(f"\n\ntrue dispersion: {round(trueDispersion, 8):>16}")
-        datafile.write(f"\nempirical mse: {round(mseEmpirical, 8):>18}")
+        datafile.write(f"\nempirical mse: {round(mseEmpirical, 8):>16}")
         datafile.write(f"\ntheoretical mse: {round(mseTheoretical, 10):>14}")
-        datafile.write(f"\n\ntrue q: {round(trueQ):>25}")
-        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 8):>20}")
-        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 6):>16}")
+        datafile.write(f"\n\ntrue q: {round(trueQ):>18}")
+        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 8):>18}")
+        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 6):>14}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
@@ -379,16 +379,16 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         squaredDTIS = np.power(diffTISquared, 2)
         mseISquaredTheoretical = (np.sum(squaredDTIS))/(nchoice*dchoice)
 
-        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared), 6):>18}")
-        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 4):>9}")
-        datafile.write(f"\ntheoretical mse: {round(mseISquaredTheoretical):>7}")
+        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared)):>10}")
+        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 10):>7}")
+        datafile.write(f"\ntheoretical mse: {round(mseISquaredTheoretical):>5}")
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
         confInt = (7.84*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice))
         qConfInt = np.sum((7.84*weight*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice)))        
         iSquaredConfInt = np.sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
         datafile.write(f"\n95% CI for dispersion: \u00B1 {round(confInt, 8)}")
-        datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 4)}")
+        datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 2)}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
         casetime = time.perf_counter() - loopTime
@@ -414,13 +414,13 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     sumdiff1 = abs(np.mean(comparelists1))
     sumqdiff1 = abs(np.mean(compareqlists1))
     datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4):>6}x")
-    datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 2):>8}x")
+    datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 4):>8}x")
     comparelists2 = np.divide(compareTListA, compareTListB)
     compareqlists2 = np.divide(compareQTListA, compareQTListB)
     sumdiff2 = abs(np.mean(comparelists2))
     sumqdiff2 = abs(np.mean(compareqlists2))
     datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
-    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 2):>6}x")
+    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 4):>6}x")
 
     # COMPUTE SIMILAR LISTS IN COMPUTEMSE FOR I^2 (USING FORMULA IN TERMS OF Q) THEN WRITE COMPARISONS HERE
 
