@@ -222,7 +222,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             alpha = functionAlpha(uFinal)
 
         casetime = time.perf_counter() - loopTime
-        datafile.write(f"\ncalibration: {round(casetime, 6):>18} seconds\n")
+        datafile.write(f"\ncalibration: {round(casetime, 6):>17} seconds\n")
 
         sigma = alpha*GS/mp.sqrt(2.0*eps)
         return sigma
@@ -231,7 +231,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
     datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 6):>15}")
+    datafile.write(f"\n\nsigma from AGM: {round(sigma, 4):>15}")
         
     compareEListA = np.zeros(nchoice)
     compareQEListA = np.zeros(nchoice)
@@ -268,18 +268,20 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         wMu = np.mean(wxTrainNew, axis=0)
         meanMu = (np.sum(mu))/dchoice
         weightedMu = (np.sum(wMu))/dchoice
-        datafile.write(f"\nmean mu: {str(round(meanMu, 6)):>22}")
-        datafile.write(f"\nweighted mu: {str(round(weightedMu, 4)):>16}")
+        datafile.write(f"\nmean mu: {str(round(meanMu, 3)):>22}")
+        datafile.write(f"\nweighted mu: {str(round(weightedMu, 1)):>15}")
 
         noisyMu = np.zeros(dchoice)
         wNoisyMu = np.zeros(dchoice)
         xiSum1 = 0
         xiSum2 = 0
 
-        mseEList = np.zeros(nchoice)
+        noisyEList = np.zeros(nchoice)
+        noisyQEList = np.zeros(nchoice)
         trueEList = np.zeros(nchoice, dtype = np.float64)
-        mseQEList = np.zeros(nchoice)
         trueQEList = np.zeros(nchoice, dtype = np.float64)
+        mseEList = np.zeros(nchoice)
+        mseQEList = np.zeros(nchoice)
         mseTList = np.zeros(nchoice, dtype = np.float64)
         mseQTList = np.zeros(nchoice, dtype = np.float64)
 
@@ -310,10 +312,14 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             noisyQ = weightedNoisyVar + xi2
             xiSum2 += xi2
 
-            mseEList[j] = np.sum(noisyDisp)
+            noisyEList[j] = np.sum(noisyDisp)
+            noisyQEList[j] = np.sum(noisyQ)
             trueEList[j] = np.sum(trueDisp)
-            mseQEList[j] = np.sum(noisyQ)
             trueQEList[j] = np.sum(weightedTrueDisp)
+
+            # EMPIRICAL MSE = THE SQUARE OF THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
+            mseEList[j] = np.power((noisyEList[j] - trueEList[j]), 2)
+            mseQEList[j] = np.power((noisyQEList[j] - trueQEList[j]), 2)
 
             # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
             doubleTrueDiff = 2*trueDiff
@@ -344,23 +350,17 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         trueDispersion = (np.sum(trueEList))/(nchoice*dchoice)
         trueQ = (np.sum(trueQEList))/(nchoice*dchoice)    
-
-        # EMPIRICAL MSE = THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
-        diffELists = np.subtract(mseEList, trueEList)
-        diffQELists = np.subtract(mseQEList, trueQEList)
-        squaredDiffELists = np.power(diffELists, 2)
-        squaredDiffQELists = np.power(diffQELists, 2)
-        mseEmpirical = (np.sum(squaredDiffELists))/(nchoice*dchoice)
-        mseQEmpirical = (np.sum(squaredDiffQELists))/(nchoice*dchoice)
+        mseEmpirical = (np.sum(mseEList))/(nchoice*dchoice)
+        mseQEmpirical = (np.sum(mseQEList))/(nchoice*dchoice)
         mseTheoretical = (np.sum(mseTList))/(nchoice*dchoice)
         mseQTheoretical = (np.sum(mseQTList))/(nchoice*dchoice)
 
-        datafile.write(f"\n\ntrue dispersion: {round(trueDispersion, 8):>16}")
+        datafile.write(f"\n\ntrue dispersion: {round(trueDispersion, 4):>15}")
         datafile.write(f"\nempirical mse: {round(mseEmpirical, 8):>16}")
         datafile.write(f"\ntheoretical mse: {round(mseTheoretical, 10):>14}")
-        datafile.write(f"\n\ntrue q: {round(trueQ):>18}")
-        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 8):>18}")
-        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 6):>14}")
+        datafile.write(f"\n\ntrue q: {round(trueQ):>16}")
+        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 4):>18}")
+        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 3):>14}")
 
         # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
         trueISquaredPrep = np.divide(nchoice-1, trueQEList)
@@ -370,7 +370,7 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
 
         # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
         xi3 = normal(0, sigma**2)
-        noisyISquared = iSquared + xi3
+        noisyISquared = np.add(iSquared, xi3)
         diffEISquared = np.subtract(noisyISquared, trueISquared)
         squaredDEIS = np.power(diffEISquared, 2)
         mseISquaredEmpirical = (np.sum(squaredDEIS))/(nchoice*dchoice)
@@ -379,16 +379,16 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         squaredDTIS = np.power(diffTISquared, 2)
         mseISquaredTheoretical = (np.sum(squaredDTIS))/(nchoice*dchoice)
 
-        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared)):>10}")
-        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 10):>7}")
+        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared)):>9}")
+        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 10):>14}")
         datafile.write(f"\ntheoretical mse: {round(mseISquaredTheoretical):>5}")
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
-        confInt = (7.84*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice))
-        qConfInt = np.sum((7.84*weight*(mp.sqrt(6))*(sigma**2))/(mp.sqrt(nchoice)))        
-        iSquaredConfInt = np.sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**2)))
-        datafile.write(f"\n95% CI for dispersion: \u00B1 {round(confInt, 8)}")
-        datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 2)}")
+        confInt = (7.84*(mp.sqrt(6))*(sigma**4))/(mp.sqrt(nchoice))
+        qConfInt = np.sum((7.84*weight*(mp.sqrt(6))*(sigma**4))/(mp.sqrt(nchoice)))        
+        iSquaredConfInt = np.sum((7.84*(mp.sqrt(2*(nchoice-1))))/(3*(np.sqrt(35*weight*nchoice))*(sigma**4)))
+        datafile.write(f"\n\n95% CI for dispersion: \u00B1 {round(confInt, 10)}")
+        datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 4)}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
         casetime = time.perf_counter() - loopTime
@@ -402,7 +402,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
     classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
     datafile.write("\nStatistics from classic GM and computation of MSE")
     datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
-    datafile.write(f"\nsquare: {round(classicSigma**2, 8):>27}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
     computeMSE(xTrainNew, classicSigma, 1)
