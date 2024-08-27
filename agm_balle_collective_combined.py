@@ -1,4 +1,3 @@
-import time
 import numpy as np
 import idx2numpy
 import os
@@ -9,8 +8,7 @@ from numpy.random import normal
 from PIL import Image
 from numpy import asarray
 
-# INITIALISING START TIME AND SEED FOR RANDOM SAMPLING
-startTime = time.perf_counter()
+# INITIALISING SEED FOR RANDOM SAMPLING
 print("\nStarting...")
 np.random.seed(3820672)
 
@@ -110,7 +108,6 @@ def loadFlair():
                 img = Image.open(file)
                 dict = asarray(img)
                 vector = dict.reshape((1, maxDimFlair))
-                # np.append(xTrainFlair, vector, axis=0)
                 xTrainFlair[count] = vector
                 count += 1
                 bar()
@@ -138,7 +135,7 @@ xTrainNewFlair = transformValues(xTrainFlair)
 
 os.chdir('..')
 
-def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize):
+def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize):
 
     if dataIndex == 0:
         datafile = open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
@@ -150,7 +147,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
     datafile.write("Statistics from Binary Search in AGM")
-    # datafile.write(f"\n\nxiTheory: {round(xiTheory, 7):>21}")
 
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
@@ -162,7 +158,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         Output:
         sig : s.d. of Gaussian noise needed to achieve (eps,dta)-DP under global sensitivity GS
         """
-        loopTime = time.perf_counter()
 
         # DEFINE GAUSSIAN CUMULATIVE DISTRIBUTION FUNCTION PHI WHERE ERF IS STANDARD ERROR FUNCTION
         def Phi(t):
@@ -192,7 +187,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
                 else:
                     uInf = uMid
                 uMid = uInf + (uSup - uInf)/2.0
-            datafile.write(f"\nbinary root: {round(uMid, 4):>16}")
             return uMid
 
         # INITIAL GUESS FOR DTA
@@ -221,31 +215,48 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             uFinal = binarySearch(predicateStopBS, predicateLeftBS, uInf, uSup)
             alpha = functionAlpha(uFinal)
 
-        casetime = time.perf_counter() - loopTime
-        datafile.write(f"\ncalibration: {round(casetime, 6):>17} seconds\n")
-
         sigma = alpha*GS/mp.sqrt(2.0*eps)
         return sigma
 
     # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
     sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
     print("Calibrating AGM...")
-    datafile.write("\nStatistics from AGM and computation of MSE")
-    datafile.write(f"\n\nsigma from AGM: {round(sigma, 4):>15}")
-        
+
     compareEListA = np.zeros(nchoice)
     compareQEListA = np.zeros(nchoice)
+    compareISEListA = np.zeros(nchoice)
     compareEListB = np.zeros(nchoice)
     compareQEListB = np.zeros(nchoice)
+    compareISEListB = np.zeros(nchoice)
     compareTListA = np.zeros(nchoice)
     compareQTListA = np.zeros(nchoice)
+    compareISTListA = np.zeros(nchoice)
     compareTListB = np.zeros(nchoice)
     compareQTListB = np.zeros(nchoice)
+    compareISTListB = np.zeros(nchoice)
+
+    V = len(varset)
+    mseDispEPlotA = np.zeros(V)
+    mseQEPlotA = np.zeros(V)
+    mseDispEPlotC = np.zeros(V)
+    mseQEPlotC = np.zeros(V)
+    mseDispTPlotA = np.zeros(V)
+    mseQTPlotA = np.zeros(V)
+    mseDispTPlotC = np.zeros(V)
+    mseQTPlotC = np.zeros(V)
+    mseISquaredEPlotA = np.zeros(V)
+    mseISquaredEPlotC = np.zeros(V)
+    mseISquaredTPlotA = np.zeros(V)
+    mseISquaredTPlotC = np.zeros(V)
+    acDispEPlot = np.zeros(V)
+    acDispTPlot = np.zeros(V)
+    acQEPlot = np.zeros(V)
+    acQTPlot = np.zeros(V)
+    acISquaredEPlot = np.zeros(V)
+    acISquaredTPlot = np.zeros(V)
 
     # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
-    def computeMSE(xTrainNew, sigma, index):
-
-        loopTime = time.perf_counter()
+    def computeMSE(xTrainNew, sigma, ACindex):
 
         if index == 2:
             xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
@@ -256,25 +267,24 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
         wVector = np.var(xTrainNew, axis=1)
         weight = np.zeros(nchoice)
-        for j in range(0, nchoice):
-            weight[j] = 1.0/(wVector[j])
+        wxTrainNew = np.zeros((nchoice, dchoice))       
 
-        # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
-        wxTrainNew = np.zeros((nchoice, dchoice))
         for j in range(0, nchoice):
+            wVectorSquared = np.power(wVector[j], 2)
+            weight[j] = 1.0/(wVectorSquared)
+
+            # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
             wxTrainNew[j] = (weight[j])*(xTrainNew[j])
 
         mu = np.mean(xTrainNew, axis=0)
-        wMu = np.mean(wxTrainNew, axis=0)
-        meanMu = (np.sum(mu))/dchoice
-        weightedMu = (np.sum(wMu))/dchoice
-        datafile.write(f"\nmean mu: {str(round(meanMu, 3)):>22}")
-        datafile.write(f"\nweighted mu: {str(round(weightedMu, 1)):>15}")
+        wSumMu = np.sum(wxTrainNew, axis=0)
+
+        # DIVIDING SUM OF WEIGHTED VECTORS BY SUM OF WEIGHTS
+        sumWeight = np.sum(weight)
+        wMu = (wSumMu)/sumWeight
 
         noisyMu = np.zeros(dchoice)
         wNoisyMu = np.zeros(dchoice)
-        xiSum1 = 0
-        xiSum2 = 0
 
         noisyEList = np.zeros(nchoice)
         noisyQEList = np.zeros(nchoice)
@@ -290,7 +300,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             xi1 = normal(0, sigma**2)
             noisyMu[i] = mu[i] + xi1
             wNoisyMu[i] = wMu[i] + xi1
-            xiSum1 += xi1
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, nchoice):
@@ -310,7 +319,6 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             xi2 = normal(0, sigma**2)
             noisyDisp = noisyVar + xi2
             noisyQ = weightedNoisyVar + xi2
-            xiSum2 += xi2
 
             noisyEList[j] = np.sum(noisyDisp)
             noisyQEList[j] = np.sum(noisyQ)
@@ -348,40 +356,71 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
             np.copyto(compareTListB, mseTList)
             np.copyto(compareQTListB, mseQTList)
 
-        trueDispersion = (np.sum(trueEList))/(nchoice*dchoice)
-        trueQ = (np.sum(trueQEList))/(nchoice*dchoice)    
-        mseEmpirical = (np.sum(mseEList))/(nchoice*dchoice)
-        mseQEmpirical = (np.sum(mseQEList))/(nchoice*dchoice)
-        mseTheoretical = (np.sum(mseTList))/(nchoice*dchoice)
-        mseQTheoretical = (np.sum(mseQTList))/(nchoice*dchoice)
+        mseEmpirical = np.sum(mseEList)
+        mseQEmpirical = np.sum(mseQEList)
+        mseTheoretical = np.sum(mseTList)
+        mseQTheoretical = np.sum(mseQTList)
 
-        datafile.write(f"\n\ntrue dispersion: {round(trueDispersion, 4):>15}")
-        datafile.write(f"\nempirical mse: {round(mseEmpirical, 8):>16}")
-        datafile.write(f"\ntheoretical mse: {round(mseTheoretical, 10):>14}")
-        datafile.write(f"\n\ntrue q: {round(trueQ):>16}")
-        datafile.write(f"\nempirical mse: {round(mseQEmpirical, 4):>18}")
-        datafile.write(f"\ntheoretical mse: {round(mseQTheoretical, 3):>14}")
+        if ACindex == 0:
+            mseDispEPlotA[rep] = mseEmpirical
+            mseQEPlotA[rep] = mseQEmpirical
+            mseDispTPlotA[rep] = mseTheoretical
+            mseQTPlotA[rep] = mseQTheoretical
+        else:
+            mseDispEPlotC[rep] = mseEmpirical
+            mseQEPlotC[rep] = mseQEmpirical
+            mseDispTPlotC[rep] = mseTheoretical
+            mseQTPlotC[rep] = mseQTheoretical
 
-        # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
-        trueISquaredPrep = np.divide(nchoice-1, trueQEList)
-        trueISquared = np.subtract(1, trueISquaredPrep)
-        iSquaredPrep = np.divide(nchoice-1, mseQEList)
-        iSquared = np.subtract(1, iSquaredPrep)
+        datafile.write("\nEXPERIMENT 1: MSE OF ANALYTIC GAUSSIAN MECHANISM")
+        datafile.write(f"\n\ndisp empirical mse: {round(mseEmpirical, 8)}")
+        datafile.write(f"\ndisp theoretical mse: {round(mseTheoretical, 10)}")
+        datafile.write(f"\n\nq empirical mse: {round(mseQEmpirical, 4)}")
+        datafile.write(f"\nq theoretical mse: {round(mseQTheoretical, 3)}")
 
-        # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
-        xi3 = normal(0, sigma**2)
-        noisyISquared = np.add(iSquared, xi3)
-        diffEISquared = np.subtract(noisyISquared, trueISquared)
-        squaredDEIS = np.power(diffEISquared, 2)
-        mseISquaredEmpirical = (np.sum(squaredDEIS))/(nchoice*dchoice)
-        diffTISquaredPrep = np.divide(nchoice-1, mseQTList)
-        diffTISquared = np.subtract(1, diffTISquaredPrep)
-        squaredDTIS = np.power(diffTISquared, 2)
-        mseISquaredTheoretical = (np.sum(squaredDTIS))/(nchoice*dchoice)
+        trueISquaredList = np.zeros(nchoice)
+        iSquaredList = np.zeros(nchoice)
+        mseISEList = np.zeros(nchoice)
+        mseISTList = np.zeros(nchoice)
 
-        datafile.write(f"\n\ntrue isquared: {round(np.sum(trueISquared)):>9}")
-        datafile.write(f"\nempirical mse: {round(mseISquaredEmpirical, 10):>14}")
-        datafile.write(f"\ntheoretical mse: {round(mseISquaredTheoretical):>5}")
+        for j in range(0, nchoice):
+
+            # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
+            trueISquaredPrep = np.divide(nchoice-1, trueQEList[j])
+            trueISquaredList[j] = np.subtract(1, trueISquaredPrep)
+            iSquaredPrep = np.divide(nchoice-1, noisyQEList[j])
+            iSquaredList[j] = np.subtract(1, iSquaredPrep)
+
+            # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
+            xi3 = normal(0, sigma**2)
+            noisyISquared = np.add(iSquaredList[j], xi3)
+
+            # COMPUTE EMPIRICAL AND THEORETICAL MSE
+            diffEISquared = np.subtract(noisyISquared, trueISquaredList[j])
+            mseISEList[j] = np.power(diffEISquared, 2)
+            diffTISquaredPrep = np.subtract(xi3, iSquaredList[j])
+            diffTISquared = np.add(diffTISquaredPrep, trueISquaredList[j])
+            mseISTList[j] = np.power(diffTISquared, 2)
+
+            if index == 0:
+                np.copyto(compareISEListA, mseISEList)
+                np.copyto(compareISTListA, mseISTList)
+            else:
+                np.copyto(compareISEListB, mseISEList)
+                np.copyto(compareISTListB, mseISTList)
+        
+        mseISquaredEmpirical = np.sum(mseISEList)
+        mseISquaredTheoretical = np.sum(mseISTList)
+
+        if ACindex == 1:
+            mseISquaredEPlotA[rep] = mseISquaredEmpirical
+            mseISquaredTPlotA[rep] = mseISquaredTheoretical
+        else:
+            mseISquaredEPlotC[rep] = mseISquaredEmpirical
+            mseISquaredTPlotC[rep] = mseISquaredTheoretical
+
+        datafile.write(f"\n\nisquared empirical mse: {round(mseISquaredEmpirical, 10)}")
+        datafile.write(f"\nisquared theoretical mse: {round(mseISquaredTheoretical)}")
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
         confInt = (7.84*(mp.sqrt(6))*(sigma**4))/(mp.sqrt(nchoice))
@@ -391,82 +430,93 @@ def runLoop(dataIndex, index, var, dchoice, nchoice, epschoice, dtachoice, xTrai
         datafile.write(f"\n95% C Interval for q: \u00B1 {round(qConfInt, 4)}")
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
-        casetime = time.perf_counter() - loopTime
-        datafile.write(f"\n\ncalibration: {round(casetime, 2):>14} seconds\n")
-
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
     computeMSE(xTrainNew, sigma, 0)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
     classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
-    datafile.write("\nStatistics from classic GM and computation of MSE")
-    datafile.write(f"\n\nsigma from classic GM: {round(classicSigma, 6):>8}")
+    datafile.write("\nEXPERIMENT 1: MSE OF CLASSIC GAUSSIAN MECHANISM")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
     computeMSE(xTrainNew, classicSigma, 1)
 
     # EXPERIMENT 2: AGM VS CGM
-    datafile.write("\nPercentages comparing AGM and classic GM")
+    datafile.write("\nEXPERIMENT 2: ANALYTIC VS CLASSIC GAUSSIAN MECHANISM")
     comparelists1 = np.divide(compareEListA, compareEListB)
     compareqlists1 = np.divide(compareQEListA, compareQEListB)
+    compareislists1 = np.divide(compareISEListA, compareISEListB)
     sumdiff1 = abs(np.mean(comparelists1))
     sumqdiff1 = abs(np.mean(compareqlists1))
+    sumisdiff1 = abs(np.mean(compareislists1))
+    acDispEPlot[rep] = sumdiff1
+    acQEPlot[rep] = sumqdiff1
+    acISquaredEPlot[rep] = sumisdiff1
     datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4):>6}x")
     datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 4):>8}x")
+    datafile.write(f"\nempirical isquared comparison: {round(sumisdiff1, 4):>1}x")
+
     comparelists2 = np.divide(compareTListA, compareTListB)
     compareqlists2 = np.divide(compareQTListA, compareQTListB)
+    compareislists2 = np.divide(compareISTListA, compareISTListB)
     sumdiff2 = abs(np.mean(comparelists2))
     sumqdiff2 = abs(np.mean(compareqlists2))
-    datafile.write(f"\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
+    sumisdiff2 = abs(np.mean(compareislists2))
+    acDispTPlot[rep] = sumdiff2
+    acQTPlot[rep] = sumqdiff2
+    acISquaredTPlot[rep] = sumisdiff2
+    datafile.write(f"\n\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
     datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 4):>6}x")
+    datafile.write(f"\ntheoretical isquared comparison: {round(sumisdiff2, 4)}x")
 
-    # COMPUTE SIMILAR LISTS IN COMPUTEMSE FOR I^2 (USING FORMULA IN TERMS OF Q) THEN WRITE COMPARISONS HERE
+def runLoopVaryEps(dataIndex, index, dconst, nconst, xTrainNew, GS, maxArraySize):
 
-def runLoopVaryEps(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
-
-    for eps in varset:
+    for rep in range(10):
+        eps = epsset[rep]
         print(f"\nProcessing dataset {dataIndex+1} for the value eps = {eps}.")
-        runLoop(dataIndex, index, eps, dconst, nconst, eps, dtaconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, rep, eps, epsset, dconst, nconst, eps, dtaconst, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryDta(dataIndex, index, varset, dconst, nconst, xTrainNew, GS, maxArraySize):
+def runLoopVaryDta(dataIndex, index, dconst, nconst, xTrainNew, GS, maxArraySize):
 
-    for dta in varset:
+    for rep in range(10):
+        dta = dtaset[rep]
         print(f"\nProcessing dataset {dataIndex+1} for the value dta = {dta}.")
-        runLoop(dataIndex, index, dta, dconst, nconst, epsconst, dta, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, rep, dta, dtaset, dconst, nconst, epsconst, dta, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryD(dataIndex, index, varset, dset, nconst, xTrainNew, GS, maxArraySize):
+def runLoopVaryD(dataIndex, index, dset, nconst, xTrainNew, GS, maxArraySize):
 
-    for d in varset:
+    for rep in range(10):
+        d = dset[rep]
         print(f"\nProcessing dataset {dataIndex+1} for the value d = {d}.")
-        runLoop(dataIndex, index, d, d, nconst, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, rep, d, dset, d, nconst, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
-def runLoopVaryN(dataIndex, index, varset, dconst, nset, xTrainNew, GS, maxArraySize):
+def runLoopVaryN(dataIndex, index, dconst, nset, xTrainNew, GS, maxArraySize):
 
-    for n in varset:
+    for rep in range(10):
+        n = nset[rep]
         print(f"\nProcessing dataset {dataIndex+1} for the value n = {n}.")
-        runLoop(dataIndex, index, n, dconst, n, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
+        runLoop(dataIndex, index, rep, n, nset, dconst, n, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
 # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-runLoopVaryEps(0, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryDta(0, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryD(0, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
-runLoopVaryN(0, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryEps(0, 0, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryDta(0, 1, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryD(0, 2, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
+runLoopVaryN(0, 3, dconstCifar, nsetCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(1, 0, epsset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryDta(1, 1, dtaset, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryD(1, 2, dsetCifar, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
-runLoopVaryN(1, 3, nsetCifar, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryEps(1, 0, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryDta(1, 1, dconstCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryD(1, 2, dsetCifar, nconstCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
+runLoopVaryN(1, 3, dconstCifar, nsetCifar, xTrainNewCifar100, GSCifar, maxArraySizeCifar)
 
-runLoopVaryEps(2, 0, epsset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryDta(2, 1, dtaset, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryD(2, 2, dsetFashion, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
-runLoopVaryN(2, 3, nsetFashion, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryEps(2, 0, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryDta(2, 1, dconstFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryD(2, 2, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
+runLoopVaryN(2, 3, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
-runLoopVaryEps(3, 0, epsset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryEps(3, 0, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryD(3, 2, dsetFlair, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryN(3, 3, nsetFlair, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryD(3, 2, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryN(3, 3, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
 # EXPERIMENT 3: WHAT IS THE COST OF A DISTRIBUTED SETTING?
 
