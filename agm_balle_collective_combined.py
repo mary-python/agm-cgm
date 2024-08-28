@@ -2,6 +2,7 @@ import numpy as np
 import idx2numpy
 import os
 import mpmath as mp
+import matplotlib.pyplot as plt
 
 from math import erf
 from numpy.random import normal
@@ -24,7 +25,6 @@ dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
 dsetFashion = np.array([392, 525, 588, 600, 625, 640, 672, 700, 735, 784])
 dsetFlair = np.array([768, 1536, 3072, 4800, 6144, 7680, 8192, 9375, 10240, 12288], dtype = np.int64)
 
-# dset = np.array([dsetCifar, dsetFashion, dsetFlair], dtype=object)
 dconstCifar = maxDimCifar = int(dsetCifar[9])
 dconstFashion = maxDimFashion = int(dsetFashion[9])
 dconstFlair = maxDimFlair = int(dsetFlair[9])
@@ -50,7 +50,9 @@ maxArraySizeFashion = dconstFashion*maxNumFashion
 maxArraySizeFlair = dconstFlair*maxNumFlair
 
 # INITIALISING OTHER PARAMETERS/CONSTANTS
+dataset = np.array(['Cifar10', 'Cifar100', 'Fashion', 'Flair'])
 parset = np.array(['eps', 'dta', 'd', 'n'])
+graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u0394}$', 'd', 'n']) 
 rset = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 R = len(rset)
 
@@ -471,6 +473,71 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
     # DIFFERENT LEVELS OF HETEROGENEITY: USE DIFFERENT SIZED ARRAYS OF CLIENTS
     # DO THESE LEVELS AFFECT THE METHOD? HYPOTHESIS: NOT MUCH
     # MEANS NOTHING IN CENTRALISED CASE BECAUSE SERVER HAS ALL DATA
+    # open("cifar10_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
+
+    # EXPERIMENT 1: BEHAVIOUR OF (EPSILON, DELTA, D, N)
+    plt.errorbar(varset, mseDispEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
+    plt.errorbar(varset, mseDispEPlotC, color = 'green', marker = 'o', label = "Empirical Classic")
+    plt.errorbar(varset, mseDispTPlotA, color = 'orange', marker = 'x', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseDispTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("MSE of Gaussian Mechanism")
+    plt.savefig("Exp1" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "disp.png")
+    plt.clf()
+
+    plt.errorbar(varset, mseQEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
+    plt.errorbar(varset, mseQEPlotC, color = 'green', marker = 'o', label = "Empirical Classic")
+    plt.errorbar(varset, mseQTPlotA, color = 'orange', marker = 'x', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseQTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("MSE of Gaussian Mechanism")
+    plt.savefig("Exp1" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "q.png")
+    plt.clf()
+
+    plt.errorbar(varset, mseISquaredEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
+    plt.errorbar(varset, mseISquaredEPlotC, color = 'green', marker = 'o', label = "Empirical Classic")
+    plt.errorbar(varset, mseISquaredTPlotA, color = 'orange', marker = 'x', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseISquaredTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("MSE of Gaussian Mechanism")
+    plt.savefig("Exp1" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "isquared.png")
+    plt.clf()
+
+    # EXPERIMENT 2: AGM VS CGM
+    plt.errorbar(varset, acDispEPlot, color = 'blue', marker = 'o', label = "Empirical")
+    plt.errorbar(varset, acDispTPlot, color = 'red', marker = 'x', label = "Theoretical")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("Multiplication factor")
+    plt.savefig("Exp2" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "disp.png")
+    plt.clf()
+
+    plt.errorbar(varset, acQEPlot, color = 'blue', marker = 'o', label = "Empirical")
+    plt.errorbar(varset, acQTPlot, color = 'red', marker = 'x', label = "Theoretical")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("Multiplication factor")
+    plt.savefig("Exp2" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "q.png")
+    plt.clf()
+
+    plt.errorbar(varset, acISquaredEPlot, color = 'blue', marker = 'o', label = "Empirical")
+    plt.errorbar(varset, acISquaredTPlot, color = 'red', marker = 'x', label = "Theoretical")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[index])
+    plt.ylabel("Multiplication factor")
+    plt.savefig("Exp2" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "isquared.png")
+    plt.clf()
+
+    # ADD GRAPHS FOR EXPERIMENTS 3 AND 4 WHEN READY
 
 def runLoopVaryEps(dataIndex, index, dconst, nconst, xTrainNew, GS, maxArraySize):
 
