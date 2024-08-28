@@ -146,8 +146,6 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
     else:
         datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
-    datafile.write("Statistics from Binary Search in AGM")
-
     def calibrateAGM(eps, dta, GS, tol=1.e-12):
         """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
         Arguments:
@@ -225,15 +223,15 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
     compareEListA = np.zeros(nchoice)
     compareQEListA = np.zeros(nchoice)
     compareISEListA = np.zeros(nchoice)
-    compareEListB = np.zeros(nchoice)
-    compareQEListB = np.zeros(nchoice)
-    compareISEListB = np.zeros(nchoice)
+    compareEListC = np.zeros(nchoice)
+    compareQEListC = np.zeros(nchoice)
+    compareISEListC = np.zeros(nchoice)
     compareTListA = np.zeros(nchoice)
     compareQTListA = np.zeros(nchoice)
     compareISTListA = np.zeros(nchoice)
-    compareTListB = np.zeros(nchoice)
-    compareQTListB = np.zeros(nchoice)
-    compareISTListB = np.zeros(nchoice)
+    compareTListC = np.zeros(nchoice)
+    compareQTListC = np.zeros(nchoice)
+    compareISTListC = np.zeros(nchoice)
 
     V = len(varset)
     mseDispEPlotA = np.zeros(V)
@@ -345,38 +343,33 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
             mseTList[j] = np.sum(extraTermSquared)
             mseQTList[j] = np.sum(wExtraTermSquared)
 
-        if index == 0:
+        mseEmpirical = np.sum(mseEList)
+        mseTheoretical = np.sum(mseTList)
+        mseQEmpirical = np.sum(mseQEList)
+        mseQTheoretical = np.sum(mseQTList)
+        datafile.write(f"\n\ndispersion empirical mse: {round(mseEmpirical)}")
+        datafile.write(f"\ndispersion theoretical mse: {round(mseTheoretical, 3)}")
+        datafile.write(f"\n\nq empirical mse: {round(mseQEmpirical)}")
+        datafile.write(f"\nq theoretical mse: {round(mseQTheoretical)}")
+
+        if ACindex == 0:
             np.copyto(compareEListA, mseEList)
             np.copyto(compareQEListA, mseQEList)
             np.copyto(compareTListA, mseTList)
             np.copyto(compareQTListA, mseQTList)
-        else:
-            np.copyto(compareEListB, mseEList)
-            np.copyto(compareQEListB, mseQEList)
-            np.copyto(compareTListB, mseTList)
-            np.copyto(compareQTListB, mseQTList)
-
-        mseEmpirical = np.sum(mseEList)
-        mseQEmpirical = np.sum(mseQEList)
-        mseTheoretical = np.sum(mseTList)
-        mseQTheoretical = np.sum(mseQTList)
-
-        if ACindex == 0:
             mseDispEPlotA[rep] = mseEmpirical
             mseQEPlotA[rep] = mseQEmpirical
             mseDispTPlotA[rep] = mseTheoretical
             mseQTPlotA[rep] = mseQTheoretical
         else:
+            np.copyto(compareEListC, mseEList)
+            np.copyto(compareQEListC, mseQEList)
+            np.copyto(compareTListC, mseTList)
+            np.copyto(compareQTListC, mseQTList)
             mseDispEPlotC[rep] = mseEmpirical
             mseQEPlotC[rep] = mseQEmpirical
             mseDispTPlotC[rep] = mseTheoretical
             mseQTPlotC[rep] = mseQTheoretical
-
-        datafile.write("\nEXPERIMENT 1: MSE OF ANALYTIC GAUSSIAN MECHANISM")
-        datafile.write(f"\n\ndisp empirical mse: {round(mseEmpirical, 8)}")
-        datafile.write(f"\ndisp theoretical mse: {round(mseTheoretical, 10)}")
-        datafile.write(f"\n\nq empirical mse: {round(mseQEmpirical, 4)}")
-        datafile.write(f"\nq theoretical mse: {round(mseQTheoretical, 3)}")
 
         trueISquaredList = np.zeros(nchoice)
         iSquaredList = np.zeros(nchoice)
@@ -402,25 +395,21 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
             diffTISquared = np.add(diffTISquaredPrep, trueISquaredList[j])
             mseISTList[j] = np.power(diffTISquared, 2)
 
-            if index == 0:
-                np.copyto(compareISEListA, mseISEList)
-                np.copyto(compareISTListA, mseISTList)
-            else:
-                np.copyto(compareISEListB, mseISEList)
-                np.copyto(compareISTListB, mseISTList)
-        
         mseISquaredEmpirical = np.sum(mseISEList)
         mseISquaredTheoretical = np.sum(mseISTList)
+        datafile.write(f"\n\nisquared empirical mse: {round(mseISquaredEmpirical, 10)}")
+        datafile.write(f"\nisquared theoretical mse: {round(mseISquaredTheoretical, 10)}")
 
-        if ACindex == 1:
+        if ACindex == 0:
+            np.copyto(compareISEListA, mseISEList)
+            np.copyto(compareISTListA, mseISTList)
             mseISquaredEPlotA[rep] = mseISquaredEmpirical
             mseISquaredTPlotA[rep] = mseISquaredTheoretical
         else:
+            np.copyto(compareISEListC, mseISEList)
+            np.copyto(compareISTListC, mseISTList)
             mseISquaredEPlotC[rep] = mseISquaredEmpirical
             mseISquaredTPlotC[rep] = mseISquaredTheoretical
-
-        datafile.write(f"\n\nisquared empirical mse: {round(mseISquaredEmpirical, 10)}")
-        datafile.write(f"\nisquared theoretical mse: {round(mseISquaredTheoretical)}")
 
         # 95% CONFIDENCE INTERVALS USING SIGMA, Z-SCORE AND WEIGHTS IF RELEVANT
         confInt = (7.84*(mp.sqrt(6))*(sigma**4))/(mp.sqrt(nchoice))
@@ -431,42 +420,43 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
         datafile.write(f"\n95% CI for isquared: \u00B1 {round(iSquaredConfInt)}")
 
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
+    datafile.write("EXPERIMENT 1: MSE OF ANALYTIC GAUSSIAN MECHANISM")
     computeMSE(xTrainNew, sigma, 0)
     print("Computing empirical and theoretical MSEs...")
 
     # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
     classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
-    datafile.write("\nEXPERIMENT 1: MSE OF CLASSIC GAUSSIAN MECHANISM")
-
+    
     # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
+    datafile.write("\n\nEXPERIMENT 1: MSE OF CLASSIC GAUSSIAN MECHANISM")
     computeMSE(xTrainNew, classicSigma, 1)
 
     # EXPERIMENT 2: AGM VS CGM
-    datafile.write("\nEXPERIMENT 2: ANALYTIC VS CLASSIC GAUSSIAN MECHANISM")
-    comparelists1 = np.divide(compareEListA, compareEListB)
-    compareqlists1 = np.divide(compareQEListA, compareQEListB)
-    compareislists1 = np.divide(compareISEListA, compareISEListB)
+    datafile.write("\n\nEXPERIMENT 2: ANALYTIC VS CLASSIC GAUSSIAN MECHANISM")
+    comparelists1 = np.divide(compareEListA, compareEListC)
+    compareqlists1 = np.divide(compareQEListA, compareQEListC)
+    compareislists1 = np.divide(compareISEListA, compareISEListC)
     sumdiff1 = abs(np.mean(comparelists1))
     sumqdiff1 = abs(np.mean(compareqlists1))
     sumisdiff1 = abs(np.mean(compareislists1))
     acDispEPlot[rep] = sumdiff1
     acQEPlot[rep] = sumqdiff1
     acISquaredEPlot[rep] = sumisdiff1
-    datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4):>6}x")
-    datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 4):>8}x")
-    datafile.write(f"\nempirical isquared comparison: {round(sumisdiff1, 4):>1}x")
+    datafile.write(f"\n\nempirical mse comparison: {round(sumdiff1, 4)}x")
+    datafile.write(f"\nempirical q comparison: {round(sumqdiff1, 4)}x")
+    datafile.write(f"\nempirical isquared comparison: {round(sumisdiff1, 4)}x")
 
-    comparelists2 = np.divide(compareTListA, compareTListB)
-    compareqlists2 = np.divide(compareQTListA, compareQTListB)
-    compareislists2 = np.divide(compareISTListA, compareISTListB)
+    comparelists2 = np.divide(compareTListA, compareTListC)
+    compareqlists2 = np.divide(compareQTListA, compareQTListC)
+    compareislists2 = np.divide(compareISTListA, compareISTListC)
     sumdiff2 = abs(np.mean(comparelists2))
     sumqdiff2 = abs(np.mean(compareqlists2))
     sumisdiff2 = abs(np.mean(compareislists2))
     acDispTPlot[rep] = sumdiff2
     acQTPlot[rep] = sumqdiff2
     acISquaredTPlot[rep] = sumisdiff2
-    datafile.write(f"\n\ntheoretical mse comparison: {round(sumdiff2, 4):>4}x")
-    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 4):>6}x")
+    datafile.write(f"\n\ntheoretical mse comparison: {round(sumdiff2, 4)}x")
+    datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 4)}x")
     datafile.write(f"\ntheoretical isquared comparison: {round(sumisdiff2, 4)}x")
 
 def runLoopVaryEps(dataIndex, index, dconst, nconst, xTrainNew, GS, maxArraySize):
@@ -514,7 +504,7 @@ runLoopVaryD(2, 2, dsetFashion, nconstFashion, xTrainNewFashion, GSFashion, maxA
 runLoopVaryN(2, 3, dconstFashion, nsetFashion, xTrainNewFashion, GSFashion, maxArraySizeFashion)
 
 runLoopVaryEps(3, 0, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-runLoopVaryDta(3, 1, dtaset, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
+runLoopVaryDta(3, 1, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryD(3, 2, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryN(3, 3, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 
