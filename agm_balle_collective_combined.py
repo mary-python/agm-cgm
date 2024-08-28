@@ -253,7 +253,7 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
     acISquaredEPlot = np.zeros(V)
     acISquaredTPlot = np.zeros(V)
 
-    # FUNCTION BY SCOTT BASED ON OWN LEMMAS THEOREMS AND COROLLARIES IN PAPER
+    # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
     def computeMSE(xTrainNew, sigma, ACindex):
 
         if index == 2:
@@ -459,6 +459,19 @@ def runLoop(dataIndex, index, rep, var, varset, dchoice, nchoice, epschoice, dta
     datafile.write(f"\ntheoretical q comparison: {round(sumqdiff2, 4)}x")
     datafile.write(f"\ntheoretical isquared comparison: {round(sumisdiff2, 4)}x")
 
+    # EXPERIMENT 3: WHAT IS THE COST OF A DISTRIBUTED SETTING?
+
+    # HYPOTHESIS: (CLOSE TO) ZERO COST, TO MATCH THEORY
+    # COMPARE TO CENTRALISED SETTING
+    # APPLY TO DISPERSION, Q, I SQUARED AND CONFIDENCE INTERVALS
+
+    # EXPERIMENT 4: VECTOR ALLOCATIONS TESTING ROBUSTNESS OF DISTRIBUTED CASE
+
+    # USE IDEAS FROM SPLITTING EMNIST DATASET BY DIGIT (OR FEMNIST BY WRITER) AND MEASURING PIXEL FUNCTION
+    # DIFFERENT LEVELS OF HETEROGENEITY: USE DIFFERENT SIZED ARRAYS OF CLIENTS
+    # DO THESE LEVELS AFFECT THE METHOD? HYPOTHESIS: NOT MUCH
+    # MEANS NOTHING IN CENTRALISED CASE BECAUSE SERVER HAS ALL DATA
+
 def runLoopVaryEps(dataIndex, index, dconst, nconst, xTrainNew, GS, maxArraySize):
 
     for rep in range(10):
@@ -487,7 +500,6 @@ def runLoopVaryN(dataIndex, index, dconst, nset, xTrainNew, GS, maxArraySize):
         print(f"\nProcessing dataset {dataIndex+1} for the value n = {n}.")
         runLoop(dataIndex, index, rep, n, nset, dconst, n, epsconst, dtaconst, xTrainNew, GS, maxArraySize)
 
-# EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
 runLoopVaryEps(0, 0, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 runLoopVaryDta(0, 1, dconstCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
 runLoopVaryD(0, 2, dsetCifar, nconstCifar, xTrainNewCifar10, GSCifar, maxArraySizeCifar)
@@ -507,25 +519,5 @@ runLoopVaryEps(3, 0, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArray
 runLoopVaryDta(3, 1, dconstFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryD(3, 2, dsetFlair, nconstFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
 runLoopVaryN(3, 3, dconstFlair, nsetFlair, xTrainNewFlair, GSFlair, maxArraySizeFlair)
-
-# EXPERIMENT 3: WHAT IS THE COST OF A DISTRIBUTED SETTING?
-
-# HYPOTHESIS: (CLOSE TO) ZERO COST, TO MATCH THEORY
-# COMPARE TO CENTRALISED SETTING
-# APPLY TO DISPERSION, Q, I SQUARED AND CONFIDENCE INTERVALS
-
-# EXPERIMENT 4: WHAT IS THE COST OF PRIVACY?
-
-# IN BOTH DISTRIBUTED AND CENTRALISED SETTINGS
-# WHAT IS THE ABSOLUTE DIFFERENCE BETWEEN TRUE AND NOISY DISPERSION?
-# BIG OR SMALL COST COMPARED TO SIZE OF DISPERSION? DRAW A CONCLUSION
-# EXTEND TO Q, I SQUARED AND CONFIDENCE INTERVALS
-
-# EXPERIMENT 5: VECTOR ALLOCATIONS TESTING ROBUSTNESS OF DISTRIBUTED CASE
-
-# USE IDEAS FROM SPLITTING EMNIST DATASET BY DIGIT (OR FEMNIST BY WRITER) AND MEASURING PIXEL FUNCTION
-# DIFFERENT LEVELS OF HETEROGENEITY: USE DIFFERENT SIZED ARRAYS OF CLIENTS
-# DO THESE LEVELS AFFECT THE METHOD? HYPOTHESIS: NOT MUCH
-# MEANS NOTHING IN CENTRALISED CASE BECAUSE SERVER HAS ALL DATA
 
 print("Finished.\n")
