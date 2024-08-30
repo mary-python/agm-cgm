@@ -162,7 +162,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     for rep in range(10):
 
         var = varset[rep]
-        print(f"\nProcessing dataset {dataIndex+1} for the value {str(var)} = {var}.")
+        print(f"\nProcessing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
 
         if epschoice == -1:
             epschoice = var
