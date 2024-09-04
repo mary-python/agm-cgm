@@ -18,8 +18,8 @@ epsset = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
 epsconst = float(epsset[0])
 
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
-dtaset = np.array([0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05])
-dtaconst = float(dtaset[1])
+dtaset = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
+dtaconst = float(dtaset[0])
 
 dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
 dsetFashion = np.array([392, 525, 588, 600, 625, 640, 672, 700, 735, 784])
@@ -249,11 +249,12 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
                 uFinal = binarySearch(predicateStopBS, predicateLeftBS, uInf, uSup)
                 alpha = functionAlpha(uFinal)
 
-            sigma = alpha*GS/mp.sqrt(2.0*eps)
-            return sigma
+            centralSigma = alpha/mp.sqrt(2.0*eps)
+            return centralSigma
 
         # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
-        sigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
+        centralSigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
+        sigma = GS*centralSigma
         print("Calibrating AGM...")
 
         compareEListA = np.zeros(nchoice)
@@ -368,6 +369,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
             datafile.write(f"\n\nq empirical mse: {round(mseQEmpirical)}")
             datafile.write(f"\nq theoretical mse: {round(mseQTheoretical)}")
 
+            xiCentral = normal(0, centralSigma**2)
+
             if ACindex == 0:
                 np.copyto(compareEListA, mseEList)
                 np.copyto(compareQEListA, mseQEList)
@@ -442,6 +445,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
 
         # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
         classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
+        classicCentralSigma = (mp.sqrt(2*mp.log(1.25/dtachoice)))/epschoice
     
         # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
         datafile.write("\n\nEXPERIMENT 1: MSE OF CLASSIC GAUSSIAN MECHANISM")
