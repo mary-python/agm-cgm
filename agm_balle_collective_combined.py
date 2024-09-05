@@ -14,11 +14,11 @@ print("\nStarting...")
 np.random.seed(3820672)
 
 # ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
-epsset = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+epsset = np.array([0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5])
 epsconst = float(epsset[0])
 
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
-dtaset = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
+dtaset = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
 dtaconst = float(dtaset[0])
 
 dsetCifar = np.array([512, 768, 1024, 1280, 1536, 1875, 2048, 2400, 2560, 3072])
@@ -494,8 +494,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
 
     # EXPERIMENT 1: BEHAVIOUR OF (EPSILON, DELTA, D, N)
     plt.errorbar(varset, mseDispEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseDispEPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseDispTPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
+    plt.errorbar(varset, mseDispTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseDispEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
     plt.errorbar(varset, mseDispTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
     plt.legend(loc = 'best')
     plt.yscale('log')
@@ -505,8 +505,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     plt.clf()
 
     plt.errorbar(varset, mseQEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseQEPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseQTPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
+    plt.errorbar(varset, mseQTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseQEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
     plt.errorbar(varset, mseQTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
     plt.legend(loc = 'best')
     plt.yscale('log')
@@ -516,8 +516,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     plt.clf()
 
     plt.errorbar(varset, mseISquaredEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseISquaredEPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseISquaredTPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
+    plt.errorbar(varset, mseISquaredTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
+    plt.errorbar(varset, mseISquaredEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
     plt.errorbar(varset, mseISquaredTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
     plt.legend(loc = 'best')
     plt.yscale('log')
