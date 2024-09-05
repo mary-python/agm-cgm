@@ -139,6 +139,7 @@ os.chdir('..')
 
 def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xTrainNew, GS, maxArraySize):
 
+    # STORING STATISTICS REQUIRED FOR GRAPHS
     V = len(varset)
     mseDispEPlotA = np.zeros(V)
     mseQEPlotA = np.zeros(V)
@@ -152,6 +153,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     mseISquaredEPlotC = np.zeros(V)
     mseISquaredTPlotA = np.zeros(V)
     mseISquaredTPlotC = np.zeros(V)
+    mseCentralPlot = np.zeros(V)
     acDispEPlot = np.zeros(V)
     acDispTPlot = np.zeros(V)
     acQEPlot = np.zeros(V)
@@ -182,7 +184,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
         else:
             datafile = open("flair_data_file_" + "%s" % parset[index] + str(var) + ".txt", "w")
 
-        def calibrateAGM(eps, dta, GS, tol=1.e-12):
+        def calibrateAGM(eps, dta, tol=1.e-12):
             """ Calibrate a Gaussian perturbation for DP using the AGM of [Balle and Wang, ICML'18]
             Arguments:
             eps : target epsilon (eps > 0)
@@ -253,7 +255,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
             return centralSigma
 
         # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
-        centralSigma = calibrateAGM(epschoice, dtachoice, GS, tol=1.e-12)
+        centralSigma = calibrateAGM(epschoice, dtachoice, tol=1.e-12)
         sigma = GS*centralSigma
         print("Calibrating AGM...")
 
@@ -271,7 +273,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
         compareISTListC = np.zeros(nchoice)
 
         # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-        def computeMSE(xTrainNew, sigma, ACindex):
+        def computeMSE(xTrainNew, sigma, centralSigma, ACindex):
 
             if index == 2:
                 xTrainCrop = xTrainNew.reshape((int(maxArraySize/dchoice), dchoice))
@@ -364,12 +366,10 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
             mseTheoretical = np.sum(mseTList)
             mseQEmpirical = np.sum(mseQEList)
             mseQTheoretical = np.sum(mseQTList)
-            datafile.write(f"\n\ndispersion empirical mse: {round(mseEmpirical)}")
+            datafile.write(f"\n\ndispersion empirical mse: {round(mseEmpirical, 3)}")
             datafile.write(f"\ndispersion theoretical mse: {round(mseTheoretical, 3)}")
             datafile.write(f"\n\nq empirical mse: {round(mseQEmpirical)}")
             datafile.write(f"\nq theoretical mse: {round(mseQTheoretical)}")
-
-            xiCentral = normal(0, centralSigma**2)
 
             if ACindex == 0:
                 np.copyto(compareEListA, mseEList)
@@ -416,8 +416,14 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
 
             mseISquaredEmpirical = np.sum(mseISEList)
             mseISquaredTheoretical = np.sum(mseISTList)
-            datafile.write(f"\n\nisquared empirical mse: {round(mseISquaredEmpirical, 5)}")
-            datafile.write(f"\nisquared theoretical mse: {round(mseISquaredTheoretical, 5)}")
+            datafile.write(f"\n\nisquared empirical mse: {round(mseISquaredEmpirical, 10)}")
+            datafile.write(f"\nisquared theoretical mse: {round(mseISquaredTheoretical, 10)}")
+
+            # CENTRALISED NOISE SQUARED IS ONLY TERM REMAINING IN MSE COMPUTATION
+            xiCentral = normal(0, centralSigma**2)
+            mseCentral = xiCentral**2
+            mseCentralPlot[rep] = mseCentral
+            datafile.write(f"\n\ncentral mse: {round(mseCentral, 3)}")
 
             if ACindex == 0:
                 np.copyto(compareISEListA, mseISEList)
@@ -440,7 +446,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
 
         # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM ANALYTIC GAUSSIAN MECHANISM
         datafile.write("EXPERIMENT 1: MSE OF ANALYTIC GAUSSIAN MECHANISM")
-        computeMSE(xTrainNew, sigma, 0)
+        computeMSE(xTrainNew, sigma, centralSigma, 0)
         print("Computing empirical and theoretical MSEs...")
 
         # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN DISPERSION AND MSE OF BOTH
@@ -449,7 +455,7 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     
         # CALL ALGORITHM TO COMPUTE MSE BASED ON SIGMA FROM CLASSIC GAUSSIAN MECHANISM
         datafile.write("\n\nEXPERIMENT 1: MSE OF CLASSIC GAUSSIAN MECHANISM")
-        computeMSE(xTrainNew, classicSigma, 1)
+        computeMSE(xTrainNew, classicSigma, classicCentralSigma, 1)
 
         # EXPERIMENT 2: AGM VS CGM
         datafile.write("\n\nEXPERIMENT 2: ANALYTIC VS CLASSIC GAUSSIAN MECHANISM")
@@ -496,7 +502,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     plt.errorbar(varset, mseDispEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
     plt.errorbar(varset, mseDispTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
     plt.errorbar(varset, mseDispEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseDispTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseDispTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
@@ -507,7 +514,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     plt.errorbar(varset, mseQEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
     plt.errorbar(varset, mseQTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
     plt.errorbar(varset, mseQEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseQTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseQTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
@@ -518,7 +526,8 @@ def runLoop(dataIndex, index, varset, dchoice, nchoice, epschoice, dtachoice, xT
     plt.errorbar(varset, mseISquaredEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
     plt.errorbar(varset, mseISquaredTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
     plt.errorbar(varset, mseISquaredEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseISquaredTPlotC, color = 'red', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseISquaredTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
+    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
