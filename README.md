@@ -8,7 +8,7 @@ This repository contains all the supporting files for the **experimental section
 - Download the Python file **agm_balle_collective_combined.py**.
 - Download the archive *cifar-10-python.tar.gz* using the instructions from [**Alex Krizhevsky's home page**](https://www.cs.toronto.edu/~kriz/cifar.html), and keep the files **data_batch_x** (each ~30GB), where x ranges from 1 to 5.
 - Download the archive *cifar-100-python.tar.gz* using the instructions from [**Alex Krizhevsky's home page**](https://www.cs.toronto.edu/~kriz/cifar.html), and keep the file **train** (~150GB).
-- Download the files **train-images-idx3-ubyte** (~45GB) and **train-labels-idx1-ubyte** (~60KB) from [**Zalando**](https://github.com/zalandoresearch/fashion-mnist).
+- Download the archives *train-images-idx3-ubyte.tar.gz* and *train-labels-idx1-ubyte.tar.gz* using the instructions from [**Zalando**](https://github.com/zalandoresearch/fashion-mnist), and keep the files **train-images-idx3-ubyte** (~45GB) and **train-labels-idx1-ubyte** (~60KB) respectively.
 
 ## Instructions
 
