@@ -8,8 +8,7 @@ This repository contains all the supporting files for the **experimental section
 - Download the Python file **agm_balle_collective_combined.py**.
 - Download the archive *cifar-10-python.tar.gz* using the instructions from [**Alex Krizhevsky's home page**](https://www.cs.toronto.edu/~kriz/cifar.html), and keep the files **data_batch_x** (each ~30GB), where x ranges from 1 to 5.
 - Download the archive *cifar-100-python.tar.gz* using the instructions from [**Alex Krizhevsky's home page**](https://www.cs.toronto.edu/~kriz/cifar.html), and keep the file **train** (~150GB).
-- Download the file **train-images-idx3-ubyte** (7657 KB) from [**Zalando**](https://github.com/zalandoresearch/fashion-mnist).
-- Download the folder *dataset_dir* using the instructions from [**Apple**](https://github.com/apple/ml-flair), and keep the subfolder *small_images* (1.11 GB) only. There is no need to download the raw full-size images.
+- Download the files **train-images-idx3-ubyte** (~45GB) and **train-labels-idx1-ubyte** (~60KB) from [**Zalando**](https://github.com/zalandoresearch/fashion-mnist).
 
 ## Instructions
 
