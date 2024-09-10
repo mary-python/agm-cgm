@@ -4,7 +4,7 @@ This repository contains all the supporting files for the **experimental section
 
 ## Environment
 
-- Install the [**latest version of Python 3**](https://www.python.org/downloads/), and install the additional packages **idx2numpy, matplotlib, mpmath, numpy and PIL** using **PIP**.
+- Install the [**latest version of Python 3**](https://www.python.org/downloads/), and install the additional packages **idx2numpy, matplotlib, mpmat and numpy** using **PIP**.
 - Download the Python file **agm_balle_collective_combined.py**.
 - Download the archives *cifar-10-python.tar.gz* and *cifar-100-python.tar.gz* using the instructions from [**Alex Krizhevsky's home page**](https://www.cs.toronto.edu/~kriz/cifar.html), and keep the files **data_batch_x** (each ~30GB, where x ranges from 1 to 5), and the file **train** (~150GB) respectively.
 - Download the archives *train-images-idx3-ubyte.gz* and *train-labels-idx1-ubyte.gz* using the instructions from [**Zalando**](https://github.com/zalandoresearch/fashion-mnist), and keep the files **train-images-idx3-ubyte** (~45GB) and **train-labels-idx1-ubyte** (~60KB) respectively.
