@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 
 from math import erf
 from numpy.random import normal
-from PIL import Image
-from numpy import asarray
 
 # INITIALISING SEED FOR RANDOM SAMPLING
 print("\nStarting...")
@@ -33,7 +31,8 @@ GSFashion = float(mp.sqrt(dimFashion))/numFashion
 # INITIALISING OTHER PARAMETERS/CONSTANTS
 dataset = np.array(['Cifar10', 'Cifar100', 'Fashion'])
 parset = np.array(['eps', 'dta'])
-graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u03b4}$']) 
+graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u03b4}$'])
+freqset = np.array(['10 (equal)', '10 (unequal)', '5 (equal)', '5 (unequal)', '2 (equal)', '2 (unequal)'])
 R = 10
 
 # IN THEORY TWO NOISE TERMS ARE ADDED WITH EACH USING EPS AND DTA HALF THE SIZE OF IN EXPERIMENTS
@@ -83,7 +82,7 @@ print("Loading data...\n")
 imagesCifar10 = loadCifar10(b'data')
 labelsCifar10 = loadCifar10(b'labels')
 imagesCifar100 = loadCifar100(b'data')
-labelsCifar100 = loadCifar100(b'labels')
+labelsCifar100 = loadCifar100(b'coarse_label')
 imagesFashion = loadFashion('train-images-idx3-ubyte')
 labelsFashion = loadFashion('train-labels-idx1-ubyte')
 
@@ -97,27 +96,128 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
 
     # STORING STATISTICS REQUIRED FOR GRAPHS
     V = len(varset)
-    mseDispEPlotA = np.zeros(V)
-    mseQEPlotA = np.zeros(V)
-    mseDispEPlotC = np.zeros(V)
-    mseQEPlotC = np.zeros(V)
-    mseDispTPlotA = np.zeros(V)
-    mseQTPlotA = np.zeros(V)
-    mseDispTPlotC = np.zeros(V)
-    mseQTPlotC = np.zeros(V)
-    mseISquaredEPlotA = np.zeros(V)
-    mseISquaredEPlotC = np.zeros(V)
-    mseISquaredTPlotA = np.zeros(V)
-    mseISquaredTPlotC = np.zeros(V)
-    mseCentralPlot = np.zeros(V)
-    acDispEPlot = np.zeros(V)
-    acDispTPlot = np.zeros(V)
-    acQEPlot = np.zeros(V)
-    acQTPlot = np.zeros(V)
-    acISquaredEPlot = np.zeros(V)
-    acISquaredTPlot = np.zeros(V)
+    mseDispEPlotVA = np.zeros(V)
+    mseQEPlotVA = np.zeros(V)
+    mseDispEPlotVC = np.zeros(V)
+    mseQEPlotVC = np.zeros(V)
+    mseDispTPlotVA = np.zeros(V)
+    mseQTPlotVA = np.zeros(V)
+    mseDispTPlotVC = np.zeros(V)
+    mseQTPlotVC = np.zeros(V)
+    mseISquaredEPlotVA = np.zeros(V)
+    mseISquaredEPlotVC = np.zeros(V)
+    mseISquaredTPlotVA = np.zeros(V)
+    mseISquaredTPlotVC = np.zeros(V)
+    mseCentralPlotV = np.zeros(V)
+    acDispEPlotV = np.zeros(V)
+    acDispTPlotV = np.zeros(V)
+    acQEPlotV = np.zeros(V)
+    acQTPlotV = np.zeros(V)
+    acISquaredEPlotV = np.zeros(V)
+    acISquaredTPlotV = np.zeros(V)
+
+    mseDispEPlotVARange = np.zeros(V)
+    mseQEPlotVARange = np.zeros(V)
+    mseDispEPlotVCRange = np.zeros(V)
+    mseQEPlotVCRange = np.zeros(V)
+    mseDispTPlotVARange = np.zeros(V)
+    mseQTPlotVARange = np.zeros(V)
+    mseDispTPlotVCRange = np.zeros(V)
+    mseQTPlotVCRange = np.zeros(V)
+    mseISquaredEPlotVARange = np.zeros(V)
+    mseISquaredEPlotVCRange = np.zeros(V)
+    mseISquaredTPlotVARange = np.zeros(V)
+    mseISquaredTPlotVCRange = np.zeros(V)
+    mseCentralPlotVRange = np.zeros(V)
+    acDispEPlotVRange = np.zeros(V)
+    acDispTPlotVRange = np.zeros(V)
+    acQEPlotVRange = np.zeros(V)
+    acQTPlotVRange = np.zeros(V)
+    acISquaredEPlotVRange = np.zeros(V)
+    acISquaredTPlotVRange = np.zeros(V)
+
+    F = len(freqset)
+    mseDispEPlotFA = np.zeros(F)
+    mseQEPlotFA = np.zeros(F)
+    mseDispEPlotFC = np.zeros(F)
+    mseQEPlotFC = np.zeros(F)
+    mseDispTPlotFA = np.zeros(F)
+    mseQTPlotFA = np.zeros(F)
+    mseDispTPlotFC = np.zeros(F)
+    mseQTPlotFC = np.zeros(F)
+    mseISquaredEPlotFA = np.zeros(F)
+    mseISquaredEPlotFC = np.zeros(F)
+    mseISquaredTPlotFA = np.zeros(F)
+    mseISquaredTPlotFC = np.zeros(F)
+    mseCentralPlotF = np.zeros(F)
+    acDispEPlotF = np.zeros(F)
+    acDispTPlotF = np.zeros(F)
+    acQEPlotF = np.zeros(F)
+    acQTPlotF = np.zeros(F)
+    acISquaredEPlotF = np.zeros(F)
+    acISquaredTPlotF = np.zeros(F)
+
+    mseDispEPlotFARange = np.zeros(F)
+    mseQEPlotFARange = np.zeros(F)
+    mseDispEPlotFCRange = np.zeros(F)
+    mseQEPlotFCRange = np.zeros(F)
+    mseDispTPlotFARange = np.zeros(F)
+    mseQTPlotFARange = np.zeros(F)
+    mseDispTPlotFCRange = np.zeros(F)
+    mseQTPlotFCRange = np.zeros(F)
+    mseISquaredEPlotFARange = np.zeros(F)
+    mseISquaredEPlotFCRange = np.zeros(F)
+    mseISquaredTPlotFARange = np.zeros(F)
+    mseISquaredTPlotFCRange = np.zeros(F)
+    mseCentralPlotFRange = np.zeros(F)
+    acDispEPlotFRange = np.zeros(F)
+    acDispTPlotFRange = np.zeros(F)
+    acQEPlotFRange = np.zeros(F)
+    acQTPlotFRange = np.zeros(F)
+    acISquaredEPlotFRange = np.zeros(F)
+    acISquaredTPlotFRange = np.zeros(F)
 
     for val in range(10):
+
+        mseDispEPlotVATemp = np.zeros(R)
+        mseQEPlotVATemp = np.zeros(R)
+        mseDispEPlotVCTemp = np.zeros(R)
+        mseQEPlotVCTemp = np.zeros(R)
+        mseDispTPlotVATemp = np.zeros(R)
+        mseQTPlotVATemp = np.zeros(R)
+        mseDispTPlotVCTemp = np.zeros(R)
+        mseQTPlotVCTemp = np.zeros(R)
+        mseISquaredEPlotVATemp = np.zeros(R)
+        mseISquaredEPlotVCTemp = np.zeros(R)
+        mseISquaredTPlotVATemp = np.zeros(R)
+        mseISquaredTPlotVCTemp = np.zeros(R)
+        mseCentralPlotVTemp = np.zeros(R)
+        acDispEPlotVTemp = np.zeros(R)
+        acDispTPlotVTemp = np.zeros(R)
+        acQEPlotVTemp = np.zeros(R)
+        acQTPlotVTemp = np.zeros(R)
+        acISquaredEPlotVTemp = np.zeros(R)
+        acISquaredTPlotVTemp = np.zeros(R)
+
+        mseDispEPlotFATemp = np.zeros(R)
+        mseQEPlotFATemp = np.zeros(R)
+        mseDispEPlotFCTemp = np.zeros(R)
+        mseQEPlotFCTemp = np.zeros(R)
+        mseDispTPlotFATemp = np.zeros(R)
+        mseQTPlotFATemp = np.zeros(R)
+        mseDispTPlotFCTemp = np.zeros(R)
+        mseQTPlotFCTemp = np.zeros(R)
+        mseISquaredEPlotFATemp = np.zeros(R)
+        mseISquaredEPlotFCTemp = np.zeros(R)
+        mseISquaredTPlotFATemp = np.zeros(R)
+        mseISquaredTPlotFCTemp = np.zeros(R)
+        mseCentralPlotFTemp = np.zeros(R)
+        acDispEPlotFTemp = np.zeros(R)
+        acDispTPlotFTemp = np.zeros(R)
+        acQEPlotFTemp = np.zeros(R)
+        acQTPlotFTemp = np.zeros(R)
+        acISquaredEPlotFTemp = np.zeros(R)
+        acISquaredTPlotFTemp = np.zeros(R)
 
         var = varset[val]
         print(f"\nProcessing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
@@ -217,8 +317,7 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         compareQTListC = np.zeros(sampleSize)
         compareISTListC = np.zeros(sampleSize)
 
-        # EXPERIMENT 1: BEHAVIOUR OF VARIABLES AT DIFFERENT SETTINGS
-        def computeMSE(ACindex, imageArray, sigma, centralSigma):
+        def computeMSE(ACindex, rep, imageArray, sigma, centralSigma):
 
             # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
             wVector = np.var(imageArray, axis=1)
@@ -311,19 +410,37 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
                 np.copyto(compareQEListA, mseQEList)
                 np.copyto(compareTListA, mseTList)
                 np.copyto(compareQTListA, mseQTList)
-                mseDispEPlotA[val] = mseDispEPlotA[val] + (mseEmpirical/R)
-                mseQEPlotA[val] = mseQEPlotA[val] + (mseQEmpirical/R)
-                mseDispTPlotA[val] = mseDispTPlotA[val] + (mseTheoretical/R)
-                mseQTPlotA[val] = mseQTPlotA[val] + (mseQTheoretical/R)
+
+                # EXPERIMENT 1 (BEHAVIOUR OF EPS AND DTA) ASSUMES UNIFORM DATA
+                if freqIndex == 0:
+                    mseDispEPlotVATemp[rep] = mseEmpirical
+                    mseQEPlotVATemp[rep] = mseQEmpirical
+                    mseDispTPlotVATemp[rep] = mseTheoretical
+                    mseQTPlotVATemp[rep] = mseQTheoretical
+
+                # EXPERIMENT 4 (STATISTICAL HETEROGENEITY) ASSUMES EPS IS CONSTANT
+                if index == 0 and val == 0:
+                    mseDispEPlotFATemp[rep] = mseEmpirical
+                    mseQEPlotFATemp[rep] = mseQEmpirical
+                    mseDispTPlotFATemp[rep] = mseTheoretical
+                    mseQTPlotFATemp[rep] = mseQTheoretical
             else:
                 np.copyto(compareEListC, mseEList)
                 np.copyto(compareQEListC, mseQEList)
                 np.copyto(compareTListC, mseTList)
                 np.copyto(compareQTListC, mseQTList)
-                mseDispEPlotC[val] = mseDispEPlotC[val] + (mseEmpirical/R)
-                mseQEPlotC[val] = mseQEPlotC[val] + (mseQEmpirical/R)
-                mseDispTPlotC[val] = mseDispTPlotC[val] + (mseTheoretical/R)
-                mseQTPlotC[val] = mseQTPlotC[val] + (mseQTheoretical/R)
+
+                if freqIndex == 0:
+                    mseDispEPlotVCTemp[rep] = mseEmpirical
+                    mseQEPlotVCTemp[rep] = mseQEmpirical
+                    mseDispTPlotVCTemp[rep] = mseTheoretical
+                    mseQTPlotVCTemp[rep] = mseQTheoretical
+
+                if index == 0 and val == 0:
+                    mseDispEPlotFCTemp[rep] = mseEmpirical
+                    mseQEPlotFCTemp[rep] = mseQEmpirical
+                    mseDispTPlotFCTemp[rep] = mseTheoretical
+                    mseQTPlotFCTemp[rep] = mseQTheoretical
 
             trueISquaredList = np.zeros(sampleSize)
             iSquaredList = np.zeros(sampleSize)
@@ -355,18 +472,34 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
             # EXPERIMENT 3: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
             mseCentral = xiCentral**2
-            mseCentralPlot[val] = mseCentral
+            
+            if freqIndex == 0:
+                mseCentralPlotVTemp[rep] = mseCentral
+            if index == 0 and val == 0:
+                mseCentralPlotFTemp[rep] = mseCentral
 
             if ACindex == 0:
                 np.copyto(compareISEListA, mseISEList)
                 np.copyto(compareISTListA, mseISTList)
-                mseISquaredEPlotA[val] = mseISquaredEPlotA[val] + (mseISquaredEmpirical/R)
-                mseISquaredTPlotA[val] = mseISquaredTPlotA[val] + (mseISquaredTheoretical/R)
+
+                if freqIndex == 0:
+                    mseISquaredEPlotVATemp[rep] = mseISquaredEmpirical
+                    mseISquaredTPlotVATemp[rep] = mseISquaredTheoretical
+
+                if index == 0 and val == 0:
+                    mseISquaredEPlotFATemp[rep] = mseISquaredEmpirical
+                    mseISquaredTPlotFATemp[rep] = mseISquaredTheoretical
             else:
                 np.copyto(compareISEListC, mseISEList)
                 np.copyto(compareISTListC, mseISTList)
-                mseISquaredEPlotC[val] = mseISquaredEPlotC[val] + (mseISquaredEmpirical/R)
-                mseISquaredTPlotC[val] = mseISquaredTPlotC[val] + (mseISquaredTheoretical/R)
+
+                if freqIndex == 0:
+                    mseISquaredEPlotVCTemp[rep] = mseISquaredEmpirical
+                    mseISquaredTPlotVCTemp[rep] = mseISquaredTheoretical
+
+                if index == 0 and val == 0:
+                    mseISquaredEPlotFCTemp[rep] = mseISquaredEmpirical
+                    mseISquaredTPlotFCTemp[rep] = mseISquaredTheoretical
 
         # EXPERIMENT 4: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
         # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
@@ -374,7 +507,7 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         # 3. EQUAL NUMBERS OF EACH OF 5 LABELS [1:1:1:1:1:0:0:0:0:0]
         # 4. UNEQUAL NUMBERS OF EACH OF 5 LABELS [6:1:1:1:1:0:0:0:0:0]
         # 5. EQUAL NUMBERS OF EACH OF 2 LABELS [1:1:0:0:0:0:0:0:0:0]
-        # 6. UNEQUAL NUMBERS OF EACH OF 2 LABELS [9:1:0:0:0:0:0:0:0:0]
+        # 6. UNEQUAL NUMBERS OF EACH OF 2 LABELS [9:1:0:0:0:0:0:0:0:0].
     
         numLabels = 10
         lsize = sampleSize/numLabels
@@ -402,6 +535,11 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
             
         while LAB_COUNT < sampleSize:
             for lab in labels:
+
+                # CIFAR-100 HAS 20 COARSE LABELS THAT CAN BE MERGED INTO 10     
+                if dataIndex == 1:
+                    lab = lab//2
+
                 if freqArray[lab] < freqSpec[lab]:
                     freqArray[lab] = freqArray[lab] + 1
                     sampledImage = newImages[LAB_COUNT]
@@ -417,19 +555,28 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         # REPEATS FOR EACH FREQUENCY SPECIFICATION
         for rep in range(R):
             print(f"\nRepeat {rep + 1}.")
-            computeMSE(0, imageArray, sigma, centralSigma)
-            computeMSE(1, imageArray, classicSigma, classicCentralSigma)
+            computeMSE(0, rep, imageArray, sigma, centralSigma)
+            computeMSE(1, rep, imageArray, classicSigma, classicCentralSigma)
 
-            # EXPERIMENT 2: AGM VS CGM
+            # COMPARING AGM AND CGM
             comparelists1 = np.divide(compareEListA, compareEListC)
             compareqlists1 = np.divide(compareQEListA, compareQEListC)
             compareislists1 = np.divide(compareISEListA, compareISEListC)
             sumdiff1 = abs(np.mean(comparelists1))
             sumqdiff1 = abs(np.mean(compareqlists1))
             sumisdiff1 = abs(np.mean(compareislists1))
-            acDispEPlot[val] = acDispEPlot[val] + (sumdiff1/R)
-            acQEPlot[val] = acQEPlot[val] + (sumqdiff1/R)
-            acISquaredEPlot[val] = acISquaredEPlot[val] + (sumisdiff1/R)
+
+            # EXPERIMENT 2 (AGM VS CGM) ASSUMES UNIFORM DATA
+            if freqIndex == 0:
+                acDispEPlotVTemp[rep] = sumdiff1
+                acQEPlotVTemp[rep] = sumqdiff1
+                acISquaredEPlotVTemp[rep] = sumisdiff1
+
+            # EXPERIMENT 4 (STATISTICAL HETEROGENEITY) ASSUMES EPS IS CONSTANT
+            if index == 0 and val == 0:
+                acDispEPlotFTemp[rep] = sumdiff1
+                acQEPlotFTemp[rep] = sumqdiff1
+                acISquaredEPlotFTemp[rep] = sumisdiff1
 
             comparelists2 = np.divide(compareTListA, compareTListC)
             compareqlists2 = np.divide(compareQTListA, compareQTListC)
@@ -437,76 +584,229 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
             sumdiff2 = abs(np.mean(comparelists2))
             sumqdiff2 = abs(np.mean(compareqlists2))
             sumisdiff2 = abs(np.mean(compareislists2))
-            acDispTPlot[val] = acDispTPlot[val] + (sumdiff2/R)
-            acQTPlot[val] = acQTPlot[val] + (sumqdiff2/R)
-            acISquaredTPlot[val] = acISquaredTPlot[val] + (sumisdiff2/R)
 
-    # EXPERIMENT 1: BEHAVIOUR OF (EPSILON, DELTA)
-    plt.errorbar(varset, mseDispEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseDispTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseDispEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseDispTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
-    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("MSE of Gaussian Mechanism")
-    plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
-    plt.clf()
+            if freqIndex == 0:
+                acDispTPlotVTemp[rep] = sumdiff2
+                acQTPlotVTemp[rep] = sumqdiff2
+                acISquaredTPlotVTemp[rep] = sumisdiff2
 
-    plt.errorbar(varset, mseQEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseQTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseQEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseQTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
-    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("MSE of Gaussian Mechanism")
-    plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
-    plt.clf()
+            if index == 0 and val == 0:
+                acDispTPlotFTemp[rep] = sumdiff2
+                acQTPlotFTemp[rep] = sumqdiff2
+                acISquaredTPlotFTemp[rep] = sumisdiff2
 
-    plt.errorbar(varset, mseISquaredEPlotA, color = 'blue', marker = 'o', label = "Empirical Analytic")
-    plt.errorbar(varset, mseISquaredTPlotA, color = 'green', marker = 'o', label = "Theoretical Analytic")
-    plt.errorbar(varset, mseISquaredEPlotC, color = 'orange', marker = 'x', label = "Empirical Classic")
-    plt.errorbar(varset, mseISquaredTPlotC, color = 'pink', marker = 'x', label = "Theoretical Classic")
-    plt.errorbar(varset, mseCentralPlot, color = 'red', marker = '*', label = "Centralized")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("MSE of Gaussian Mechanism")
-    plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
-    plt.clf()
+        if freqIndex == 0:
+            mseDispEPlotVA[val] = np.mean(mseDispEPlotVATemp)
+            mseQEPlotVA[val] = np.mean(mseQEPlotVATemp)
+            mseDispEPlotVC[val] = np.mean(mseDispEPlotVCTemp)
+            mseQEPlotVC[val] = np.mean(mseQEPlotVCTemp)
+            mseDispTPlotVA[val] = np.mean(mseDispTPlotVATemp)
+            mseQTPlotVA[val] = np.mean(mseQTPlotVATemp)
+            mseDispTPlotVC[val] = np.mean(mseDispTPlotVCTemp)
+            mseQTPlotVC[val] = np.mean(mseQTPlotVCTemp)
+            mseISquaredEPlotVA[val] = np.mean(mseISquaredEPlotVATemp)
+            mseISquaredEPlotVC[val] = np.mean(mseISquaredEPlotVCTemp)
+            mseISquaredTPlotVA[val] = np.mean(mseISquaredTPlotVATemp)
+            mseISquaredTPlotVC[val] = np.mean(mseISquaredTPlotVCTemp)
+            mseCentralPlotV[val] = np.mean(mseCentralPlotVTemp)
+            acDispEPlotV[val] = np.mean(acDispEPlotVTemp)
+            acDispTPlotV[val] = np.mean(acDispTPlotVTemp)
+            acQEPlotV[val] = np.mean(acQEPlotVTemp)
+            acQTPlotV[val] = np.mean(acQTPlotVTemp)
+            acISquaredEPlotV[val] = np.mean(acISquaredEPlotVTemp)
+            acISquaredTPlotV[val] = np.mean(acISquaredTPlotVTemp)
 
-    # EXPERIMENT 2: AGM VS CGM
-    plt.errorbar(varset, acDispEPlot, color = 'blue', marker = 'o', label = "Empirical")
-    plt.errorbar(varset, acDispTPlot, color = 'red', marker = 'x', label = "Theoretical")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("Multiplication factor")
-    plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
-    plt.clf()
+            mseDispEPlotVARange[val] = np.std(mseDispEPlotVATemp)
+            mseQEPlotVARange[val] = np.std(mseQEPlotVATemp)
+            mseDispEPlotVCRange[val] = np.std(mseDispEPlotVCTemp)
+            mseQEPlotVCRange[val] = np.std(mseQEPlotVCTemp)
+            mseDispTPlotVARange[val] = np.std(mseDispTPlotVATemp)
+            mseQTPlotVARange[val] = np.std(mseQTPlotVATemp)
+            mseDispTPlotVCRange[val] = np.std(mseDispTPlotVCTemp)
+            mseQTPlotVCRange[val] = np.std(mseQTPlotVCTemp)
+            mseISquaredEPlotVARange[val] = np.std(mseISquaredEPlotVATemp)
+            mseISquaredEPlotVCRange[val] = np.std(mseISquaredEPlotVCTemp)
+            mseISquaredTPlotVARange[val] = np.std(mseISquaredTPlotVATemp)
+            mseISquaredTPlotVCRange[val] = np.std(mseISquaredTPlotVCTemp)
+            mseCentralPlotVRange[val] = np.std(mseCentralPlotVTemp)
+            acDispEPlotVRange[val] = np.std(acDispEPlotVTemp)
+            acDispTPlotVRange[val] = np.std(acDispTPlotVTemp)
+            acQEPlotVRange[val] = np.std(acQEPlotVTemp)
+            acQTPlotVRange[val] = np.std(acQTPlotVTemp)
+            acISquaredEPlotVRange[val] = np.std(acISquaredEPlotVTemp)
+            acISquaredTPlotVRange[val] = np.std(acISquaredTPlotVTemp)
 
-    plt.errorbar(varset, acQEPlot, color = 'blue', marker = 'o', label = "Empirical")
-    plt.errorbar(varset, acQTPlot, color = 'red', marker = 'x', label = "Theoretical")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("Multiplication factor")
-    plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
-    plt.clf()
+        if index == 0 and val == 0:
+            mseDispEPlotFA[freqIndex] = np.mean(mseDispEPlotFATemp)
+            mseQEPlotFA[freqIndex] = np.mean(mseQEPlotFATemp)
+            mseDispEPlotFC[freqIndex] = np.mean(mseDispEPlotFCTemp)
+            mseQEPlotFC[freqIndex] = np.mean(mseQEPlotFCTemp)
+            mseDispTPlotFA[freqIndex] = np.mean(mseDispTPlotFATemp)
+            mseQTPlotFA[freqIndex] = np.mean(mseQTPlotFATemp)
+            mseDispTPlotFC[freqIndex] = np.mean(mseDispTPlotFCTemp)
+            mseQTPlotFC[freqIndex] = np.mean(mseQTPlotFCTemp)
+            mseISquaredEPlotFA[freqIndex] = np.mean(mseISquaredEPlotFATemp)
+            mseISquaredEPlotFC[freqIndex] = np.mean(mseISquaredEPlotFCTemp)
+            mseISquaredTPlotFA[freqIndex] = np.mean(mseISquaredTPlotFATemp)
+            mseISquaredTPlotFC[freqIndex] = np.mean(mseISquaredTPlotFCTemp)
+            mseCentralPlotF[freqIndex] = np.mean(mseCentralPlotFTemp)
+            acDispEPlotF[freqIndex] = np.mean(acDispEPlotFTemp)
+            acDispTPlotF[freqIndex] = np.mean(acDispTPlotFTemp)
+            acQEPlotF[freqIndex] = np.mean(acQEPlotFTemp)
+            acQTPlotF[freqIndex] = np.mean(acQTPlotFTemp)
+            acISquaredEPlotF[freqIndex] = np.mean(acISquaredEPlotFTemp)
+            acISquaredTPlotF[freqIndex] = np.mean(acISquaredTPlotFTemp)
 
-    plt.errorbar(varset, acISquaredEPlot, color = 'blue', marker = 'o', label = "Empirical")
-    plt.errorbar(varset, acISquaredTPlot, color = 'red', marker = 'x', label = "Theoretical")
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("Multiplication factor")
-    plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
-    plt.clf()
+            mseDispEPlotFARange[freqIndex] = np.std(mseDispEPlotFATemp)
+            mseQEPlotFARange[freqIndex] = np.std(mseQEPlotFATemp)
+            mseDispEPlotFCRange[freqIndex] = np.std(mseDispEPlotFCTemp)
+            mseQEPlotFCRange[freqIndex] = np.std(mseQEPlotFCTemp)
+            mseDispTPlotFARange[freqIndex] = np.std(mseDispTPlotFATemp)
+            mseQTPlotFARange[freqIndex] = np.std(mseQTPlotFATemp)
+            mseDispTPlotFCRange[freqIndex] = np.std(mseDispTPlotFCTemp)
+            mseQTPlotFCRange[freqIndex] = np.std(mseQTPlotFCTemp)
+            mseISquaredEPlotFARange[freqIndex] = np.std(mseISquaredEPlotFATemp)
+            mseISquaredEPlotFCRange[freqIndex] = np.std(mseISquaredEPlotFCTemp)
+            mseISquaredTPlotFARange[freqIndex] = np.std(mseISquaredTPlotFATemp)
+            mseISquaredTPlotFCRange[freqIndex] = np.std(mseISquaredTPlotFCTemp)
+            mseCentralPlotFRange[freqIndex] = np.std(mseCentralPlotFTemp)
+            acDispEPlotFRange[freqIndex] = np.std(acDispEPlotFTemp)
+            acDispTPlotFRange[freqIndex] = np.std(acDispTPlotFTemp)
+            acQEPlotFRange[freqIndex] = np.std(acQEPlotFTemp)
+            acQTPlotFRange[freqIndex] = np.std(acQTPlotFTemp)
+            acISquaredEPlotFRange[freqIndex] = np.std(acISquaredEPlotFTemp)
+            acISquaredTPlotFRange[freqIndex] = np.std(acISquaredTPlotFTemp)
 
-    # ADD GRAPHS FOR EXPERIMENT 4 WHEN READY
+    # EXPERIMENT 1: BEHAVIOUR OF (EPSILON, DELTA) GIVEN UNIFORM DATA
+    if freqIndex == 0:
+        plt.errorbar(varset, mseDispEPlotVA, yerr = np.minimum(mseDispEPlotVARange, np.sqrt(mseDispEPlotVA), np.divide(mseDispEPlotVA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(varset, mseDispTPlotVA, yerr = np.minimum(mseDispTPlotVARange, np.sqrt(mseDispTPlotVA), np.divide(mseDispTPlotVA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(varset, mseDispEPlotVC, yerr = np.minimum(mseDispEPlotVCRange, np.sqrt(mseDispEPlotVC), np.divide(mseDispEPlotVC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(varset, mseDispTPlotVC, yerr = np.minimum(mseDispTPlotVCRange, np.sqrt(mseDispTPlotVC), np.divide(mseDispTPlotVC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(varset, mseCentralPlotV, yerr = np.minimum(mseCentralPlotVRange, np.sqrt(mseCentralPlotV), np.divide(mseCentralPlotV, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
+        plt.clf()
+
+        plt.errorbar(varset, mseQEPlotVA, yerr = np.minimum(mseQEPlotVARange, np.sqrt(mseQEPlotVA), np.divide(mseQEPlotVA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(varset, mseQTPlotVA, yerr = np.minimum(mseQTPlotVARange, np.sqrt(mseQTPlotVA), np.divide(mseQTPlotVA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(varset, mseQEPlotVC, yerr = np.minimum(mseQEPlotVCRange, np.sqrt(mseQEPlotVC), np.divide(mseQEPlotVC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(varset, mseQTPlotVC, yerr = np.minimum(mseQTPlotVCRange, np.sqrt(mseQTPlotVC), np.divide(mseQTPlotVC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(varset, mseCentralPlotV, yerr = np.minimum(mseCentralPlotVRange, np.sqrt(mseCentralPlotV), np.divide(mseCentralPlotV, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
+        plt.clf()
+
+        plt.errorbar(varset, mseISquaredEPlotVA, yerr = np.minimum(mseISquaredEPlotVARange, np.sqrt(mseISquaredEPlotVA), np.divide(mseISquaredEPlotVA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(varset, mseISquaredTPlotVA, yerr = np.minimum(mseISquaredTPlotVARange, np.sqrt(mseISquaredTPlotVA), np.divide(mseISquaredTPlotVA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(varset, mseISquaredEPlotVC, yerr = np.minimum(mseISquaredEPlotVCRange, np.sqrt(mseISquaredEPlotVC), np.divide(mseISquaredEPlotVC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(varset, mseISquaredTPlotVC, yerr = np.minimum(mseISquaredTPlotVCRange, np.sqrt(mseISquaredTPlotVC), np.divide(mseISquaredTPlotVC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(varset, mseCentralPlotV, yerr = np.minimum(mseCentralPlotVRange, np.sqrt(mseCentralPlotV), np.divide(mseCentralPlotV, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp1_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
+        plt.clf()
+
+        # EXPERIMENT 2: AGM VS CGM (UNIFORM DATA)
+        plt.errorbar(varset, acDispEPlotV, yerr = np.minimum(acDispEPlotVRange, np.sqrt(acDispEPlotV), np.divide(acDispEPlotV, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(varset, acDispTPlotV, yerr = np.minimum(acDispTPlotVRange, np.sqrt(acDispTPlotV), np.divide(acDispTPlotV, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
+        plt.clf()
+
+        plt.errorbar(varset, acQEPlotV, yerr = np.minimum(acQEPlotVRange, np.sqrt(acQEPlotV), np.divide(acQEPlotV, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(varset, acQTPlotV, yerr = np.minimum(acQTPlotVRange, np.sqrt(acQTPlotV), np.divide(acQTPlotV, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
+        plt.clf()
+
+        plt.errorbar(varset, acISquaredEPlotV, yerr = np.minimum(acISquaredEPlotVRange, np.sqrt(acISquaredEPlotV), np.divide(acISquaredEPlotV, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(varset, acISquaredTPlotV, yerr = np.minimum(acISquaredTPlotVRange, np.sqrt(acISquaredTPlotV), np.divide(acISquaredTPlotV, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Value of " + "%s" % graphset[index])
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp2_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
+        plt.clf()
+
+    if index == 0:
+        # EXPERIMENT 4: STATISTICAL HETEROGENEITY (CONSTANT EPS OR DTA)
+        plt.errorbar(freqset, mseDispEPlotFA, yerr = np.minimum(mseDispEPlotFARange, np.sqrt(mseDispEPlotFA), np.divide(mseDispEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(freqset, mseDispTPlotFA, yerr = np.minimum(mseDispTPlotFARange, np.sqrt(mseDispTPlotFA), np.divide(mseDispTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(freqset, mseDispEPlotFC, yerr = np.minimum(mseDispEPlotFCRange, np.sqrt(mseDispEPlotFC), np.divide(mseDispEPlotFC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(freqset, mseDispTPlotFC, yerr = np.minimum(mseDispTPlotFCRange, np.sqrt(mseDispTPlotFC), np.divide(mseDispTPlotFC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(freqset, mseCentralPlotF, yerr = np.minimum(mseCentralPlotFRange, np.sqrt(mseCentralPlotF), np.divide(mseCentralPlotF, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp41_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
+        plt.clf()
+
+        plt.errorbar(freqset, mseQEPlotFA, yerr = np.minimum(mseQEPlotFARange, np.sqrt(mseQEPlotFA), np.divide(mseQEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(freqset, mseQTPlotFA, yerr = np.minimum(mseQTPlotFARange, np.sqrt(mseQTPlotFA), np.divide(mseQTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(freqset, mseQEPlotFC, yerr = np.minimum(mseQEPlotFCRange, np.sqrt(mseQEPlotFC), np.divide(mseQEPlotFC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(freqset, mseQTPlotFC, yerr = np.minimum(mseQTPlotFCRange, np.sqrt(mseQTPlotFC), np.divide(mseQTPlotFC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(freqset, mseCentralPlotF, yerr = np.minimum(mseCentralPlotFRange, np.sqrt(mseCentralPlotF), np.divide(mseCentralPlotF, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp41_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
+        plt.clf()
+
+        plt.errorbar(freqset, mseISquaredEPlotFA, yerr = np.minimum(mseISquaredEPlotFARange, np.sqrt(mseISquaredEPlotFA), np.divide(mseISquaredEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical Analytic")
+        plt.errorbar(freqset, mseISquaredTPlotFA, yerr = np.minimum(mseISquaredTPlotFARange, np.sqrt(mseISquaredTPlotFA), np.divide(mseISquaredTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical Analytic")
+        plt.errorbar(freqset, mseISquaredEPlotFC, yerr = np.minimum(mseISquaredEPlotFCRange, np.sqrt(mseISquaredEPlotFC), np.divide(mseISquaredEPlotFC, 2)), color = 'orange', marker = 'x', label = "Empirical Classic")
+        plt.errorbar(freqset, mseISquaredTPlotFC, yerr = np.minimum(mseISquaredTPlotFCRange, np.sqrt(mseISquaredTPlotFC), np.divide(mseISquaredTPlotFC, 2)), color = 'pink', marker = 'x', label = "Theoretical Classic")
+        plt.errorbar(freqset, mseCentralPlotF, yerr = np.minimum(mseCentralPlotFRange, np.sqrt(mseCentralPlotF), np.divide(mseCentralPlotF, 2)), color = 'red', marker = '*', label = "Centralized")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("MSE of Gaussian Mechanism")
+        plt.savefig("Exp41_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
+        plt.clf()
+
+        plt.errorbar(freqset, acDispEPlotF, yerr = np.minimum(acDispEPlotFRange, np.sqrt(acDispEPlotF), np.divide(acDispEPlotF, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(freqset, acDispTPlotF, yerr = np.minimum(acDispTPlotFRange, np.sqrt(acDispTPlotF), np.divide(acDispTPlotF, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp42_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
+        plt.clf()
+
+        plt.errorbar(freqset, acQEPlotF, yerr = np.minimum(acQEPlotFRange, np.sqrt(acQEPlotF), np.divide(acQEPlotF, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(freqset, acQTPlotF, yerr = np.minimum(acQTPlotFRange, np.sqrt(acQTPlotF), np.divide(acQTPlotF, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp42_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
+        plt.clf()
+
+        plt.errorbar(freqset, acISquaredEPlotF, yerr = np.minimum(acISquaredEPlotFRange, np.sqrt(acISquaredEPlotF), np.divide(acISquaredEPlotF, 2)), color = 'blue', marker = 'o', label = "Empirical")
+        plt.errorbar(freqset, acISquaredTPlotF, yerr = np.minimum(acISquaredTPlotFRange, np.sqrt(acISquaredTPlotF), np.divide(acISquaredTPlotF, 2)), color = 'red', marker = 'x', label = "Theoretical")
+        plt.legend(loc = 'best')
+        plt.yscale('log')
+        plt.xlabel("Labels")
+        plt.ylabel("Multiplication factor")
+        plt.savefig("Exp42_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_isquared.png")
+        plt.clf()
 
 def runLoopVaryEps(dataIndex, index, freqIndex, dim, num, newImages, labels, GS):
     runLoop(dataIndex, index, freqIndex, epsset, dim, num, -1, dtaconst, newImages, labels, GS)
