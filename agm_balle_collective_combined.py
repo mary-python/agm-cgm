@@ -65,8 +65,12 @@ def loadCifar100(property):
     return trainCifar100
 
 # LOADING FASHION-MNIST DATA
-def loadFashion(filename):
-    dataFashion = idx2numpy.convert_from_file(filename)
+def loadFashion(filename, reshape):
+    dict = idx2numpy.convert_from_file(filename)
+    if reshape == 1:
+        dataFashion = dict.reshape((numFashion, dimFashion))
+    else:
+        dataFashion = dict
     return dataFashion
 
 # ADAPTATION OF TRANSFORMATION OF LABEL INDICES TO ONE-HOT ENCODED VECTORS AND IMAGES TO 3072-DIMENSIONAL VECTORS BY HADHAZI
@@ -81,8 +85,8 @@ imagesCifar10 = loadCifar10(b'data')
 labelsCifar10 = loadCifar10(b'labels')
 imagesCifar100 = loadCifar100(b'data')
 labelsCifar100 = loadCifar100(b'coarse_labels')
-imagesFashion = loadFashion('train-images-idx3-ubyte')
-labelsFashion = loadFashion('train-labels-idx1-ubyte')
+imagesFashion = loadFashion('train-images-idx3-ubyte', 1)
+labelsFashion = loadFashion('train-labels-idx1-ubyte', 0)
 
 newImagesCifar10 = transformValues(imagesCifar10)
 newImagesCifar100 = transformValues(imagesCifar100)
@@ -507,10 +511,7 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         numLabels = 10
         lsize = sampleSize/numLabels
         freqArray = np.zeros(numLabels)
-        if dataIndex == 2:
-            imageArray = np.zeros((sampleSize, int(np.sqrt(dim)), int(np.sqrt(dim))))
-        else:
-            imageArray = np.zeros((sampleSize, dim))
+        imageArray = np.zeros((sampleSize, dim))
         freqOne = np.array([lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize])
         freqTwo = np.array([5.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize])
         freqThree = np.array([2*lsize, 2*lsize, 2*lsize, 2*lsize, 2*lsize, 0, 0, 0, 0, 0])
