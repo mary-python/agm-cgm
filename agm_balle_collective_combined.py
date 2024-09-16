@@ -508,7 +508,7 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         lsize = sampleSize/numLabels
         freqArray = np.zeros(numLabels)
         if dataIndex == 2:
-            imageArray = np.zeros((sampleSize, np.sqrt(dim), np.sqrt(dim)))
+            imageArray = np.zeros((sampleSize, int(np.sqrt(dim)), int(np.sqrt(dim))))
         else:
             imageArray = np.zeros((sampleSize, dim))
         freqOne = np.array([lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize])
