@@ -1,6 +1,5 @@
 import numpy as np
 import idx2numpy
-import os
 import mpmath as mp
 import matplotlib.pyplot as plt
 
@@ -88,8 +87,6 @@ labelsFashion = loadFashion('train-labels-idx1-ubyte')
 newImagesCifar10 = transformValues(imagesCifar10)
 newImagesCifar100 = transformValues(imagesCifar100)
 newImagesFashion = transformValues(imagesFashion)
-
-os.chdir('..')
 
 def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, labels, GS):
 
@@ -537,20 +534,17 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         LAB_COUNT = 0
         INDEX_COUNT = 0
 
-        while LAB_COUNT < sampleSize:
-            for lab in labels:
-
-                # CIFAR-100 HAS 20 COARSE LABELS THAT CAN BE MERGED INTO 10     
-                if dataIndex == 1:
-                    lab = lab//2
-
-                if freqArray[lab] < freqSpec[lab]:
-                    freqArray[lab] = freqArray[lab] + 1
-                    sampledImage = newImages[LAB_COUNT]
-                    imageArray[INDEX_COUNT] = sampledImage
-                    INDEX_COUNT = INDEX_COUNT + 1
-
-                LAB_COUNT = LAB_COUNT + 1
+        for lab in labels:
+            
+            # CIFAR-100 HAS 20 COARSE LABELS THAT CAN BE MERGED INTO 10     
+            if dataIndex == 1:
+                lab = lab//2
+                
+            if freqArray[lab] < freqSpec[lab]:
+                freqArray[lab] = freqArray[lab] + 1
+                sampledImage = newImages[LAB_COUNT]
+                imageArray[INDEX_COUNT] = sampledImage
+                INDEX_COUNT = INDEX_COUNT + 1
 
         # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN MSE AND DISTRIBUTED/CENTRALISED SETTING
         classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dta)))/eps
