@@ -67,8 +67,7 @@ def loadCifar100(property):
 
 # LOADING FASHION-MNIST DATA
 def loadFashion(filename):
-    dict = idx2numpy.convert_from_file(filename)
-    dataFashion = dict.reshape((numFashion, dimFashion))
+    dataFashion = idx2numpy.convert_from_file(filename)
     return dataFashion
 
 # ADAPTATION OF TRANSFORMATION OF LABEL INDICES TO ONE-HOT ENCODED VECTORS AND IMAGES TO 3072-DIMENSIONAL VECTORS BY HADHAZI
@@ -78,11 +77,11 @@ def transformValues(x):
     return x
 
 # CALL ALL THE ABOVE METHODS
-print("Loading data...\n")
+print("Loading data...")
 imagesCifar10 = loadCifar10(b'data')
 labelsCifar10 = loadCifar10(b'labels')
 imagesCifar100 = loadCifar100(b'data')
-labelsCifar100 = loadCifar100(b'coarse_label')
+labelsCifar100 = loadCifar100(b'coarse_labels')
 imagesFashion = loadFashion('train-images-idx3-ubyte')
 labelsFashion = loadFashion('train-labels-idx1-ubyte')
 
@@ -220,7 +219,7 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         acISquaredTPlotFTemp = np.zeros(R)
 
         var = varset[val]
-        print(f"\nProcessing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
+        print(f"Processing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
 
         if eps == -1:
             eps = var
@@ -300,10 +299,9 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         # CALL ALGORITHM FOR AGM TO FIND SIGMA GIVEN EPS AND DTA AS INPUT
         centralSigma = calibrateAGM(eps, dta, tol=1.e-12)
         sigma = GS*centralSigma
-        print("Calibrating AGM...")
 
         sample = 0.02
-        sampleSize = num*sample
+        sampleSize = int(num*sample)
         compareEListA = np.zeros(sampleSize)
         compareQEListA = np.zeros(sampleSize)
         compareISEListA = np.zeros(sampleSize)
@@ -512,13 +510,16 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
         numLabels = 10
         lsize = sampleSize/numLabels
         freqArray = np.zeros(numLabels)
-        imageArray = np.zeros(num*sample)
+        if dataIndex == 2:
+            imageArray = np.zeros((sampleSize, np.sqrt(dim), np.sqrt(dim)))
+        else:
+            imageArray = np.zeros((sampleSize, dim))
         freqOne = np.array([lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize])
         freqTwo = np.array([5.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize])
         freqThree = np.array([2*lsize, 2*lsize, 2*lsize, 2*lsize, 2*lsize, 0, 0, 0, 0, 0])
-        freqFour = np.array[6*lsize, lsize, lsize, lsize, lsize, 0, 0, 0, 0, 0]
-        freqFive = np.array[5*lsize, 5*lsize, 0, 0, 0, 0, 0, 0, 0, 0]
-        freqSix = np.array[9*lsize, lsize, 0, 0, 0, 0, 0, 0, 0, 0]
+        freqFour = np.array([6*lsize, lsize, lsize, lsize, lsize, 0, 0, 0, 0, 0])
+        freqFive = np.array([5*lsize, 5*lsize, 0, 0, 0, 0, 0, 0, 0, 0])
+        freqSix = np.array([9*lsize, lsize, 0, 0, 0, 0, 0, 0, 0, 0])
 
         if freqIndex == 0:
             freqSpec = freqOne
@@ -532,7 +533,10 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
             freqSpec = freqFive
         if freqIndex == 5:
             freqSpec = freqSix
-            
+     
+        LAB_COUNT = 0
+        INDEX_COUNT = 0
+
         while LAB_COUNT < sampleSize:
             for lab in labels:
 
@@ -554,7 +558,6 @@ def runLoop(dataIndex, index, freqIndex, varset, dim, num, eps, dta, newImages, 
 
         # REPEATS FOR EACH FREQUENCY SPECIFICATION
         for rep in range(R):
-            print(f"\nRepeat {rep + 1}.")
             computeMSE(0, rep, imageArray, sigma, centralSigma)
             computeMSE(1, rep, imageArray, classicSigma, classicCentralSigma)
 
