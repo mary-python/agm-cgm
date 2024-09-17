@@ -12,8 +12,8 @@ This repository contains all the supporting files for the **experimental section
 ## Instructions
 
 - After setting up the Python environment and downloading the required files as outlined above, open and run **agm_balle_collective_combined**. There will be a progress bar and various text updates appearing in the terminal, indicating the progress of the experiments.
-- When the final text update "Finished." appears, the experiments have finished and the final plots have been saved in the same folder as the Python files. This should happen after approximately **6-12 hours**, depending on the computer or laptop used.
-- These final plots should be **exactly the graphs found in the experimental section** of **_Towards Robust Federated Analytics via Differentially Private Measurements of Statistical Heterogeneity_**.
+- When the final text update "Finished." appears, the experiments have finished, the final tables have been printed in the terminal, and all plots have been saved in the same folder as the Python files. This should happen after approximately **6-12 hours**, depending on the computer or laptop used.
+- These final plots should be **exactly the tables and graphs found in the experimental section** of **_Towards Robust Federated Analytics via Differentially Private Measurements of Statistical Heterogeneity_**.
 
 ## Authors
 
