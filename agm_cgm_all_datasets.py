@@ -25,7 +25,7 @@ numFashion = 60000
 GSCifar = float(mp.sqrt(dimCifar))/numCifar
 GSFashion = float(mp.sqrt(dimFashion))/numFashion
 
-# INITIALISING OTHER PARAMETERS/CONSTANTS
+# INITIALISING OTHER PARAMETERS AND CONSTANTS
 dataset = np.array(['Cifar10', 'Cifar100', 'Fashion'])
 freqset = np.array(['10 (equal)', '10 (unequal)', '5 (equal)', '5 (unequal)', '2 (equal)', '2 (unequal)'])
 R = 10
@@ -87,65 +87,65 @@ newImagesFashion = transformValues(imagesFashion)
 def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
     F = len(freqset)
-    mseDispEPlotFA = np.zeros(F)
-    mseDispEPlotFC = np.zeros(F)
-    mseDispTPlotFA = np.zeros(F)
-    mseDispTPlotFC = np.zeros(F)
-    mseQEPlotFA = np.zeros(F)
-    mseQEPlotFC = np.zeros(F)   
-    mseQTPlotFA = np.zeros(F)
-    mseQTPlotFC = np.zeros(F)
-    mseISquaredEPlotFA = np.zeros(F)
-    mseISquaredEPlotFC = np.zeros(F)
-    mseISquaredTPlotFA = np.zeros(F)
-    mseISquaredTPlotFC = np.zeros(F)
-    mseCentralPlotFA = np.zeros(F)
-    mseCentralPlotFC = np.zeros(F)
+    mseDispEPlotA = np.zeros(F)
+    mseDispEPlotC = np.zeros(F)
+    mseDispTPlotA = np.zeros(F)
+    mseDispTPlotC = np.zeros(F)
+    mseQEPlotA = np.zeros(F)
+    mseQEPlotC = np.zeros(F)   
+    mseQTPlotA = np.zeros(F)
+    mseQTPlotC = np.zeros(F)
+    mseI2EPlotA = np.zeros(F)
+    mseI2EPlotC = np.zeros(F)
+    mseI2TPlotA = np.zeros(F)
+    mseI2TPlotC = np.zeros(F)
+    mseCentralPlotA = np.zeros(F)
+    mseCentralPlotC = np.zeros(F)
 
-    mseDispEPlotFARange = np.zeros(F)
-    mseDispEPlotFCRange = np.zeros(F)
-    mseDispTPlotFARange = np.zeros(F)
-    mseDispTPlotFCRange = np.zeros(F)
-    mseQEPlotFARange = np.zeros(F)
-    mseQEPlotFCRange = np.zeros(F)
-    mseQTPlotFARange = np.zeros(F)
-    mseQTPlotFCRange = np.zeros(F)
-    mseISquaredEPlotFARange = np.zeros(F)
-    mseISquaredEPlotFCRange = np.zeros(F)
-    mseISquaredTPlotFARange = np.zeros(F)
-    mseISquaredTPlotFCRange = np.zeros(F)
-    mseCentralPlotFARange = np.zeros(F)
-    mseCentralPlotFCRange = np.zeros(F)
+    mseDispEPlotARange = np.zeros(F)
+    mseDispEPlotCRange = np.zeros(F)
+    mseDispTPlotARange = np.zeros(F)
+    mseDispTPlotCRange = np.zeros(F)
+    mseQEPlotARange = np.zeros(F)
+    mseQEPlotCRange = np.zeros(F)
+    mseQTPlotARange = np.zeros(F)
+    mseQTPlotCRange = np.zeros(F)
+    mseI2EPlotARange = np.zeros(F)
+    mseI2EPlotCRange = np.zeros(F)
+    mseI2TPlotARange = np.zeros(F)
+    mseI2TPlotCRange = np.zeros(F)
+    mseCentralPlotARange = np.zeros(F)
+    mseCentralPlotCRange = np.zeros(F)
 
-    mseDispEPlotVATemp = np.zeros(R)
-    mseDispEPlotVCTemp = np.zeros(R)
-    mseDispTPlotVATemp = np.zeros(R)
-    mseDispTPlotVCTemp = np.zeros(R)
-    mseQEPlotVATemp = np.zeros(R)
-    mseQEPlotVCTemp = np.zeros(R)
-    mseQTPlotVATemp = np.zeros(R)
-    mseQTPlotVCTemp = np.zeros(R)
-    mseISquaredEPlotVATemp = np.zeros(R)
-    mseISquaredEPlotVCTemp = np.zeros(R)
-    mseISquaredTPlotVATemp = np.zeros(R)
-    mseISquaredTPlotVCTemp = np.zeros(R)
-    mseCentralPlotVATemp = np.zeros(R)
-    mseCentralPlotVCTemp = np.zeros(R)
+    mseDispETableATemp = np.zeros(R)
+    mseDispETableCTemp = np.zeros(R)
+    mseDispTTableATemp = np.zeros(R)
+    mseDispTTableCTemp = np.zeros(R)
+    mseQETableATemp = np.zeros(R)
+    mseQETableCTemp = np.zeros(R)
+    mseQTTableATemp = np.zeros(R)
+    mseQTTableCTemp = np.zeros(R)
+    mseI2ETableATemp = np.zeros(R)
+    mseI2ETableCTemp = np.zeros(R)
+    mseI2TTableATemp = np.zeros(R)
+    mseI2TTableCTemp = np.zeros(R)
+    mseCTableATemp = np.zeros(R)
+    mseCTableCTemp = np.zeros(R)
 
-    mseDispEPlotFATemp = np.zeros((F, R))
-    mseDispEPlotFCTemp = np.zeros((F, R))
-    mseDispTPlotFATemp = np.zeros((F, R))
-    mseDispTPlotFCTemp = np.zeros((F, R))
-    mseQEPlotFATemp = np.zeros((F, R))
-    mseQEPlotFCTemp = np.zeros((F, R))
-    mseQTPlotFATemp = np.zeros((F, R))
-    mseQTPlotFCTemp = np.zeros((F, R))
-    mseISquaredEPlotFATemp = np.zeros((F, R))
-    mseISquaredEPlotFCTemp = np.zeros((F, R))
-    mseISquaredTPlotFATemp = np.zeros((F, R))
-    mseISquaredTPlotFCTemp = np.zeros((F, R))
-    mseCentralPlotFATemp = np.zeros((F, R))
-    mseCentralPlotFCTemp = np.zeros((F, R))
+    mseDispEPlotATemp = np.zeros((F, R))
+    mseDispEPlotCTemp = np.zeros((F, R))
+    mseDispTPlotATemp = np.zeros((F, R))
+    mseDispTPlotCTemp = np.zeros((F, R))
+    mseQEPlotATemp = np.zeros((F, R))
+    mseQEPlotCTemp = np.zeros((F, R))
+    mseQTPlotATemp = np.zeros((F, R))
+    mseQTPlotCTemp = np.zeros((F, R))
+    mseI2EPlotATemp = np.zeros((F, R))
+    mseI2EPlotCTemp = np.zeros((F, R))
+    mseI2TPlotATemp = np.zeros((F, R))
+    mseI2TPlotCTemp = np.zeros((F, R))
+    mseCPlotATemp = np.zeros((F, R))
+    mseCPlotCTemp = np.zeros((F, R))
 
     print(f"Processing dataset {dataIndex+1}.")
 
@@ -235,10 +235,10 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
         for j in range(0, sampleSize):
             wVectorSquared = np.power(wVector[j], 2)
-            weight[j] = 1.0/(wVectorSquared)
+            weight[j] = np.divide(1.0, wVectorSquared)
 
             # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
-            wImageArray[j] = (weight[j])*(imageArray[j])
+            wImageArray[j] = np.multiply(weight[j], imageArray[j])
 
         mu = np.mean(imageArray, axis=0)
         wSumMu = np.sum(wImageArray, axis=0)
@@ -250,10 +250,6 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
         noisyMu = np.zeros(dim)
         wNoisyMu = np.zeros(dim)
 
-        noisyEList = np.zeros(sampleSize)
-        noisyQEList = np.zeros(sampleSize)
-        trueEList = np.zeros(sampleSize, dtype = np.float64)
-        trueQEList = np.zeros(sampleSize, dtype = np.float64)
         mseEList = np.zeros(sampleSize)
         mseQEList = np.zeros(sampleSize)
         mseTList = np.zeros(sampleSize, dtype = np.float64)
@@ -262,45 +258,40 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
         # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
         for i in range(0, dim):
             xi1 = normal(0, sigma**2)
-            noisyMu[i] = mu[i] + xi1
-            wNoisyMu[i] = wMu[i] + xi1
+            noisyMu[i] = np.add(mu[i], xi1)
+            wNoisyMu[i] = np.add(wMu[i], xi1)
 
         # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
         for j in range(0, sampleSize):
-            trueDiff = np.subtract(imageArray[j], mu)
-            wTrueDiff = np.subtract(imageArray[j], wMu)
-            noisyDiff = np.subtract(imageArray[j], noisyMu)
-            wNoisyDiff = np.subtract(imageArray[j], wNoisyMu)
+            trueDiff = np.sum(np.subtract(imageArray[j], mu))
+            wTrueDiff = np.sum(np.subtract(imageArray[j], wMu))
+            noisyDiff = np.sum(np.subtract(imageArray[j], noisyMu))
+            wNoisyDiff = np.sum(np.subtract(imageArray[j], wNoisyMu))
 
             # INCORPORATING WEIGHTS FOR STATISTICS ON Q
             trueDisp = np.power(trueDiff, 2)
             wTrueDisp = np.power(wTrueDiff, 2)
-            weightedTrueDisp = (weight[j])*(wTrueDisp)
+            weightedTrueDisp = np.multiply(weight[j], wTrueDisp)
             noisyVar = np.power(noisyDiff, 2)
             wNoisyVar = np.power(wNoisyDiff, 2)
-            weightedNoisyVar = (weight[j])*(wNoisyVar)
+            weightedNoisyVar = np.multiply(weight[j], wNoisyVar)
 
             xi2 = normal(0, sigma**2)
-            noisyDisp = noisyVar + xi2
-            noisyQ = weightedNoisyVar + xi2
+            noisyDisp = np.add(noisyVar, xi2)
+            noisyQ = np.add(weightedNoisyVar, xi2)
 
-            noisyEList[j] = np.sum(noisyDisp)
-            noisyQEList[j] = np.sum(noisyQ)
-            trueEList[j] = np.sum(trueDisp)
-            trueQEList[j] = np.sum(weightedTrueDisp)
+            # EMSE = MSE OF FORMULA OF DISPERSION OR Q
+            mseEList[j] = np.power(np.subtract(noisyDisp, trueDisp), 2)
+            mseQEList[j] = np.power(np.subtract(noisyQ, weightedTrueDisp), 2)
 
-            # EMPIRICAL MSE = THE SQUARE OF THE ABOVE UNROUNDED STATISTIC MINUS THE TRUE DISPERSION
-            mseEList[j] = np.power((noisyEList[j] - trueEList[j]), 2)
-            mseQEList[j] = np.power((noisyQEList[j] - trueQEList[j]), 2)
-
-            # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING THEORETICAL MSE USING VARIABLES DEFINED ABOVE
-            doubleTrueDiff = 2*trueDiff
-            wDoubleTrueDiff = 2*wTrueDiff
+            # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING TMSE USING VARIABLES DEFINED ABOVE
+            doubleTrueDiff = np.multiply(2, trueDiff)
+            wDoubleTrueDiff = np.multiply(2, wTrueDiff)
             bracket = np.subtract(xi1, doubleTrueDiff)
             wBracket = np.subtract(xi1, wDoubleTrueDiff)
             multiply = np.multiply(xi1, bracket)
             wMultiply = np.multiply(xi1, wBracket)
-            weightedMult = (weight[j])*(wMultiply)
+            weightedMult = np.multiply(weight[j], wMultiply)
 
             extraTerm = np.add(multiply, xi2)
             wExtraTerm = np.add(weightedMult, xi2)
@@ -309,89 +300,86 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             mseTList[j] = np.sum(extraTermSquared)
             mseQTList[j] = np.sum(wExtraTermSquared)
 
-        mseEmpirical = np.sum(mseEList)
-        mseTheoretical = np.sum(mseTList)
-        mseQEmpirical = np.sum(mseQEList)
-        mseQTheoretical = np.sum(mseQTList)
+        mseE = np.sum(mseEList)
+        mseT = np.sum(mseTList)
+        mseQE = np.sum(mseQEList)
+        mseQT = np.sum(mseQTList)
 
         if ACindex == 0:
 
-            # EXPERIMENT 1 (EMPIRICAL VS THEORETICAL) ASSUMES UNIFORM DATA
+            # EXPERIMENT 1 (EMSE VS TMSE) ASSUMES UNIFORM DATA
             if fi == 0:
-                mseDispEPlotVATemp[rep] = mseEmpirical
-                mseDispTPlotVATemp[rep] = mseTheoretical
-                mseQEPlotVATemp[rep] = mseQEmpirical
-                mseQTPlotVATemp[rep] = mseQTheoretical
+                mseDispETableATemp[rep] = mseE
+                mseDispTTableATemp[rep] = mseT
+                mseQETableATemp[rep] = mseQE
+                mseQTTableATemp[rep] = mseQT
 
             # EXPERIMENT 3 (STATISTICAL HETEROGENEITY)
-            mseDispEPlotFATemp[fi, rep] = mseEmpirical
-            mseDispTPlotFATemp[fi, rep] = mseTheoretical
-            mseQEPlotFATemp[fi, rep] = mseQEmpirical
-            mseQTPlotFATemp[fi, rep] = mseQTheoretical
+            mseDispEPlotATemp[fi, rep] = mseE
+            mseDispTPlotATemp[fi, rep] = mseT
+            mseQEPlotATemp[fi, rep] = mseQE
+            mseQTPlotATemp[fi, rep] = mseQT
 
         else:
             if fi == 0:
-                mseDispEPlotVCTemp[rep] = mseEmpirical
-                mseDispTPlotVCTemp[rep] = mseTheoretical
-                mseQEPlotVCTemp[rep] = mseQEmpirical
-                mseQTPlotVCTemp[rep] = mseQTheoretical
+                mseDispETableCTemp[rep] = mseE
+                mseDispTTableCTemp[rep] = mseT
+                mseQETableCTemp[rep] = mseQE
+                mseQTTableCTemp[rep] = mseQT
 
-            mseDispEPlotFCTemp[fi, rep] = mseEmpirical
-            mseDispTPlotFCTemp[fi, rep] = mseTheoretical
-            mseQEPlotFCTemp[fi, rep] = mseQEmpirical
-            mseQTPlotFCTemp[fi, rep] = mseQTheoretical
+            mseDispEPlotCTemp[fi, rep] = mseE
+            mseDispTPlotCTemp[fi, rep] = mseT
+            mseQEPlotCTemp[fi, rep] = mseQE
+            mseQTPlotCTemp[fi, rep] = mseQT
 
-        trueISquaredList = np.zeros(sampleSize)
-        iSquaredList = np.zeros(sampleSize)
         mseISEList = np.zeros(sampleSize)
         mseISTList = np.zeros(sampleSize)
 
         for j in range(0, sampleSize):
 
             # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
-            trueISquaredPrep = np.divide(sampleSize-1, trueQEList[j])
-            trueISquaredList[j] = np.subtract(1, trueISquaredPrep)
-            iSquaredPrep = np.divide(sampleSize-1, noisyQEList[j])
-            iSquaredList[j] = np.subtract(1, iSquaredPrep)
+            trueI2Prep = np.divide(sampleSize-1, weightedTrueDisp)
+            trueI2 = np.subtract(1, trueI2Prep)
+            I2Prep = np.divide(sampleSize-1, noisyQ)
+            I2 = np.subtract(1, I2Prep)
 
             # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
             xi3 = normal(0, sigma**2)
-            noisyISquared = np.add(iSquaredList[j], xi3)
+            noisyI2 = np.add(I2, xi3)
 
-            # COMPUTE EMPIRICAL AND THEORETICAL MSE
-            diffEISquared = np.subtract(noisyISquared, trueISquaredList[j])
-            mseISEList[j] = np.power(diffEISquared, 2)
-            diffTISquaredPrep = np.subtract(xi3, iSquaredList[j])
-            diffTISquared = np.add(diffTISquaredPrep, trueISquaredList[j])
-            mseISTList[j] = np.power(diffTISquared, 2)
+            # COMPUTE EMSE AND TMSE
+            diffEI2 = np.subtract(noisyI2, trueI2)
+            mseISEList[j] = np.power(diffEI2, 2)
+            diffTI2Prep = np.subtract(xi3, I2)
+            diffTI2 = np.add(diffTI2Prep, trueI2)
+            mseISTList[j] = np.power(diffTI2, 2)
 
-        mseISquaredEmpirical = np.sum(mseISEList)
-        mseISquaredTheoretical = np.sum(mseISTList)
+        mseI2E = np.sum(mseISEList)
+        mseI2T = np.sum(mseISTList)
 
         # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
         xiCentral = normal(0, centralSigma**2)
-        mseCentral = xiCentral**2
+        mseC = xiCentral**2
 
         if ACindex == 0:
-
             if fi == 0:
-                mseISquaredEPlotVATemp[rep] = mseISquaredEmpirical
-                mseISquaredTPlotVATemp[rep] = mseISquaredTheoretical
-                mseCentralPlotVATemp[rep] = mseCentral
+                mseI2ETableATemp[rep] = mseI2E
+                mseI2TTableATemp[rep] = mseI2T
+                mseCTableATemp[rep] = mseC
 
-            mseISquaredEPlotFATemp[fi, rep] = mseISquaredEmpirical
-            mseISquaredTPlotFATemp[fi, rep] = mseISquaredTheoretical
-            mseCentralPlotFATemp[fi, rep] = mseCentral
+            mseI2EPlotATemp[fi, rep] = mseI2E
+            mseI2TPlotATemp[fi, rep] = mseI2T
+            mseCPlotATemp[fi, rep] = mseC
 
         else:
             if fi == 0:
-                mseISquaredEPlotVCTemp[rep] = mseISquaredEmpirical
-                mseISquaredTPlotVCTemp[rep] = mseISquaredTheoretical
-                mseCentralPlotVCTemp[rep] = mseCentral
+                mseI2ETableCTemp[rep] = mseI2E
+                mseI2TTableCTemp[rep] = mseI2T
+                mseCTableCTemp[rep] = mseC
 
-            mseISquaredEPlotFCTemp[fi, rep] = mseISquaredEmpirical
-            mseISquaredTPlotFCTemp[fi, rep] = mseISquaredTheoretical
-            mseCentralPlotFCTemp[fi, rep] = mseCentral
+            mseI2EPlotCTemp[fi, rep] = mseI2E
+            mseI2TPlotCTemp[fi, rep] = mseI2T
+            mseCPlotCTemp[fi, rep] = mseC
 
     # EXPERIMENT 3: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
     # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
@@ -441,7 +429,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 imageArray[INDEX_COUNT] = sampledImage
                 INDEX_COUNT = INDEX_COUNT + 1
 
-        # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN MSE AND DISTRIBUTED/CENTRALIZED SETTING
+        # COMPUTE SIGMA USING CLASSIC GAUSSIAN MECHANISM FOR COMPARISON BETWEEN MSE AND DISTRIBUTED OR CENTRALIZED SETTING
         classicSigma = (GS*mp.sqrt(2*mp.log(1.25/dta)))/eps
         classicCentralSigma = (mp.sqrt(2*mp.log(1.25/dta)))/eps
 
@@ -451,92 +439,119 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
         if fi == 0:
-            mseDispEPlotVA = round(np.mean(mseDispEPlotVATemp), 2)
-            mseDispEPlotVC = round(np.mean(mseDispEPlotVCTemp), 2)
-            mseDispTPlotVA = round(np.mean(mseDispTPlotVATemp), 2)
-            mseDispTPlotVC = round(np.mean(mseDispTPlotVCTemp), 2)
-            mseQEPlotVA = round(np.mean(mseQEPlotVATemp), 2)
-            mseQEPlotVC = round(np.mean(mseQEPlotVCTemp), 2)
-            mseQTPlotVA = round(np.mean(mseQTPlotVATemp), 2)
-            mseQTPlotVC = round(np.mean(mseQTPlotVCTemp), 2)
-            mseISquaredEPlotVA = round(np.mean(mseISquaredEPlotVATemp))
-            mseISquaredEPlotVC = round(np.mean(mseISquaredEPlotVCTemp))
-            mseISquaredTPlotVA = round(np.mean(mseISquaredTPlotVATemp))
-            mseISquaredTPlotVC = round(np.mean(mseISquaredTPlotVCTemp))
-            mseCentralPlotVA = round(np.mean(mseCentralPlotVATemp), 2)
-            mseCentralPlotVC = round(np.mean(mseCentralPlotVCTemp), 2)
+            mseDispETableA = np.mean(mseDispETableATemp)
+            mseDispETableC = np.mean(mseDispETableCTemp)
+            mseDispTTableA = np.mean(mseDispTTableATemp)
+            mseDispTTableC = np.mean(mseDispTTableCTemp)
+            mseQETableA = np.mean(mseQETableATemp)
+            mseQETableC = np.mean(mseQETableCTemp)
+            mseQTTableA = np.mean(mseQTTableATemp)
+            mseQTTableC = np.mean(mseQTTableCTemp)
+            mseCentralTableA = np.mean(mseCTableATemp)
+            mseCentralTableC = np.mean(mseCTableCTemp)
+            mseI2ETableA = np.mean(mseI2ETableATemp)
+            mseI2ETableC = np.mean(mseI2ETableCTemp)
+            mseI2TTableA = np.mean(mseI2TTableATemp)
+            mseI2TTableC = np.mean(mseI2TTableCTemp)
 
-            mseDispEPlotVARange = round(np.std(mseDispEPlotVATemp), 10)
-            mseDispEPlotVCRange = round(np.std(mseDispEPlotVCTemp), 10)
-            mseDispTPlotVARange = round(np.std(mseDispTPlotVATemp), 10)
-            mseDispTPlotVCRange = round(np.std(mseDispTPlotVCTemp), 10)
-            mseQEPlotVARange = round(np.std(mseQEPlotVATemp), 10)
-            mseQEPlotVCRange = round(np.std(mseQEPlotVCTemp), 10)
-            mseQTPlotVARange = round(np.std(mseQTPlotVATemp), 10)
-            mseQTPlotVCRange = round(np.std(mseQTPlotVCTemp), 10)
-            mseISquaredEPlotVARange = round(np.std(mseISquaredEPlotVATemp), 10)
-            mseISquaredEPlotVCRange = round(np.std(mseISquaredEPlotVCTemp), 10)
-            mseISquaredTPlotVARange = round(np.std(mseISquaredTPlotVATemp), 10)
-            mseISquaredTPlotVCRange = round(np.std(mseISquaredTPlotVCTemp), 10)
-            mseCentralPlotVARange = round(np.std(mseCentralPlotVATemp), 2)
-            mseCentralPlotVCRange = round(np.std(mseCentralPlotVCTemp), 2)
+            mseDispETableARound = round(mseDispETableA, 12)
+            mseDispETableCRound = round(mseDispETableC, 10)
+            mseDispTTableARound = round(mseDispTTableA, 12)
+            mseDispTTableCRound = round(mseDispTTableC, 10)
+            mseQETableARound = round(mseQETableA, 13)
+            mseQETableCRound = round(mseQETableC, 10)
+            mseQTTableARound = round(mseQTTableA, 12)
+            mseQTTableCRound = round(mseQTTableC, 10)
+            mseCentralTableARound = round(mseCentralTableA, 3)
+            mseCentralTableCRound = round(mseCentralTableC, 2)
 
-        mseDispEPlotFA[fi] = np.mean(mseDispEPlotFATemp[fi])
-        mseQEPlotFA[fi] = np.mean(mseQEPlotFATemp[fi])
-        mseDispEPlotFC[fi] = np.mean(mseDispEPlotFCTemp[fi])
-        mseQEPlotFC[fi] = np.mean(mseQEPlotFCTemp[fi])
-        mseDispTPlotFA[fi] = np.mean(mseDispTPlotFATemp[fi])
-        mseQTPlotFA[fi] = np.mean(mseQTPlotFATemp[fi])
-        mseDispTPlotFC[fi] = np.mean(mseDispTPlotFCTemp[fi])
-        mseQTPlotFC[fi] = np.mean(mseQTPlotFCTemp[fi])
-        mseISquaredEPlotFA[fi] = np.mean(mseISquaredEPlotFATemp[fi])
-        mseISquaredEPlotFC[fi] = np.mean(mseISquaredEPlotFCTemp[fi])
-        mseISquaredTPlotFA[fi] = np.mean(mseISquaredTPlotFATemp[fi])
-        mseISquaredTPlotFC[fi] = np.mean(mseISquaredTPlotFCTemp[fi])
-        mseCentralPlotFA[fi] = np.mean(mseCentralPlotFATemp[fi])
-        mseCentralPlotFC[fi] = np.mean(mseCentralPlotFCTemp[fi])
+            mseDispETableARange = round(np.std(mseDispETableATemp), 13)
+            mseDispETableCRange = round(np.std(mseDispETableCTemp), 11)
+            mseDispTTableARange = round(np.std(mseDispTTableATemp), 13)
+            mseDispTTableCRange = round(np.std(mseDispTTableCTemp), 11)
+            mseQETableARange = round(np.std(mseQETableATemp), 13)
+            mseQETableCRange = round(np.std(mseQETableCTemp), 11)
+            mseQTTableARange = round(np.std(mseQTTableATemp), 13)
+            mseQTTableCRange = round(np.std(mseQTTableCTemp), 11)
+            mseCentralTableARange = round(np.std(mseCTableATemp), 3)
+            mseCentralTableCRange = round(np.std(mseCTableCTemp), 2)
 
-        mseDispEPlotFARange[fi] = np.std(mseDispEPlotFATemp[fi])
-        mseQEPlotFARange[fi] = np.std(mseQEPlotFATemp[fi])
-        mseDispEPlotFCRange[fi] = np.std(mseDispEPlotFCTemp[fi])
-        mseQEPlotFCRange[fi] = np.std(mseQEPlotFCTemp[fi])
-        mseDispTPlotFARange[fi] = np.std(mseDispTPlotFATemp[fi])
-        mseQTPlotFARange[fi] = np.std(mseQTPlotFATemp[fi])
-        mseDispTPlotFCRange[fi] = np.std(mseDispTPlotFCTemp[fi])
-        mseQTPlotFCRange[fi] = np.std(mseQTPlotFCTemp[fi])
-        mseISquaredEPlotFARange[fi] = np.std(mseISquaredEPlotFATemp[fi])
-        mseISquaredEPlotFCRange[fi] = np.std(mseISquaredEPlotFCTemp[fi])
-        mseISquaredTPlotFARange[fi] = np.std(mseISquaredTPlotFATemp[fi])
-        mseISquaredTPlotFCRange[fi] = np.std(mseISquaredTPlotFCTemp[fi])
-        mseCentralPlotFARange[fi] = np.std(mseCentralPlotFATemp[fi])
-        mseCentralPlotFCRange[fi] = np.std(mseCentralPlotFCTemp[fi])
+            mseDispETableAC = np.round(np.divide(mseDispETableA, mseDispETableC), 5)
+            mseDispTTableAC = np.round(np.divide(mseDispTTableA, mseDispTTableC), 5)
+            mseDispETTableA = np.round(np.divide(mseDispETableA, mseDispTTableA), 8)
+            mseDispETTableC = np.round(np.divide(mseDispETableC, mseDispTTableC), 8)
+            mseQETableAC = np.round(np.divide(mseQETableA, mseQETableC), 5)
+            mseQTTableAC = np.round(np.divide(mseQTTableA, mseQTTableC), 5)
+            mseQETTableA = np.round(np.divide(mseQETableA, mseQTTableA), 5)
+            mseQETTableC = np.round(np.divide(mseQETableC, mseQTTableC), 5)
+            mseCentralTableAC = np.round(np.divide(mseCentralTableA, mseCentralTableC), 5)
+            mseI2ETableAC = np.round(np.divide(mseI2ETableA, mseI2ETableC), 5)
+            mseI2TTableAC = np.round(np.divide(mseI2TTableA, mseI2TTableC), 5)
+            mseI2ETTableA = np.round(np.divide(mseI2ETableA, mseI2TTableA), 5)
+            mseI2ETTableC = np.round(np.divide(mseI2ETableC, mseI2TTableC), 5)
 
-    # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMPIRICAL/THEORETICAL AND DISTRIBUTED/CENTRALIZED
+        mseDispEPlotA[fi] = np.mean(mseDispEPlotATemp[fi])
+        mseDispEPlotC[fi] = np.mean(mseDispEPlotCTemp[fi])
+        mseDispTPlotA[fi] = np.mean(mseDispTPlotATemp[fi])
+        mseDispTPlotC[fi] = np.mean(mseDispTPlotCTemp[fi])
+        mseQEPlotA[fi] = np.mean(mseQEPlotATemp[fi])
+        mseQEPlotC[fi] = np.mean(mseQEPlotCTemp[fi])
+        mseQTPlotA[fi] = np.mean(mseQTPlotATemp[fi])
+        mseQTPlotC[fi] = np.mean(mseQTPlotCTemp[fi])
+        mseCentralPlotA[fi] = np.mean(mseCPlotATemp[fi])
+        mseCentralPlotC[fi] = np.mean(mseCPlotCTemp[fi])
+
+        mseDispEPlotARange[fi] = np.std(mseDispEPlotATemp[fi])
+        mseDispEPlotCRange[fi] = np.std(mseDispEPlotCTemp[fi])
+        mseDispTPlotARange[fi] = np.std(mseDispTPlotATemp[fi])
+        mseDispTPlotCRange[fi] = np.std(mseDispTPlotCTemp[fi])
+        mseQEPlotARange[fi] = np.std(mseQEPlotATemp[fi])
+        mseQEPlotCRange[fi] = np.std(mseQEPlotCTemp[fi])
+        mseQTPlotARange[fi] = np.std(mseQTPlotATemp[fi])
+        mseQTPlotCRange[fi] = np.std(mseQTPlotCTemp[fi])
+        mseCentralPlotARange[fi] = np.std(mseCPlotATemp[fi])
+        mseCentralPlotCRange[fi] = np.std(mseCPlotCTemp[fi])
+
+        mseI2EPlotA[fi] = np.mean(mseI2EPlotATemp[fi])
+        mseI2EPlotC[fi] = np.mean(mseI2EPlotCTemp[fi])
+        mseI2TPlotA[fi] = np.mean(mseI2TPlotATemp[fi])
+        mseI2TPlotC[fi] = np.mean(mseI2TPlotCTemp[fi])
+        mseI2EPlotARange[fi] = np.std(mseI2EPlotATemp[fi])
+        mseI2EPlotCRange[fi] = np.std(mseI2EPlotCTemp[fi])
+        mseI2TPlotARange[fi] = np.std(mseI2TPlotATemp[fi])
+        mseI2TPlotCRange[fi] = np.std(mseI2TPlotCTemp[fi])
+
+    # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
     DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "Range AGM", "Range CGM"])
-    DispTable.add_row(["Empirical", mseDispEPlotVA, mseDispEPlotVC, mseDispEPlotVARange, mseDispEPlotVCRange])
-    DispTable.add_row(["Theoretical", mseDispTPlotVA, mseDispTPlotVC, mseDispTPlotVARange, mseDispTPlotVCRange])
-    DispTable.add_row(["Centralized", mseCentralPlotVA, mseCentralPlotVC, mseCentralPlotVARange, mseCentralPlotVCRange])
+    DispTable.add_row(["EMSE", mseDispETableARound, mseDispETableCRound, mseDispETableARange, mseDispETableCRange])
+    DispTable.add_row(["TMSE", mseDispTTableARound, mseDispTTableCRound, mseDispTTableARange, mseDispTTableCRange])
+    DispTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableARange, mseCentralTableCRange])
     print(DispTable)
 
     QTable = PrettyTable(["Q", "AGM", "CGM", "Range AGM", "Range CGM"])
-    QTable.add_row(["Empirical", mseQEPlotVA, mseQEPlotVC, mseQEPlotVARange, mseQEPlotVCRange])
-    QTable.add_row(["Theoretical", mseQTPlotVA, mseQTPlotVC, mseQTPlotVARange, mseQTPlotVCRange])
-    QTable.add_row(["Centralized", mseCentralPlotVA, mseCentralPlotVC, mseCentralPlotVARange, mseCentralPlotVCRange])
+    QTable.add_row(["EMSE", mseQETableARound, mseQETableCRound, mseQETableARange, mseQETableCRange])
+    QTable.add_row(["TMSE", mseQTTableARound, mseQTTableCRound, mseQTTableARange, mseQTTableCRange])
+    QTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableARange, mseCentralTableCRange])
     print(QTable)
 
-    ISquaredTable = PrettyTable(["ISquared", "AGM", "CGM", "Range AGM", "Range CGM"])
-    ISquaredTable.add_row(["Empirical", mseISquaredEPlotVA, mseISquaredEPlotVC, mseISquaredEPlotVARange, mseISquaredEPlotVCRange])
-    ISquaredTable.add_row(["Theoretical", mseISquaredTPlotVA, mseISquaredTPlotVC, mseISquaredTPlotVARange, mseISquaredTPlotVCRange])
-    ISquaredTable.add_row(["Centralized", mseCentralPlotVA, mseCentralPlotVC, mseCentralPlotVARange, mseCentralPlotVCRange])
-    print(ISquaredTable)
+    ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
+    ACTable.add_row(["EMSE", mseDispETableAC, mseQETableAC, mseI2ETableAC])
+    ACTable.add_row(["TMSE", mseDispTTableAC, mseQTTableAC, mseI2TTableAC])
+    ACTable.add_row(["CMSE", mseCentralTableAC, mseCentralTableAC, mseCentralTableAC])
+    print(ACTable)
+
+    ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
+    ETTable.add_row(["AGM", mseDispETTableA, mseQETTableA, mseI2ETTableA])
+    ETTable.add_row(["CGM", mseDispETTableC, mseQETTableC, mseI2ETTableC])
+    print(ETTable)
 
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
-    plt.errorbar(freqset, mseDispEPlotFA, yerr = np.minimum(mseDispEPlotFARange, np.sqrt(mseDispEPlotFA), np.divide(mseDispEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
-    plt.errorbar(freqset, mseDispEPlotFC, yerr = np.minimum(mseDispEPlotFCRange, np.sqrt(mseDispEPlotFC), np.divide(mseDispEPlotFC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
-    plt.errorbar(freqset, mseDispTPlotFA, yerr = np.minimum(mseDispTPlotFARange, np.sqrt(mseDispTPlotFA), np.divide(mseDispTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
-    plt.errorbar(freqset, mseDispTPlotFC, yerr = np.minimum(mseDispTPlotFCRange, np.sqrt(mseDispTPlotFC), np.divide(mseDispTPlotFC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
-    plt.errorbar(freqset, mseCentralPlotFA, yerr = np.minimum(mseCentralPlotFARange, np.sqrt(mseCentralPlotFA), np.divide(mseCentralPlotFA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
-    plt.errorbar(freqset, mseCentralPlotFC, yerr = np.minimum(mseCentralPlotFCRange, np.sqrt(mseCentralPlotFC), np.divide(mseCentralPlotFC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
+    plt.errorbar(freqset, mseDispEPlotA, yerr = np.minimum(mseDispEPlotARange, np.sqrt(mseDispEPlotA), np.divide(mseDispEPlotA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
+    plt.errorbar(freqset, mseDispEPlotC, yerr = np.minimum(mseDispEPlotCRange, np.sqrt(mseDispEPlotC), np.divide(mseDispEPlotC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
+    plt.errorbar(freqset, mseDispTPlotA, yerr = np.minimum(mseDispTPlotARange, np.sqrt(mseDispTPlotA), np.divide(mseDispTPlotA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
+    plt.errorbar(freqset, mseDispTPlotC, yerr = np.minimum(mseDispTPlotCRange, np.sqrt(mseDispTPlotC), np.divide(mseDispTPlotC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
+    plt.errorbar(freqset, mseCentralPlotA, yerr = np.minimum(mseCentralPlotARange, np.sqrt(mseCentralPlotA), np.divide(mseCentralPlotA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
+    plt.errorbar(freqset, mseCentralPlotC, yerr = np.minimum(mseCentralPlotCRange, np.sqrt(mseCentralPlotC), np.divide(mseCentralPlotC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Labels")
@@ -544,12 +559,12 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
     plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_disp.png")
     plt.clf()
 
-    plt.errorbar(freqset, mseQEPlotFA, yerr = np.minimum(mseQEPlotFARange, np.sqrt(mseQEPlotFA), np.divide(mseQEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
-    plt.errorbar(freqset, mseQEPlotFC, yerr = np.minimum(mseQEPlotFCRange, np.sqrt(mseQEPlotFC), np.divide(mseQEPlotFC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
-    plt.errorbar(freqset, mseQTPlotFA, yerr = np.minimum(mseQTPlotFARange, np.sqrt(mseQTPlotFA), np.divide(mseQTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
-    plt.errorbar(freqset, mseQTPlotFC, yerr = np.minimum(mseQTPlotFCRange, np.sqrt(mseQTPlotFC), np.divide(mseQTPlotFC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
-    plt.errorbar(freqset, mseCentralPlotFA, yerr = np.minimum(mseCentralPlotFARange, np.sqrt(mseCentralPlotFA), np.divide(mseCentralPlotFA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
-    plt.errorbar(freqset, mseCentralPlotFC, yerr = np.minimum(mseCentralPlotFCRange, np.sqrt(mseCentralPlotFC), np.divide(mseCentralPlotFC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
+    plt.errorbar(freqset, mseQEPlotA, yerr = np.minimum(mseQEPlotARange, np.sqrt(mseQEPlotA), np.divide(mseQEPlotA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
+    plt.errorbar(freqset, mseQEPlotC, yerr = np.minimum(mseQEPlotCRange, np.sqrt(mseQEPlotC), np.divide(mseQEPlotC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
+    plt.errorbar(freqset, mseQTPlotA, yerr = np.minimum(mseQTPlotARange, np.sqrt(mseQTPlotA), np.divide(mseQTPlotA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
+    plt.errorbar(freqset, mseQTPlotC, yerr = np.minimum(mseQTPlotCRange, np.sqrt(mseQTPlotC), np.divide(mseQTPlotC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
+    plt.errorbar(freqset, mseCentralPlotA, yerr = np.minimum(mseCentralPlotARange, np.sqrt(mseCentralPlotA), np.divide(mseCentralPlotA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
+    plt.errorbar(freqset, mseCentralPlotC, yerr = np.minimum(mseCentralPlotCRange, np.sqrt(mseCentralPlotC), np.divide(mseCentralPlotC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Labels")
@@ -557,17 +572,17 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
     plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_q.png")
     plt.clf()
 
-    plt.errorbar(freqset, mseISquaredEPlotFA, yerr = np.minimum(mseISquaredEPlotFARange, np.sqrt(mseISquaredEPlotFA), np.divide(mseISquaredEPlotFA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
-    plt.errorbar(freqset, mseISquaredEPlotFC, yerr = np.minimum(mseISquaredEPlotFCRange, np.sqrt(mseISquaredEPlotFC), np.divide(mseISquaredEPlotFC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
-    plt.errorbar(freqset, mseISquaredTPlotFA, yerr = np.minimum(mseISquaredTPlotFARange, np.sqrt(mseISquaredTPlotFA), np.divide(mseISquaredTPlotFA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
-    plt.errorbar(freqset, mseISquaredTPlotFC, yerr = np.minimum(mseISquaredTPlotFCRange, np.sqrt(mseISquaredTPlotFC), np.divide(mseISquaredTPlotFC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
-    plt.errorbar(freqset, mseCentralPlotFA, yerr = np.minimum(mseCentralPlotFARange, np.sqrt(mseCentralPlotFA), np.divide(mseCentralPlotFA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
-    plt.errorbar(freqset, mseCentralPlotFC, yerr = np.minimum(mseCentralPlotFCRange, np.sqrt(mseCentralPlotFC), np.divide(mseCentralPlotFC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
+    plt.errorbar(freqset, mseI2EPlotA, yerr = np.minimum(mseI2EPlotARange, np.sqrt(mseI2EPlotA), np.divide(mseI2EPlotA, 2)), color = 'blue', marker = 'o', label = "Empirical AGM")
+    plt.errorbar(freqset, mseI2EPlotC, yerr = np.minimum(mseI2EPlotCRange, np.sqrt(mseI2EPlotC), np.divide(mseI2EPlotC, 2)), color = 'blue', marker = 'x', label = "Empirical CGM")
+    plt.errorbar(freqset, mseI2TPlotA, yerr = np.minimum(mseI2TPlotARange, np.sqrt(mseI2TPlotA), np.divide(mseI2TPlotA, 2)), color = 'green', marker = 'o', label = "Theoretical AGM")
+    plt.errorbar(freqset, mseI2TPlotC, yerr = np.minimum(mseI2TPlotCRange, np.sqrt(mseI2TPlotC), np.divide(mseI2TPlotC, 2)), color = 'green', marker = 'x', label = "Theoretical CGM")
+    plt.errorbar(freqset, mseCentralPlotA, yerr = np.minimum(mseCentralPlotARange, np.sqrt(mseCentralPlotA), np.divide(mseCentralPlotA, 2)), color = 'red', marker = 'o', label = "Centralized AGM")
+    plt.errorbar(freqset, mseCentralPlotC, yerr = np.minimum(mseCentralPlotCRange, np.sqrt(mseCentralPlotC), np.divide(mseCentralPlotC, 2)), color = 'red', marker = 'x', label = "Centralized CGM")
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Labels")
     plt.ylabel("MSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_isquared.png")
+    plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_i2.png")
     plt.clf()
 
 def runLoopVaryEps(dataIndex, dim, num, newImages, labels, GS):
