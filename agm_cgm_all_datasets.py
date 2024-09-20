@@ -97,10 +97,8 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
 
     mseDispEPlotA = np.zeros((F, V))
     mseQEPlotA = np.zeros((F, V))
-    mseI2EPlotA = np.zeros((F, V))
     mseDispEPlotASD = np.zeros((F, V))
     mseQEPlotASD = np.zeros((F, V))
-    mseI2EPlotASD = np.zeros((F, V))
 
     for val in range(10):
 
@@ -121,7 +119,6 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
 
         mseDispEPlotATemp = np.zeros((F, V, R))
         mseQEPlotATemp = np.zeros((F, V, R))
-        mseI2EPlotATemp = np.zeros((F, V, R))
 
         var = varset[val]
         print(f"Processing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
@@ -336,16 +333,13 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             xiCentral = normal(0, centralSigma**2)
             mseC = xiCentral**2
 
-            if ACindex == 0:
-                if fi == 0 and val == 0 and index == 1:
+            if fi == 0 and val == 0 and index == 1:
+                if ACindex == 0:           
                     mseI2ETableATemp[rep] = mseI2E
                     mseI2TTableATemp[rep] = mseI2T
                     mseCTableATemp[rep] = mseC
 
-                mseI2EPlotATemp[fi, val, rep] = mseI2E
-
-            else:
-                if fi == 0 and val == 0 and index == 1:
+                else:
                     mseI2ETableCTemp[rep] = mseI2E
                     mseI2TTableCTemp[rep] = mseI2T
                     mseCTableCTemp[rep] = mseC
@@ -461,10 +455,8 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
-            mseI2EPlotA[fi, val] = np.mean(mseI2EPlotATemp[fi, val])
             mseDispEPlotASD[fi, val] = np.std(mseDispEPlotATemp[fi, val])
             mseQEPlotASD[fi, val] = np.std(mseQEPlotATemp[fi, val])
-            mseI2EPlotASD[fi, val] = np.std(mseI2EPlotATemp[fi, val])
 
     # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
     if index == 1:
@@ -516,19 +508,6 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     plt.xlabel("Value of " + "%s" % graphset[index])
     plt.ylabel("EMSE of Gaussian Mechanism")
     plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
-    plt.clf()
-
-    plt.errorbar(varset, mseI2EPlotA[0], yerr = np.minimum(mseI2EPlotASD[0], np.sqrt(mseI2EPlotA[0]), np.divide(mseI2EPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseI2EPlotA[1], yerr = np.minimum(mseI2EPlotASD[1], np.sqrt(mseI2EPlotA[1]), np.divide(mseI2EPlotA[1], 2)), color = 'blue', marker = 'x', label = freqset[1])
-    plt.errorbar(varset, mseI2EPlotA[2], yerr = np.minimum(mseI2EPlotASD[2], np.sqrt(mseI2EPlotA[2]), np.divide(mseI2EPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseI2EPlotA[3], yerr = np.minimum(mseI2EPlotASD[3], np.sqrt(mseI2EPlotA[3]), np.divide(mseI2EPlotA[3], 2)), color = 'green', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseI2EPlotA[4], yerr = np.minimum(mseI2EPlotASD[4], np.sqrt(mseI2EPlotA[4]), np.divide(mseI2EPlotA[4], 2)), color = 'red', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseI2EPlotA[5], yerr = np.minimum(mseI2EPlotASD[5], np.sqrt(mseI2EPlotA[5]), np.divide(mseI2EPlotA[5], 2)), color = 'red', marker = 'x', label = freqset[5])
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("EMSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_i2.png")
     plt.clf()
 
 def runLoopVaryEps(dataIndex, index, dim, num, newImages, labels, GS):
