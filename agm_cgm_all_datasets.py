@@ -12,11 +12,11 @@ print("\nStarting...")
 np.random.seed(3820672)
 
 # ARRAYS STORING SETS OF VALUES OF EACH VARIABLE WITH OPTIMA CHOSEN AS CONSTANTS
-epsset = np.array([0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3])
+epsset = np.array([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5])
 epsconst = float(epsset[0])
 
 # VECTOR DIMENSION CHOSEN TO MATCH THAT OF CONVERTED IMAGES ABOVE AND NUMBER OF CLIENTS CHOSEN TO GIVE SENSIBLE GS
-dtaset = np.array([0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2])
+dtaset = np.array([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5])
 dtaconst = float(dtaset[0])
 
 # SETTING DIMENSIONS OF DATASETS
@@ -100,7 +100,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     mseDispEPlotASD = np.zeros((F, V))
     mseQEPlotASD = np.zeros((F, V))
 
-    for val in range(10):
+    for val in range(len(varset)):
 
         mseDispETableATemp = np.zeros(R)
         mseDispETableCTemp = np.zeros(R)
@@ -346,11 +346,11 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
 
         # EXPERIMENT 3: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
         # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
-        # 2. UNEQUAL NUMBERS OF EACH OF 10 LABELS [11:1:1:1:1:1:1:1:1:1]
+        # 2. UNEQUAL NUMBERS OF EACH OF 10 LABELS [91:1:1:1:1:1:1:1:1:1]
         # 3. EQUAL NUMBERS OF EACH OF 5 LABELS [1:1:1:1:1:0:0:0:0:0]
-        # 4. UNEQUAL NUMBERS OF EACH OF 5 LABELS [6:1:1:1:1:0:0:0:0:0]
+        # 4. UNEQUAL NUMBERS OF EACH OF 5 LABELS [96:1:1:1:1:0:0:0:0:0]
         # 5. EQUAL NUMBERS OF EACH OF 2 LABELS [1:1:0:0:0:0:0:0:0:0]
-        # 6. UNEQUAL NUMBERS OF EACH OF 2 LABELS [9:1:0:0:0:0:0:0:0:0].
+        # 6. UNEQUAL NUMBERS OF EACH OF 2 LABELS [99:1:0:0:0:0:0:0:0:0].
     
         for fi in range(6):
             numLabels = 10
@@ -358,11 +358,11 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             freqArray = np.zeros(numLabels)
             imageArray = np.zeros((sampleSize, dim))
             freqOne = np.array([lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize, lsize])
-            freqTwo = np.array([5.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize, 0.5*lsize])
+            freqTwo = np.array([9.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize])
             freqThree = np.array([2*lsize, 2*lsize, 2*lsize, 2*lsize, 2*lsize, 0, 0, 0, 0, 0])
-            freqFour = np.array([6*lsize, lsize, lsize, lsize, lsize, 0, 0, 0, 0, 0])
+            freqFour = np.array([9.6*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0.1*lsize, 0, 0, 0, 0, 0])
             freqFive = np.array([5*lsize, 5*lsize, 0, 0, 0, 0, 0, 0, 0, 0])
-            freqSix = np.array([9*lsize, lsize, 0, 0, 0, 0, 0, 0, 0, 0])
+            freqSix = np.array([9.9*lsize, 0.1*lsize, 0, 0, 0, 0, 0, 0, 0, 0])
 
             if fi == 0:
                 freqSpec = freqOne
@@ -417,41 +417,41 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
                 mseI2TTableA = np.mean(mseI2TTableATemp)
                 mseI2TTableC = np.mean(mseI2TTableCTemp)
 
-                mseDispETableARound = round(mseDispETableA, 16)
+                mseDispETableARound = round(mseDispETableA, 14)
                 mseDispETableCRound = round(mseDispETableC, 12)
-                mseDispTTableARound = round(mseDispTTableA, 16)
+                mseDispTTableARound = round(mseDispTTableA, 14)
                 mseDispTTableCRound = round(mseDispTTableC, 12)
-                mseQETableARound = round(mseQETableA, 16)
+                mseQETableARound = round(mseQETableA, 14)
                 mseQETableCRound = round(mseQETableC, 12)
-                mseQTTableARound = round(mseQTTableA, 16)
-                mseQTTableCRound = round(mseQTTableC, 12)
+                mseQTTableARound = round(mseQTTableA, 14)
+                mseQTTableCRound = round(mseQTTableC, 11)
                 mseCentralTableARound = round(mseCentralTableA, 3)
-                mseCentralTableCRound = round(mseCentralTableC, 2)
+                mseCentralTableCRound = round(mseCentralTableC, 1)
 
                 mseDispETableASD = round(np.std(mseDispETableATemp), 16)
-                mseDispETableCSD = round(np.std(mseDispETableCTemp), 14)
+                mseDispETableCSD = round(np.std(mseDispETableCTemp), 13)
                 mseDispTTableASD = round(np.std(mseDispTTableATemp), 16)
-                mseDispTTableCSD = round(np.std(mseDispTTableCTemp), 14)
+                mseDispTTableCSD = round(np.std(mseDispTTableCTemp), 13)
                 mseQETableASD = round(np.std(mseQETableATemp), 16)
-                mseQETableCSD = round(np.std(mseQETableCTemp), 14)
+                mseQETableCSD = round(np.std(mseQETableCTemp), 13)
                 mseQTTableASD = round(np.std(mseQTTableATemp), 16)
-                mseQTTableCSD = round(np.std(mseQTTableCTemp), 14)
+                mseQTTableCSD = round(np.std(mseQTTableCTemp), 13)
                 mseCentralTableASD = round(np.std(mseCTableATemp), 3)
-                mseCentralTableCSD = round(np.std(mseCTableCTemp), 2)
+                mseCentralTableCSD = round(np.std(mseCTableCTemp), 1)
 
                 mseDispETableAC = np.round(np.divide(mseDispETableA, mseDispETableC), 7)
-                mseDispTTableAC = np.round(np.divide(mseDispTTableA, mseDispTTableC), 6)
-                mseDispETTableA = np.round(np.divide(mseDispETableA, mseDispTTableA), 7)
-                mseDispETTableC = np.round(np.divide(mseDispETableC, mseDispTTableC), 7)
-                mseQETableAC = np.round(np.divide(mseQETableA, mseQETableC), 6)
-                mseQTTableAC = np.round(np.divide(mseQTTableA, mseQTTableC), 6)
-                mseQETTableA = np.round(np.divide(mseQETableA, mseQTTableA), 6)
-                mseQETTableC = np.round(np.divide(mseQETableC, mseQTTableC), 6)
-                mseCentralTableAC = np.round(np.divide(mseCentralTableA, mseCentralTableC), 6)
-                mseI2ETableAC = np.round(np.divide(mseI2ETableA, mseI2ETableC), 5)
-                mseI2TTableAC = np.round(np.divide(mseI2TTableA, mseI2TTableC), 5)
-                mseI2ETTableA = np.round(np.divide(mseI2ETableA, mseI2TTableA), 5)
-                mseI2ETTableC = np.round(np.divide(mseI2ETableC, mseI2TTableC), 5)
+                mseDispTTableAC = np.round(np.divide(mseDispTTableA, mseDispTTableC), 10)
+                mseDispETTableA = np.round(np.divide(mseDispETableA, mseDispTTableA), 4)
+                mseDispETTableC = np.round(np.divide(mseDispETableC, mseDispTTableC), 4)
+                mseQETableAC = np.round(np.divide(mseQETableA, mseQETableC), 9)
+                mseQTTableAC = np.round(np.divide(mseQTTableA, mseQTTableC), 7)
+                mseQETTableA = np.round(np.divide(mseQETableA, mseQTTableA), 4)
+                mseQETTableC = np.round(np.divide(mseQETableC, mseQTTableC), 4)
+                mseCentralTableAC = np.round(np.divide(mseCentralTableA, mseCentralTableC), 7)
+                mseI2ETableAC = np.round(np.divide(mseI2ETableA, mseI2ETableC), 7)
+                mseI2TTableAC = np.round(np.divide(mseI2TTableA, mseI2TTableC), 7)
+                mseI2ETTableA = np.round(np.divide(mseI2ETableA, mseI2TTableA), 4)
+                mseI2ETTableC = np.round(np.divide(mseI2ETableC, mseI2TTableC), 4)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
@@ -485,11 +485,11 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
 
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
     plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(mseDispEPlotASD[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(mseDispEPlotASD[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blue', marker = 'x', label = freqset[1])
+    plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(mseDispEPlotASD[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
     plt.errorbar(varset, mseDispEPlotA[2], yerr = np.minimum(mseDispEPlotASD[2], np.sqrt(mseDispEPlotA[2]), np.divide(mseDispEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseDispEPlotA[3], yerr = np.minimum(mseDispEPlotASD[3], np.sqrt(mseDispEPlotA[3]), np.divide(mseDispEPlotA[3], 2)), color = 'green', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseDispEPlotA[4], yerr = np.minimum(mseDispEPlotASD[4], np.sqrt(mseDispEPlotA[4]), np.divide(mseDispEPlotA[4], 2)), color = 'red', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseDispEPlotA[5], yerr = np.minimum(mseDispEPlotASD[5], np.sqrt(mseDispEPlotA[5]), np.divide(mseDispEPlotA[5], 2)), color = 'red', marker = 'x', label = freqset[5])
+    plt.errorbar(varset, mseDispEPlotA[3], yerr = np.minimum(mseDispEPlotASD[3], np.sqrt(mseDispEPlotA[3]), np.divide(mseDispEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
+    plt.errorbar(varset, mseDispEPlotA[4], yerr = np.minimum(mseDispEPlotASD[4], np.sqrt(mseDispEPlotA[4]), np.divide(mseDispEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
+    plt.errorbar(varset, mseDispEPlotA[5], yerr = np.minimum(mseDispEPlotASD[5], np.sqrt(mseDispEPlotA[5]), np.divide(mseDispEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
@@ -498,11 +498,11 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     plt.clf()
 
     plt.errorbar(varset, mseQEPlotA[0], yerr = np.minimum(mseQEPlotASD[0], np.sqrt(mseQEPlotA[0]), np.divide(mseQEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseQEPlotA[1], yerr = np.minimum(mseQEPlotASD[1], np.sqrt(mseQEPlotA[1]), np.divide(mseQEPlotA[1], 2)), color = 'blue', marker = 'x', label = freqset[1])
+    plt.errorbar(varset, mseQEPlotA[1], yerr = np.minimum(mseQEPlotASD[1], np.sqrt(mseQEPlotA[1]), np.divide(mseQEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
     plt.errorbar(varset, mseQEPlotA[2], yerr = np.minimum(mseQEPlotASD[2], np.sqrt(mseQEPlotA[2]), np.divide(mseQEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseQEPlotA[3], yerr = np.minimum(mseQEPlotASD[3], np.sqrt(mseQEPlotA[3]), np.divide(mseQEPlotA[3], 2)), color = 'green', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseQEPlotA[4], yerr = np.minimum(mseQEPlotASD[4], np.sqrt(mseQEPlotA[4]), np.divide(mseQEPlotA[4], 2)), color = 'red', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseQEPlotA[5], yerr = np.minimum(mseQEPlotASD[5], np.sqrt(mseQEPlotA[5]), np.divide(mseQEPlotA[5], 2)), color = 'red', marker = 'x', label = freqset[5])
+    plt.errorbar(varset, mseQEPlotA[3], yerr = np.minimum(mseQEPlotASD[3], np.sqrt(mseQEPlotA[3]), np.divide(mseQEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
+    plt.errorbar(varset, mseQEPlotA[4], yerr = np.minimum(mseQEPlotASD[4], np.sqrt(mseQEPlotA[4]), np.divide(mseQEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
+    plt.errorbar(varset, mseQEPlotA[5], yerr = np.minimum(mseQEPlotASD[5], np.sqrt(mseQEPlotA[5]), np.divide(mseQEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
