@@ -99,6 +99,8 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     mseQEPlotA = np.zeros((F, V))
     mseDispEPlotASD = np.zeros((F, V))
     mseQEPlotASD = np.zeros((F, V))
+    diffDispETableA = np.zeros(7)
+    diffQETableA = np.zeros(7)
 
     for val in range(len(varset)):
 
@@ -121,7 +123,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
         mseQEPlotATemp = np.zeros((F, V, R))
 
         var = varset[val]
-        print(f"Processing dataset {dataIndex+1} for the value {parset[index]} = {var}.")
+        print(f"Processing dataset {dataset[dataIndex]} for the value {parset[index]} = {var}.")
 
         if eps == -1:
             eps = var
@@ -333,8 +335,8 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             xiCentral = normal(0, centralSigma**2)
             mseC = xiCentral**2
 
-            if fi == 0 and val == 0 and index == 1:
-                if ACindex == 0:           
+            if fi == 0 and val == 0 and index == 1: 
+                if ACindex == 0:  
                     mseI2ETableATemp[rep] = mseI2E
                     mseI2TTableATemp[rep] = mseI2T
                     mseCTableATemp[rep] = mseC
@@ -464,26 +466,73 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
         DispTable.add_row(["EMSE", mseDispETableARound, mseDispETableCRound, mseDispETableASD, mseDispETableCSD])
         DispTable.add_row(["TMSE", mseDispTTableARound, mseDispTTableCRound, mseDispTTableASD, mseDispTTableCSD])
         DispTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableASD, mseCentralTableCSD])
-        print(DispTable)
+        
+        DispData = DispTable.get_string()
+        with open("Table_" + "%s" % dataset[dataIndex] + "_disp.txt", "w") as table1:
+            table1.write(DispData)
 
         QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
         QTable.add_row(["EMSE", mseQETableARound, mseQETableCRound, mseQETableASD, mseQETableCSD])
         QTable.add_row(["TMSE", mseQTTableARound, mseQTTableCRound, mseQTTableASD, mseQTTableCSD])
         QTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableASD, mseCentralTableCSD])
-        print(QTable)
+        
+        QData = QTable.get_string()
+        with open("Table_" + "%s" % dataset[dataIndex] + "_q.txt", "w") as table2:
+            table2.write(QData)
 
         ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
         ACTable.add_row(["EMSE", mseDispETableAC, mseQETableAC, mseI2ETableAC])
         ACTable.add_row(["TMSE", mseDispTTableAC, mseQTTableAC, mseI2TTableAC])
         ACTable.add_row(["CMSE", mseCentralTableAC, mseCentralTableAC, mseCentralTableAC])
-        print(ACTable)
+        
+        ACData = ACTable.get_string()
+        with open("Table_" + "%s" % dataset[dataIndex] + "_ac.txt", "w") as table3:
+            table3.write(ACData)
 
         ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
         ETTable.add_row(["AGM", mseDispETTableA, mseQETTableA, mseI2ETTableA])
         ETTable.add_row(["CGM", mseDispETTableC, mseQETTableC, mseI2ETTableC])
-        print(ETTable)
+        
+        ETData = ETTable.get_string()
+        with open("Table_" + "%s" % dataset[dataIndex] + "_et.txt", "w") as table4:
+            table4.write(ETData)
 
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
+    diffDispETableA[0] = np.sum(np.subtract(mseDispEPlotA[4], mseDispEPlotA[5]))
+    diffDispETableA[1] = np.sum(np.subtract(mseDispEPlotA[2], mseDispEPlotA[3]))
+    diffDispETableA[2] = np.sum(np.subtract(mseDispEPlotA[0], mseDispEPlotA[1]))
+    diffDispETableA[3] = np.sum(np.subtract(mseDispEPlotA[0], mseDispEPlotA[2]))
+    diffDispETableA[4] = np.sum(np.subtract(mseDispEPlotA[2], mseDispEPlotA[4]))
+    diffDispETableA[5] = np.sum(np.subtract(mseDispEPlotA[1], mseDispEPlotA[3]))
+    diffDispETableA[6] = np.sum(np.subtract(mseDispEPlotA[3], mseDispEPlotA[5]))
+
+    diffQETableA[0] = np.sum(np.subtract(mseQEPlotA[4], mseQEPlotA[5]))
+    diffQETableA[1] = np.sum(np.subtract(mseQEPlotA[2], mseQEPlotA[3]))
+    diffQETableA[2] = np.sum(np.subtract(mseQEPlotA[0], mseQEPlotA[1]))
+    diffQETableA[3] = np.sum(np.subtract(mseQEPlotA[0], mseQEPlotA[2]))
+    diffQETableA[4] = np.sum(np.subtract(mseQEPlotA[2], mseQEPlotA[4]))
+    diffQETableA[5] = np.sum(np.subtract(mseQEPlotA[1], mseQEPlotA[3]))
+    diffQETableA[6] = np.sum(np.subtract(mseQEPlotA[3], mseQEPlotA[5]))
+
+    ADTableSH = PrettyTable(["Abs Diff", "Dispersion", "Q"])
+    ADTableSH.add_row(["2 labels", diffDispETableA[0], diffQETableA[0]])
+    ADTableSH.add_row(["5 labels", diffDispETableA[1], diffQETableA[1]])
+    ADTableSH.add_row(["10 labels", diffDispETableA[2], diffQETableA[2]])
+
+    ADDataSH = ADTableSH.get_string()
+    with open("Table_" + "%s" % dataset[dataIndex] + "_abs_diff_sh.txt", "w") as table5:
+        table5.write(ADDataSH)
+
+    ADTableLabels = PrettyTable(["Abs Diff", "Dispersion", "Q"])
+    ADTableLabels.add_row(["SH: 2v5", diffDispETableA[3], diffQETableA[3]])
+    ADTableLabels.add_row(["SH: 5v10", diffDispETableA[4], diffQETableA[4]])
+    ADTableLabels.add_row(["Non-SH: 2v5", diffDispETableA[5], diffDispETableA[5]])
+    ADTableLabels.add_row(["Non-SH: 10v5", diffDispETableA[6], diffQETableA[6]])
+
+    ADDataLabels = ADTableLabels.get_string()
+    with open("Table_" + "%s" % dataset[dataIndex] + "_abs_diff_labels.txt", "w") as table6:
+        table6.write(ADDataLabels)
+
     plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(mseDispEPlotASD[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
     plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(mseDispEPlotASD[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
     plt.errorbar(varset, mseDispEPlotA[2], yerr = np.minimum(mseDispEPlotASD[2], np.sqrt(mseDispEPlotA[2]), np.divide(mseDispEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
