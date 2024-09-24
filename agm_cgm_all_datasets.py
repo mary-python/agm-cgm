@@ -498,40 +498,44 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             table4.write(ETData)
 
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
-    diffDispETableA[0] = np.sum(np.subtract(mseDispEPlotA[4], mseDispEPlotA[5]))
-    diffDispETableA[1] = np.sum(np.subtract(mseDispEPlotA[2], mseDispEPlotA[3]))
-    diffDispETableA[2] = np.sum(np.subtract(mseDispEPlotA[0], mseDispEPlotA[1]))
-    diffDispETableA[3] = np.sum(np.subtract(mseDispEPlotA[0], mseDispEPlotA[2]))
-    diffDispETableA[4] = np.sum(np.subtract(mseDispEPlotA[2], mseDispEPlotA[4]))
-    diffDispETableA[5] = np.sum(np.subtract(mseDispEPlotA[1], mseDispEPlotA[3]))
-    diffDispETableA[6] = np.sum(np.subtract(mseDispEPlotA[3], mseDispEPlotA[5]))
+    def computePercDiff(a, b):
+        percDiff = np.divide(np.subtract(a, b), a)*100
+        return np.mean(percDiff)
 
-    diffQETableA[0] = np.sum(np.subtract(mseQEPlotA[4], mseQEPlotA[5]))
-    diffQETableA[1] = np.sum(np.subtract(mseQEPlotA[2], mseQEPlotA[3]))
-    diffQETableA[2] = np.sum(np.subtract(mseQEPlotA[0], mseQEPlotA[1]))
-    diffQETableA[3] = np.sum(np.subtract(mseQEPlotA[0], mseQEPlotA[2]))
-    diffQETableA[4] = np.sum(np.subtract(mseQEPlotA[2], mseQEPlotA[4]))
-    diffQETableA[5] = np.sum(np.subtract(mseQEPlotA[1], mseQEPlotA[3]))
-    diffQETableA[6] = np.sum(np.subtract(mseQEPlotA[3], mseQEPlotA[5]))
+    diffDispETableA[0] = np.round(computePercDiff(mseDispEPlotA[4], mseDispEPlotA[5]), 15)
+    diffDispETableA[1] = np.round(computePercDiff(mseDispEPlotA[2], mseDispEPlotA[3]), 15)
+    diffDispETableA[2] = np.round(computePercDiff(mseDispEPlotA[0], mseDispEPlotA[1]), 15)
+    diffDispETableA[3] = np.round(computePercDiff(mseDispEPlotA[0], mseDispEPlotA[2]), 15)
+    diffDispETableA[4] = np.round(computePercDiff(mseDispEPlotA[2], mseDispEPlotA[4]), 15)
+    diffDispETableA[5] = np.round(computePercDiff(mseDispEPlotA[1], mseDispEPlotA[3]), 15)
+    diffDispETableA[6] = np.round(computePercDiff(mseDispEPlotA[3], mseDispEPlotA[5]), 15)
 
-    ADTableSH = PrettyTable(["Abs Diff", "Dispersion", "Q"])
-    ADTableSH.add_row(["2 labels", diffDispETableA[0], diffQETableA[0]])
-    ADTableSH.add_row(["5 labels", diffDispETableA[1], diffQETableA[1]])
-    ADTableSH.add_row(["10 labels", diffDispETableA[2], diffQETableA[2]])
+    diffQETableA[0] = np.round(computePercDiff(mseQEPlotA[4], mseQEPlotA[5]), 15)
+    diffQETableA[1] = np.round(computePercDiff(mseQEPlotA[2], mseQEPlotA[3]), 15)
+    diffQETableA[2] = np.round(computePercDiff(mseQEPlotA[0], mseQEPlotA[1]), 15)
+    diffQETableA[3] = np.round(computePercDiff(mseQEPlotA[0], mseQEPlotA[2]), 15)
+    diffQETableA[4] = np.round(computePercDiff(mseQEPlotA[2], mseQEPlotA[4]), 15)
+    diffQETableA[5] = np.round(computePercDiff(mseQEPlotA[1], mseQEPlotA[3]), 15)
+    diffQETableA[6] = np.round(computePercDiff(mseQEPlotA[3], mseQEPlotA[5]), 15)
 
-    ADDataSH = ADTableSH.get_string()
-    with open("Table_" + "%s" % dataset[dataIndex] + "_abs_diff_sh.txt", "w") as table5:
-        table5.write(ADDataSH)
+    PLTableSH = PrettyTable(["Perc Loss", "Dispersion", "Q"])
+    PLTableSH.add_row(["10 labels", diffDispETableA[0], diffQETableA[0]])
+    PLTableSH.add_row(["5 labels", diffDispETableA[1], diffQETableA[1]])
+    PLTableSH.add_row(["2 labels", diffDispETableA[2], diffQETableA[2]])
 
-    ADTableLabels = PrettyTable(["Abs Diff", "Dispersion", "Q"])
-    ADTableLabels.add_row(["SH: 2v5", diffDispETableA[3], diffQETableA[3]])
-    ADTableLabels.add_row(["SH: 5v10", diffDispETableA[4], diffQETableA[4]])
-    ADTableLabels.add_row(["Non-SH: 2v5", diffDispETableA[5], diffDispETableA[5]])
-    ADTableLabels.add_row(["Non-SH: 10v5", diffDispETableA[6], diffQETableA[6]])
+    PLDataSH = PLTableSH.get_string()
+    with open("Table_" + "%s" % dataset[dataIndex] + "_perc_loss_sh.txt", "w") as table5:
+        table5.write(PLDataSH)
 
-    ADDataLabels = ADTableLabels.get_string()
-    with open("Table_" + "%s" % dataset[dataIndex] + "_abs_diff_labels.txt", "w") as table6:
-        table6.write(ADDataLabels)
+    PLTableLabels = PrettyTable(["Perc Loss", "Dispersion", "Q"])
+    PLTableLabels.add_row(["SH: 10v5", diffDispETableA[3], diffQETableA[3]])
+    PLTableLabels.add_row(["SH: 5v2", diffDispETableA[4], diffQETableA[4]])
+    PLTableLabels.add_row(["Non-SH: 10v5", diffDispETableA[5], diffDispETableA[5]])
+    PLTableLabels.add_row(["Non-SH: 10v2", diffDispETableA[6], diffQETableA[6]])
+
+    PLDataLabels = PLTableLabels.get_string()
+    with open("Table_" + "%s" % dataset[dataIndex] + "_perc_loss_labels.txt", "w") as table6:
+        table6.write(PLDataLabels)
 
     plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(mseDispEPlotASD[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
     plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(mseDispEPlotASD[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
