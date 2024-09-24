@@ -531,7 +531,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     PLTableLabels.add_row(["SH: 10v5", diffDispETableA[3], diffQETableA[3]])
     PLTableLabels.add_row(["SH: 5v2", diffDispETableA[4], diffQETableA[4]])
     PLTableLabels.add_row(["Non-SH: 10v5", diffDispETableA[5], diffDispETableA[5]])
-    PLTableLabels.add_row(["Non-SH: 10v2", diffDispETableA[6], diffQETableA[6]])
+    PLTableLabels.add_row(["Non-SH: 5v2", diffDispETableA[6], diffQETableA[6]])
 
     PLDataLabels = PLTableLabels.get_string()
     with open("Table_" + "%s" % dataset[dataIndex] + "_perc_loss_labels.txt", "w") as table6:
