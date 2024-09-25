@@ -30,7 +30,7 @@ GSCifar = float(mp.sqrt(dimCifar))/numCifar
 GSFashion = float(mp.sqrt(dimFashion))/numFashion
 
 # INITIALISING OTHER PARAMETERS AND CONSTANTS
-dataset = np.array(['Cifar10', 'Cifar100', 'Fashion'])
+cifarset = np.array(['Cifar10', 'Cifar100', 'Fashion'])
 parset = np.array(['eps', 'dta'])
 graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u03b4}$'])
 freqset = np.array(['10 (equal)', '10 (unequal)', '5 (equal)', '5 (unequal)', '2 (equal)', '2 (unequal)'])
@@ -90,17 +90,50 @@ newImagesCifar10 = transformValues(imagesCifar10)
 newImagesCifar100 = transformValues(imagesCifar100)
 newImagesFashion = transformValues(imagesFashion)
 
+# PREPARING GLOBAL ARRAYS
+F = len(freqset)
+E = len(epsset)
+D = len(dtaset)
+C = len(cifarset)
+T1 = 4
+T2 = 7
+
+mseDispTable = np.zeros((C, 3*T1))
+mseQTable = np.zeros((C, 3*T1))
+mseI2Table = np.zeros((C, 3*T1))
+mseCentralTable = np.zeros((C, C))
+
+stdDispTable = np.zeros((C, T1))
+stdQTable = np.zeros((C, T1))
+stdI2Table = np.zeros((C, T1))
+stdCentralTable = np.zeros((C, C-1))
+
+mseDispEps = np.zeros((C, F, E))
+mseQEps = np.zeros((C, F, E))
+stdDispEps = np.zeros((C, F, E))
+stdQEps = np.zeros((C, F, E))
+
+mseDispDta = np.zeros((C, F, D))
+mseQDta = np.zeros((C, F, D))
+stdDispDta = np.zeros((C, F, D))
+stdQDta = np.zeros((C, F, D))
+
+percLossDispEps = np.zeros((C, T2))
+percLossQEps = np.zeros((C, T2))
+percLossDispDta = np.zeros((C, T2))
+percLossQDta = np.zeros((C, T2))
+
 def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS):
-    
+
     F = len(freqset)
     V = len(varset)
 
     mseDispEPlotA = np.zeros((F, V))
     mseQEPlotA = np.zeros((F, V))
-    mseDispEPlotASD = np.zeros((F, V))
-    mseQEPlotASD = np.zeros((F, V))
-    diffDispETableA = np.zeros(7)
-    diffQETableA = np.zeros(7)
+    stdDispEPlotA = np.zeros((F, V))
+    stdQEPlotA = np.zeros((F, V))
+    percLossDispTable = np.zeros(T2)
+    percLossQTable = np.zeros(T2)
 
     for val in range(len(varset)):
 
@@ -123,7 +156,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
         mseQEPlotATemp = np.zeros((F, V, R))
 
         var = varset[val]
-        print(f"Processing dataset {dataset[dataIndex]} for the value {parset[index]} = {var}.")
+        print(f"Processing cifarset {cifarset[dataIndex]} for the value {parset[index]} = {var}.")
 
         if eps == -1:
             eps = var
@@ -412,155 +445,179 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
                 mseQETableC = np.mean(mseQETableCTemp)
                 mseQTTableA = np.mean(mseQTTableATemp)
                 mseQTTableC = np.mean(mseQTTableCTemp)
-                mseCentralTableA = np.mean(mseCTableATemp)
-                mseCentralTableC = np.mean(mseCTableCTemp)
                 mseI2ETableA = np.mean(mseI2ETableATemp)
                 mseI2ETableC = np.mean(mseI2ETableCTemp)
                 mseI2TTableA = np.mean(mseI2TTableATemp)
                 mseI2TTableC = np.mean(mseI2TTableCTemp)
+                mseCentralTableA = np.mean(mseCTableATemp)
+                mseCentralTableC = np.mean(mseCTableCTemp)
 
-                mseDispETableARound = round(mseDispETableA, 14)
-                mseDispETableCRound = round(mseDispETableC, 12)
-                mseDispTTableARound = round(mseDispTTableA, 14)
-                mseDispTTableCRound = round(mseDispTTableC, 12)
-                mseQETableARound = round(mseQETableA, 14)
-                mseQETableCRound = round(mseQETableC, 12)
-                mseQTTableARound = round(mseQTTableA, 14)
-                mseQTTableCRound = round(mseQTTableC, 11)
-                mseCentralTableARound = round(mseCentralTableA, 3)
-                mseCentralTableCRound = round(mseCentralTableC, 1)
+                mseDispTable[dataIndex, 0] = round(mseDispETableA, 14)
+                mseDispTable[dataIndex, 1] = round(mseDispETableC, 12)
+                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 14)
+                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 12)
+                mseQTable[dataIndex, 0] = round(mseQETableA, 14)
+                mseQTable[dataIndex, 1] = round(mseQETableC, 12)
+                mseQTable[dataIndex, 2] = round(mseQTTableA, 14)
+                mseQTable[dataIndex, 3] = round(mseQTTableC, 11)
+                mseI2Table[dataIndex, 0] = round(mseI2ETableA)
+                mseI2Table[dataIndex, 1] = round(mseI2ETableC)
+                mseI2Table[dataIndex, 2] = round(mseI2TTableA)
+                mseI2Table[dataIndex, 3] = round(mseI2TTableC)
+                mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 3)
+                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 1)
 
-                mseDispETableASD = round(np.std(mseDispETableATemp), 16)
-                mseDispETableCSD = round(np.std(mseDispETableCTemp), 13)
-                mseDispTTableASD = round(np.std(mseDispTTableATemp), 16)
-                mseDispTTableCSD = round(np.std(mseDispTTableCTemp), 13)
-                mseQETableASD = round(np.std(mseQETableATemp), 16)
-                mseQETableCSD = round(np.std(mseQETableCTemp), 13)
-                mseQTTableASD = round(np.std(mseQTTableATemp), 16)
-                mseQTTableCSD = round(np.std(mseQTTableCTemp), 13)
-                mseCentralTableASD = round(np.std(mseCTableATemp), 3)
-                mseCentralTableCSD = round(np.std(mseCTableCTemp), 1)
+                mseDispTable[dataIndex, 4] = np.round(np.divide(mseDispETableA, mseDispETableC), 7)
+                mseDispTable[dataIndex, 5] = np.round(np.divide(mseDispTTableA, mseDispTTableC), 10)
+                mseDispTable[dataIndex, 6] = np.round(np.divide(mseDispETableA, mseDispTTableA), 4)
+                mseDispTable[dataIndex, 7] = np.round(np.divide(mseDispETableC, mseDispTTableC), 4)
+                mseQTable[dataIndex, 4] = np.round(np.divide(mseQETableA, mseQETableC), 9)
+                mseQTable[dataIndex, 5] = np.round(np.divide(mseQTTableA, mseQTTableC), 7)
+                mseQTable[dataIndex, 6] = np.round(np.divide(mseQETableA, mseQTTableA), 4)
+                mseQTable[dataIndex, 7] = np.round(np.divide(mseQETableC, mseQTTableC), 4)
+                mseI2Table[dataIndex, 4] = np.round(np.divide(mseI2ETableA, mseI2ETableC), 7)
+                mseI2Table[dataIndex, 5] = np.round(np.divide(mseI2TTableA, mseI2TTableC), 7)
+                mseI2Table[dataIndex, 6] = np.round(np.divide(mseI2ETableA, mseI2TTableA), 4)
+                mseI2Table[dataIndex, 7] = np.round(np.divide(mseI2ETableC, mseI2TTableC), 4)
+                mseCentralTable[dataIndex, 2] = np.round(np.divide(mseCentralTableA, mseCentralTableC), 7)
 
-                mseDispETableAC = np.round(np.divide(mseDispETableA, mseDispETableC), 7)
-                mseDispTTableAC = np.round(np.divide(mseDispTTableA, mseDispTTableC), 10)
-                mseDispETTableA = np.round(np.divide(mseDispETableA, mseDispTTableA), 4)
-                mseDispETTableC = np.round(np.divide(mseDispETableC, mseDispTTableC), 4)
-                mseQETableAC = np.round(np.divide(mseQETableA, mseQETableC), 9)
-                mseQTTableAC = np.round(np.divide(mseQTTableA, mseQTTableC), 7)
-                mseQETTableA = np.round(np.divide(mseQETableA, mseQTTableA), 4)
-                mseQETTableC = np.round(np.divide(mseQETableC, mseQTTableC), 4)
-                mseCentralTableAC = np.round(np.divide(mseCentralTableA, mseCentralTableC), 7)
-                mseI2ETableAC = np.round(np.divide(mseI2ETableA, mseI2ETableC), 7)
-                mseI2TTableAC = np.round(np.divide(mseI2TTableA, mseI2TTableC), 7)
-                mseI2ETTableA = np.round(np.divide(mseI2ETableA, mseI2TTableA), 4)
-                mseI2ETTableC = np.round(np.divide(mseI2ETableC, mseI2TTableC), 4)
+                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 16)
+                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 13)
+                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 16)
+                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 13)
+                stdQTable[dataIndex, 0] = round(np.std(mseQETableATemp), 16)
+                stdQTable[dataIndex, 1] = round(np.std(mseQETableCTemp), 13)
+                stdQTable[dataIndex, 2] = round(np.std(mseQTTableATemp), 16)
+                stdQTable[dataIndex, 3] = round(np.std(mseQTTableCTemp), 13)
+                stdI2Table[dataIndex, 0] = round(np.std(mseI2ETableATemp))
+                stdI2Table[dataIndex, 1] = round(np.std(mseI2ETableCTemp))
+                stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp))
+                stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp))
+                stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 3)
+                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 1)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
-            mseDispEPlotASD[fi, val] = np.std(mseDispEPlotATemp[fi, val])
-            mseQEPlotASD[fi, val] = np.std(mseQEPlotATemp[fi, val])
+            stdDispEPlotA[fi, val] = np.std(mseDispEPlotATemp[fi, val])
+            stdQEPlotA[fi, val] = np.std(mseQEPlotATemp[fi, val])
 
     # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
     if index == 1:
         DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
-        DispTable.add_row(["EMSE", mseDispETableARound, mseDispETableCRound, mseDispETableASD, mseDispETableCSD])
-        DispTable.add_row(["TMSE", mseDispTTableARound, mseDispTTableCRound, mseDispTTableASD, mseDispTTableCSD])
-        DispTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableASD, mseCentralTableCSD])
+        DispTable.add_row(["EMSE", mseDispTable[0, 0], mseDispTable[0, 1], stdDispTable[0, 0], stdDispTable[0, 1]])
+        DispTable.add_row(["TMSE", mseDispTable[0, 2], mseDispTable[0, 3], stdDispTable[0, 2], stdDispTable[0, 3]])
+        DispTable.add_row(["CMSE", mseCentralTable[0, 0], mseCentralTable[0, 1], stdCentralTable[0, 0], stdCentralTable[0, 1]])
         
         DispData = DispTable.get_string()
-        with open("Table_" + "%s" % dataset[dataIndex] + "_disp.txt", "w") as table1:
+        with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.txt", "w") as table1:
             table1.write(DispData)
 
         QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
-        QTable.add_row(["EMSE", mseQETableARound, mseQETableCRound, mseQETableASD, mseQETableCSD])
-        QTable.add_row(["TMSE", mseQTTableARound, mseQTTableCRound, mseQTTableASD, mseQTTableCSD])
-        QTable.add_row(["CMSE", mseCentralTableARound, mseCentralTableCRound, mseCentralTableASD, mseCentralTableCSD])
+        QTable.add_row(["EMSE", mseQTable[0, 0], mseQTable[0, 1], stdQTable[0, 0], stdQTable[0, 1]])
+        QTable.add_row(["TMSE", mseQTable[0, 2], mseQTable[0, 3], stdQTable[0, 2], stdQTable[0, 3]])
+        QTable.add_row(["CMSE", mseCentralTable[0, 0], mseCentralTable[0, 1], stdCentralTable[0, 0], stdCentralTable[0, 1]])
         
         QData = QTable.get_string()
-        with open("Table_" + "%s" % dataset[dataIndex] + "_q.txt", "w") as table2:
+        with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.txt", "w") as table2:
             table2.write(QData)
 
         ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
-        ACTable.add_row(["EMSE", mseDispETableAC, mseQETableAC, mseI2ETableAC])
-        ACTable.add_row(["TMSE", mseDispTTableAC, mseQTTableAC, mseI2TTableAC])
-        ACTable.add_row(["CMSE", mseCentralTableAC, mseCentralTableAC, mseCentralTableAC])
+        ACTable.add_row(["EMSE", mseDispTable[0, 0], mseQTable[0, 0], mseI2Table[0, 0]])
+        ACTable.add_row(["TMSE", mseDispTable[0, 1], mseQTable[0, 1], mseI2Table[0, 1]])
+        ACTable.add_row(["CMSE", mseCentralTable[0, 2], mseCentralTable[0, 2], mseCentralTable[0, 2]])
         
         ACData = ACTable.get_string()
-        with open("Table_" + "%s" % dataset[dataIndex] + "_ac.txt", "w") as table3:
+        with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_ac.txt", "w") as table3:
             table3.write(ACData)
 
         ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
-        ETTable.add_row(["AGM", mseDispETTableA, mseQETTableA, mseI2ETTableA])
-        ETTable.add_row(["CGM", mseDispETTableC, mseQETTableC, mseI2ETTableC])
+        ETTable.add_row(["AGM", mseDispTable[0, 2], mseQTable[0, 2], mseI2Table[0, 2]])
+        ETTable.add_row(["CGM", mseDispTable[0, 3], mseQTable[0, 3], mseI2Table[0, 3]])
         
         ETData = ETTable.get_string()
-        with open("Table_" + "%s" % dataset[dataIndex] + "_et.txt", "w") as table4:
+        with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_et.txt", "w") as table4:
             table4.write(ETData)
 
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
-    def computePercDiff(a, b):
-        percDiff = np.divide(np.subtract(a, b), a)*100
-        return np.round(np.mean(percDiff), 4)
+    def computePercLoss(a, b):
+        percLoss = np.divide(np.subtract(a, b), a)*100
+        return np.round(np.mean(percLoss), 4)
 
-    diffDispETableA[0] = computePercDiff(mseDispEPlotA[4], mseDispEPlotA[5])
-    diffDispETableA[1] = computePercDiff(mseDispEPlotA[2], mseDispEPlotA[3])
-    diffDispETableA[2] = computePercDiff(mseDispEPlotA[0], mseDispEPlotA[1])
-    diffDispETableA[3] = computePercDiff(mseDispEPlotA[0], mseDispEPlotA[2])
-    diffDispETableA[4] = computePercDiff(mseDispEPlotA[2], mseDispEPlotA[4])
-    diffDispETableA[5] = computePercDiff(mseDispEPlotA[1], mseDispEPlotA[3])
-    diffDispETableA[6] = computePercDiff(mseDispEPlotA[3], mseDispEPlotA[5])
+    percLossDispTable[0] = computePercLoss(mseDispEPlotA[4], mseDispEPlotA[5])
+    percLossDispTable[1] = computePercLoss(mseDispEPlotA[2], mseDispEPlotA[3])
+    percLossDispTable[2] = computePercLoss(mseDispEPlotA[0], mseDispEPlotA[1])
+    percLossDispTable[3] = computePercLoss(mseDispEPlotA[0], mseDispEPlotA[2])
+    percLossDispTable[4] = computePercLoss(mseDispEPlotA[2], mseDispEPlotA[4])
+    percLossDispTable[5] = computePercLoss(mseDispEPlotA[1], mseDispEPlotA[3])
+    percLossDispTable[6] = computePercLoss(mseDispEPlotA[3], mseDispEPlotA[5])
 
-    diffQETableA[0] = computePercDiff(mseQEPlotA[4], mseQEPlotA[5])
-    diffQETableA[1] = computePercDiff(mseQEPlotA[2], mseQEPlotA[3])
-    diffQETableA[2] = computePercDiff(mseQEPlotA[0], mseQEPlotA[1])
-    diffQETableA[3] = computePercDiff(mseQEPlotA[0], mseQEPlotA[2])
-    diffQETableA[4] = computePercDiff(mseQEPlotA[2], mseQEPlotA[4])
-    diffQETableA[5] = computePercDiff(mseQEPlotA[1], mseQEPlotA[3])
-    diffQETableA[6] = computePercDiff(mseQEPlotA[3], mseQEPlotA[5])
+    percLossQTable[0] = computePercLoss(mseQEPlotA[4], mseQEPlotA[5])
+    percLossQTable[1] = computePercLoss(mseQEPlotA[2], mseQEPlotA[3])
+    percLossQTable[2] = computePercLoss(mseQEPlotA[0], mseQEPlotA[1])
+    percLossQTable[3] = computePercLoss(mseQEPlotA[0], mseQEPlotA[2])
+    percLossQTable[4] = computePercLoss(mseQEPlotA[2], mseQEPlotA[4])
+    percLossQTable[5] = computePercLoss(mseQEPlotA[1], mseQEPlotA[3])
+    percLossQTable[6] = computePercLoss(mseQEPlotA[3], mseQEPlotA[5])
 
-    PLTableSH = PrettyTable(["Perc Loss", "Dispersion", "Q"])
-    PLTableSH.add_row(["10 labels", diffDispETableA[0], diffQETableA[0]])
-    PLTableSH.add_row(["5 labels", diffDispETableA[1], diffQETableA[1]])
-    PLTableSH.add_row(["2 labels", diffDispETableA[2], diffQETableA[2]])
+    if index == 0:
+        mseDispEps[dataIndex] = np.copy(mseDispEPlotA)
+        mseQEps[dataIndex] = np.copy(mseDispEPlotA)
+        stdDispEps[dataIndex] = np.copy(stdDispEPlotA)
+        stdQEps[dataIndex] = np.copy(stdQEPlotA)
+        percLossDispEps[dataIndex] = np.copy(percLossDispTable)
+        percLossQEps[dataIndex] = np.copy(percLossQTable)
 
-    PLDataSH = PLTableSH.get_string()
-    with open("Table_" + "%s" % dataset[dataIndex] + "_perc_loss_sh.txt", "w") as table5:
-        table5.write(PLDataSH)
+    if index == 1:
+        mseDispDta[dataIndex] = np.copy(mseDispEPlotA)
+        mseQDta[dataIndex] = np.copy(mseDispEPlotA)
+        stdDispDta[dataIndex] = np.copy(stdDispEPlotA)
+        stdQDta[dataIndex] = np.copy(stdQEPlotA)
+        percLossDispDta[dataIndex] = np.copy(percLossDispTable)
+        percLossQDta[dataIndex] = np.copy(percLossQTable)
 
-    PLTableLabels = PrettyTable(["Perc Loss", "Dispersion", "Q"])
-    PLTableLabels.add_row(["SH: 10v5", diffDispETableA[3], diffQETableA[3]])
-    PLTableLabels.add_row(["SH: 5v2", diffDispETableA[4], diffQETableA[4]])
-    PLTableLabels.add_row(["Non-SH: 10v5", diffDispETableA[5], diffDispETableA[5]])
-    PLTableLabels.add_row(["Non-SH: 5v2", diffDispETableA[6], diffQETableA[6]])
+    PLTable1 = PrettyTable(["Perc Loss", "Dispersion", "Q"])
+    PLTable1.add_row(["10 labels", percLossDispTable[0], percLossQTable[0]])
+    PLTable1.add_row(["5 labels", percLossDispTable[1], percLossQTable[1]])
+    PLTable1.add_row(["2 labels", percLossDispTable[2], percLossQTable[2]])
 
-    PLDataLabels = PLTableLabels.get_string()
-    with open("Table_" + "%s" % dataset[dataIndex] + "_perc_loss_labels.txt", "w") as table6:
-        table6.write(PLDataLabels)
+    PLData1 = PLTable1.get_string()
+    with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_pl1.txt", "w") as table5:
+        table5.write(PLData1)
 
-    plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(mseDispEPlotASD[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(mseDispEPlotASD[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
-    plt.errorbar(varset, mseDispEPlotA[2], yerr = np.minimum(mseDispEPlotASD[2], np.sqrt(mseDispEPlotA[2]), np.divide(mseDispEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseDispEPlotA[3], yerr = np.minimum(mseDispEPlotASD[3], np.sqrt(mseDispEPlotA[3]), np.divide(mseDispEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseDispEPlotA[4], yerr = np.minimum(mseDispEPlotASD[4], np.sqrt(mseDispEPlotA[4]), np.divide(mseDispEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseDispEPlotA[5], yerr = np.minimum(mseDispEPlotASD[5], np.sqrt(mseDispEPlotA[5]), np.divide(mseDispEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
+    PLTable2 = PrettyTable(["Perc Loss", "Dispersion", "Q"])
+    PLTable2.add_row(["SH: 10v5", percLossDispTable[3], percLossQTable[3]])
+    PLTable2.add_row(["SH: 5v2", percLossDispTable[4], percLossQTable[4]])
+    PLTable2.add_row(["Non-SH: 10v5", percLossDispTable[5], percLossQTable[5]])
+    PLTable2.add_row(["Non-SH: 5v2", percLossDispTable[6], percLossQTable[6]])
+
+    PLData2 = PLTable2.get_string()
+    with open("Table_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_pl2.txt", "w") as table6:
+        table6.write(PLData2)
+
+    plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(stdDispEPlotA[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
+    plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(stdDispEPlotA[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
+    plt.errorbar(varset, mseDispEPlotA[2], yerr = np.minimum(stdDispEPlotA[2], np.sqrt(mseDispEPlotA[2]), np.divide(mseDispEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
+    plt.errorbar(varset, mseDispEPlotA[3], yerr = np.minimum(stdDispEPlotA[3], np.sqrt(mseDispEPlotA[3]), np.divide(mseDispEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
+    plt.errorbar(varset, mseDispEPlotA[4], yerr = np.minimum(stdDispEPlotA[4], np.sqrt(mseDispEPlotA[4]), np.divide(mseDispEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
+    plt.errorbar(varset, mseDispEPlotA[5], yerr = np.minimum(stdDispEPlotA[5], np.sqrt(mseDispEPlotA[5]), np.divide(mseDispEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
     plt.ylabel("EMSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
+    plt.savefig("Graph_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
     plt.clf()
 
-    plt.errorbar(varset, mseQEPlotA[0], yerr = np.minimum(mseQEPlotASD[0], np.sqrt(mseQEPlotA[0]), np.divide(mseQEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseQEPlotA[1], yerr = np.minimum(mseQEPlotASD[1], np.sqrt(mseQEPlotA[1]), np.divide(mseQEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
-    plt.errorbar(varset, mseQEPlotA[2], yerr = np.minimum(mseQEPlotASD[2], np.sqrt(mseQEPlotA[2]), np.divide(mseQEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseQEPlotA[3], yerr = np.minimum(mseQEPlotASD[3], np.sqrt(mseQEPlotA[3]), np.divide(mseQEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseQEPlotA[4], yerr = np.minimum(mseQEPlotASD[4], np.sqrt(mseQEPlotA[4]), np.divide(mseQEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseQEPlotA[5], yerr = np.minimum(mseQEPlotASD[5], np.sqrt(mseQEPlotA[5]), np.divide(mseQEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
+    plt.errorbar(varset, mseQEPlotA[0], yerr = np.minimum(stdQEPlotA[0], np.sqrt(mseQEPlotA[0]), np.divide(mseQEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
+    plt.errorbar(varset, mseQEPlotA[1], yerr = np.minimum(stdQEPlotA[1], np.sqrt(mseQEPlotA[1]), np.divide(mseQEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
+    plt.errorbar(varset, mseQEPlotA[2], yerr = np.minimum(stdQEPlotA[2], np.sqrt(mseQEPlotA[2]), np.divide(mseQEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
+    plt.errorbar(varset, mseQEPlotA[3], yerr = np.minimum(stdQEPlotA[3], np.sqrt(mseQEPlotA[3]), np.divide(mseQEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
+    plt.errorbar(varset, mseQEPlotA[4], yerr = np.minimum(stdQEPlotA[4], np.sqrt(mseQEPlotA[4]), np.divide(mseQEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
+    plt.errorbar(varset, mseQEPlotA[5], yerr = np.minimum(stdQEPlotA[5], np.sqrt(mseQEPlotA[5]), np.divide(mseQEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
     plt.legend(loc = 'best')
     plt.yscale('log')
     plt.xlabel("Value of " + "%s" % graphset[index])
     plt.ylabel("EMSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % dataset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
+    plt.savefig("Graph_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
     plt.clf()
 
 def runLoopVaryEps(dataIndex, index, dim, num, newImages, labels, GS):
