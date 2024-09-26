@@ -166,7 +166,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
         mseI2EPlotATemp = np.zeros((F, V, R))
 
         var = varset[val]
-        print(f"Processing cifarset {cifarset[dataIndex]} for the value {parset[idx]} = {var}.")
+        print(f"Processing dataset {cifarset[dataIndex]} for the value {parset[idx]} = {var}.")
 
         if eps == -1:
             eps = var
