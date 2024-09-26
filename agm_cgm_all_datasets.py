@@ -114,9 +114,9 @@ stdDisp = np.zeros((2*C, F, E))
 stdQ = np.zeros((2*C, F, E))
 stdI2 = np.zeros((2*C, F, E))
 
-percLossDisp = np.zeros((C, T2))
-percLossQ = np.zeros((C, T2))
-percLossI2 = np.zeros((C, T2))
+percLossDisp = np.zeros((2*C, T2))
+percLossQ = np.zeros((2*C, T2))
+percLossI2 = np.zeros((2*C, T2))
 
 def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
