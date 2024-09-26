@@ -30,10 +30,10 @@ GSCifar = float(mp.sqrt(dimCifar))/numCifar
 GSFashion = float(mp.sqrt(dimFashion))/numFashion
 
 # INITIALISING OTHER PARAMETERS AND CONSTANTS
-cifarset = np.array(['Cifar10', 'Cifar100', 'Fashion'])
+cifarset = np.array(['Cifar-10', 'Cifar-100', 'Fashion-MNIST'])
 parset = np.array(['eps', 'dta'])
 graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u03b4}$'])
-freqset = np.array(['10 (equal)', '10 (unequal)', '5 (equal)', '5 (unequal)', '2 (equal)', '2 (unequal)'])
+freqset = np.array(['10_equal', '10_unequal', '5_equal', '5_unequal', '2_equal', '2_unequal'])
 R = 10
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
@@ -108,12 +108,12 @@ stdQTable = np.zeros((C, T1))
 stdI2Table = np.zeros((C, T1))
 stdCentralTable = np.zeros((C, C-1))
 
-mseDispEps = np.zeros((C, F, E))
-mseQEps = np.zeros((C, F, E))
-mseI2Eps = np.zeros((C, F, E))
-stdDispEps = np.zeros((C, F, E))
-stdQEps = np.zeros((C, F, E))
-stdI2Eps = np.zeros((C, F, E))
+mseDisp = np.zeros((C, F, E))
+mseQ = np.zeros((C, F, E))
+mseI2 = np.zeros((C, F, E))
+stdDisp = np.zeros((C, F, E))
+stdQ = np.zeros((C, F, E))
+stdI2 = np.zeros((C, F, E))
 
 mseDispDta = np.zeros((C, F, D))
 mseQDta = np.zeros((C, F, D))
@@ -122,14 +122,14 @@ stdDispDta = np.zeros((C, F, D))
 stdQDta = np.zeros((C, F, D))
 stdI2Dta = np.zeros((C, F, D))
 
-percLossDispEps = np.zeros((C, T2))
-percLossQEps = np.zeros((C, T2))
-percLossI2Eps = np.zeros((C, T2))
+percLossDispPlot = np.zeros((C, T2))
+percLossQPlot = np.zeros((C, T2))
+percLossI2Plot = np.zeros((C, T2))
 percLossDispDta = np.zeros((C, T2))
 percLossQDta = np.zeros((C, T2))
 percLossI2Dta = np.zeros((C, T2))
 
-def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS):
+def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
     F = len(freqset)
     V = len(varset)
@@ -166,7 +166,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
         mseI2EPlotATemp = np.zeros((F, V, R))
 
         var = varset[val]
-        print(f"Processing cifarset {cifarset[dataIndex]} for the value {parset[index]} = {var}.")
+        print(f"Processing cifarset {cifarset[dataIndex]} for the value {parset[idx]} = {var}.")
 
         if eps == -1:
             eps = var
@@ -332,7 +332,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             if ACindex == 0:
 
                 # TABLES ASSUME UNIFORM DATA
-                if fi == 0 and val == 0 and index == 1:
+                if fi == 0 and val == 0 and idx == 1:
                     mseDispETableATemp[rep] = mseE
                     mseDispTTableATemp[rep] = mseT
                     mseQETableATemp[rep] = mseQE
@@ -343,7 +343,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
                 mseQEPlotATemp[fi, val, rep] = mseQE
 
             else:
-                if fi == 0 and val == 0 and index == 1:
+                if fi == 0 and val == 0 and idx == 1:
                     mseDispETableCTemp[rep] = mseE
                     mseDispTTableCTemp[rep] = mseT
                     mseQETableCTemp[rep] = mseQE
@@ -379,7 +379,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             mseC = xiCentral**2
 
             if ACindex == 0:
-                if fi == 0 and val == 0 and index == 1: 
+                if fi == 0 and val == 0 and idx == 1: 
                     mseI2ETableATemp[rep] = mseI2E
                     mseI2TTableATemp[rep] = mseI2T
                     mseCTableATemp[rep] = mseC
@@ -387,7 +387,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
                 mseI2EPlotATemp[rep] = mseI2E
 
             else:
-                if fi == 0 and val == 0 and index == 1: 
+                if fi == 0 and val == 0 and idx == 1: 
                     mseI2ETableCTemp[rep] = mseI2E
                     mseI2TTableCTemp[rep] = mseI2T
                     mseCTableCTemp[rep] = mseC
@@ -449,7 +449,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
                 computeMSE(0, rep, fi, imageArray, sigma, centralSigma)
                 computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
-            if fi == 0 and val == 0 and index == 1:
+            if fi == 0 and val == 0 and idx == 1:
                 mseDispETableA = np.mean(mseDispETableATemp)
                 mseDispETableC = np.mean(mseDispETableCTemp)
                 mseDispTTableA = np.mean(mseDispTTableATemp)
@@ -517,7 +517,7 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
             stdI2EPlotA[fi, val] = np.std(mseI2EPlotATemp[fi, val])
 
     # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
-    if index == 1:
+    if idx == 1:
         DispTable = PrettyTable(["Disp Cifar-10", "AGM", "CGM", "SD AGM", "SD CGM"])
         DispTable.add_row(["EMSE", mseDispTable[0, 0], mseDispTable[0, 1], stdDispTable[0, 0], stdDispTable[0, 1]])
         DispTable.add_row(["TMSE", mseDispTable[0, 2], mseDispTable[0, 3], stdDispTable[0, 2], stdDispTable[0, 3]])
@@ -629,133 +629,23 @@ def runLoop(dataIndex, index, varset, dim, num, eps, dta, newImages, labels, GS)
     percLossI2Table[5] = computePercLoss(mseI2EPlotA[1], mseI2EPlotA[3])
     percLossI2Table[6] = computePercLoss(mseI2EPlotA[3], mseI2EPlotA[5])
 
-    if index == 0:
-        mseDispEps[dataIndex] = np.copy(mseDispEPlotA)
-        mseQEps[dataIndex] = np.copy(mseQEPlotA)
-        mseI2Eps[dataIndex] = np.copy(mseI2EPlotA)
-        stdDispEps[dataIndex] = np.copy(stdDispEPlotA)
-        stdQEps[dataIndex] = np.copy(stdQEPlotA)
-        stdI2Eps[dataIndex] = np.copy(stdI2EPlotA)
-        percLossDispEps[dataIndex] = np.copy(percLossDispTable)
-        percLossQEps[dataIndex] = np.copy(percLossQTable)
-        percLossI2Eps[dataIndex] = np.copy(percLossI2Table)
+    copyIndex = (2*dataIndex) + idx
 
-    if index == 1:
-        mseDispDta[dataIndex] = np.copy(mseDispEPlotA)
-        mseQDta[dataIndex] = np.copy(mseQEPlotA)
-        mseI2Dta[dataIndex] = np.copy(mseI2EPlotA)
-        stdDispDta[dataIndex] = np.copy(stdDispEPlotA)
-        stdQDta[dataIndex] = np.copy(stdQEPlotA)
-        stdI2Dta[dataIndex] = np.copy(stdI2EPlotA)
-        percLossDispDta[dataIndex] = np.copy(percLossDispTable)
-        percLossQDta[dataIndex] = np.copy(percLossQTable)
-        percLossI2Dta[dataIndex] = np.copy(percLossI2Table)
+    mseDisp[copyIndex] = np.copy(mseDispEPlotA)
+    mseQ[copyIndex] = np.copy(mseQEPlotA)
+    mseI2[copyIndex] = np.copy(mseI2EPlotA)
+    stdDisp[copyIndex] = np.copy(stdDispEPlotA)
+    stdQ[copyIndex] = np.copy(stdQEPlotA)
+    stdI2[copyIndex] = np.copy(stdI2EPlotA)
+    percLossDispPlot[copyIndex] = np.copy(percLossDispTable)
+    percLossQPlot[copyIndex] = np.copy(percLossQTable)
+    percLossI2Plot[copyIndex] = np.copy(percLossI2Table)
 
-    PLEpsTable1 = PrettyTable(["PLE1 Cifar-10", "Dispersion", "Q", "I\u00B2"])
-    PLEpsTable1.add_row(["10 labels", percLossDispEps[0, 0], percLossQEps[0, 0], percLossI2Eps[0, 0]])
-    PLEpsTable1.add_row(["5 labels", percLossDispEps[0, 1], percLossQEps[0, 1], percLossI2Eps[0, 1]])
-    PLEpsTable1.add_row(["2 labels", percLossDispEps[0, 2], percLossQEps[0, 2], percLossI2Eps[0, 2]])
-    PLEpsTable1.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
-    PLEpsTable1.add_row(["10 labels", percLossDispEps[1, 0], percLossQEps[1, 0], percLossI2Eps[1, 0]])
-    PLEpsTable1.add_row(["5 labels", percLossDispEps[1, 1], percLossQEps[1, 1], percLossI2Eps[1, 1]])
-    PLEpsTable1.add_row(["2 labels", percLossDispEps[1, 2], percLossQEps[1, 2], percLossI2Eps[1, 2]])
-    PLEpsTable1.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
-    PLEpsTable1.add_row(["10 labels", percLossDispEps[2, 0], percLossQEps[2, 0], percLossI2Eps[2, 0]])
-    PLEpsTable1.add_row(["5 labels", percLossDispEps[2, 1], percLossQEps[2, 1], percLossI2Eps[2, 1]])
-    PLEpsTable1.add_row(["2 labels", percLossDispEps[2, 2], percLossQEps[2, 2], percLossI2Eps[2, 2]])
+def runLoopVaryEps(dataIndex, idx, dim, num, newImages, labels, GS):
+    runLoop(dataIndex, idx, epsset, dim, num, -1, dtaconst, newImages, labels, GS)
 
-    PLEpsData1 = PLEpsTable1.get_string()
-    with open("Table_6_eps_pl1.txt", "w") as table6:
-        table6.write(PLEpsData1)
-
-    PLDtaTable2 = PrettyTable(["PLE2 Cifar-10", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispEps[0, 3], percLossQEps[0, 3], percLossI2Eps[0, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispEps[0, 4], percLossQEps[0, 4], percLossI2Eps[0, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispEps[0, 5], percLossQEps[0, 5], percLossI2Eps[0, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispEps[0, 6], percLossQEps[0, 6], percLossI2Eps[0, 6]])
-    PLDtaTable2.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispEps[1, 3], percLossQEps[1, 3], percLossI2Eps[1, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispEps[1, 4], percLossQEps[1, 4], percLossI2Eps[1, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispEps[1, 5], percLossQEps[1, 5], percLossI2Eps[1, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispEps[1, 6], percLossQEps[1, 6], percLossI2Eps[1, 6]])
-    PLDtaTable2.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispEps[2, 3], percLossQEps[2, 3], percLossI2Eps[2, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispEps[2, 4], percLossQEps[2, 4], percLossI2Eps[2, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispEps[2, 5], percLossQEps[2, 5], percLossI2Eps[2, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispEps[2, 6], percLossQEps[2, 6], percLossI2Eps[2, 6]])
-
-    PLDtaData2 = PLDtaTable2.get_string()
-    with open("Table_7_eps_pl2.txt", "w") as table7:
-        table7.write(PLDtaData2)
-
-    PLDtaTable1 = PrettyTable(["PLD1 Cifar-10", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable1.add_row(["10 labels", percLossDispDta[0, 0], percLossQDta[0, 0], percLossI2Dta[0, 0]])
-    PLDtaTable1.add_row(["5 labels", percLossDispDta[0, 1], percLossQDta[0, 1], percLossI2Dta[0, 1]])
-    PLDtaTable1.add_row(["2 labels", percLossDispDta[0, 2], percLossQDta[0, 2], percLossI2Dta[0, 2]])
-    PLDtaTable1.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable1.add_row(["10 labels", percLossDispDta[1, 0], percLossQDta[1, 0], percLossI2Dta[1, 0]])
-    PLDtaTable1.add_row(["5 labels", percLossDispDta[1, 1], percLossQDta[1, 1], percLossI2Dta[1, 1]])
-    PLDtaTable1.add_row(["2 labels", percLossDispDta[1, 2], percLossQDta[1, 2], percLossI2Dta[1, 2]])
-    PLDtaTable1.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable1.add_row(["10 labels", percLossDispDta[2, 0], percLossQDta[2, 0], percLossI2Dta[2, 0]])
-    PLDtaTable1.add_row(["5 labels", percLossDispDta[2, 1], percLossQDta[2, 1], percLossI2Dta[2, 1]])
-    PLDtaTable1.add_row(["2 labels", percLossDispDta[2, 2], percLossQDta[2, 2], percLossI2Dta[2, 2]])
-
-    PLDtaData1 = PLDtaTable1.get_string()
-    with open("Table_8_dta_pl1.txt", "w") as table8:
-        table8.write(PLDtaData1)
-
-    PLDtaTable2 = PrettyTable(["PLD2 Cifar-10", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispDta[0, 3], percLossQDta[0, 3], percLossI2Dta[0, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispDta[0, 4], percLossQDta[0, 4], percLossI2Dta[0, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispDta[0, 5], percLossQDta[0, 5], percLossI2Dta[0, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispDta[0, 6], percLossQDta[0, 6], percLossI2Dta[0, 6]])
-    PLDtaTable2.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispDta[1, 3], percLossQDta[1, 3], percLossI2Dta[1, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispDta[1, 4], percLossQDta[1, 4], percLossI2Dta[1, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispDta[1, 5], percLossQDta[1, 5], percLossI2Dta[1, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispDta[1, 6], percLossQDta[1, 6], percLossI2Dta[1, 6]])
-    PLDtaTable2.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
-    PLDtaTable2.add_row(["SH: 10v5", percLossDispDta[2, 3], percLossQDta[2, 3], percLossI2Dta[2, 3]])
-    PLDtaTable2.add_row(["SH: 5v2", percLossDispDta[2, 4], percLossQDta[2, 4], percLossI2Dta[2, 4]])
-    PLDtaTable2.add_row(["Non-SH: 10v5", percLossDispDta[2, 5], percLossQDta[2, 5], percLossI2Dta[2, 5]])
-    PLDtaTable2.add_row(["Non-SH: 5v2", percLossDispDta[2, 6], percLossQDta[2, 6], percLossI2Dta[2, 6]])
-
-    PLDtaData2 = PLDtaTable2.get_string()
-    with open("Table_9_dta_pl2.txt", "w") as table9:
-        table9.write(PLDtaData2)
-
-    plt.errorbar(varset, mseDispEPlotA[0], yerr = np.minimum(stdDispEPlotA[0], np.sqrt(mseDispEPlotA[0]), np.divide(mseDispEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseDispEPlotA[1], yerr = np.minimum(stdDispEPlotA[1], np.sqrt(mseDispEPlotA[1]), np.divide(mseDispEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
-    plt.errorbar(varset, mseDispEPlotA[2], yerr = np.minimum(stdDispEPlotA[2], np.sqrt(mseDispEPlotA[2]), np.divide(mseDispEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseDispEPlotA[3], yerr = np.minimum(stdDispEPlotA[3], np.sqrt(mseDispEPlotA[3]), np.divide(mseDispEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseDispEPlotA[4], yerr = np.minimum(stdDispEPlotA[4], np.sqrt(mseDispEPlotA[4]), np.divide(mseDispEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseDispEPlotA[5], yerr = np.minimum(stdDispEPlotA[5], np.sqrt(mseDispEPlotA[5]), np.divide(mseDispEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("EMSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_disp.png")
-    plt.clf()
-
-    plt.errorbar(varset, mseQEPlotA[0], yerr = np.minimum(stdQEPlotA[0], np.sqrt(mseQEPlotA[0]), np.divide(mseQEPlotA[0], 2)), color = 'blue', marker = 'o', label = freqset[0])
-    plt.errorbar(varset, mseQEPlotA[1], yerr = np.minimum(stdQEPlotA[1], np.sqrt(mseQEPlotA[1]), np.divide(mseQEPlotA[1], 2)), color = 'blueviolet', marker = 'x', label = freqset[1])
-    plt.errorbar(varset, mseQEPlotA[2], yerr = np.minimum(stdQEPlotA[2], np.sqrt(mseQEPlotA[2]), np.divide(mseQEPlotA[2], 2)), color = 'green', marker = 'o', label = freqset[2])
-    plt.errorbar(varset, mseQEPlotA[3], yerr = np.minimum(stdQEPlotA[3], np.sqrt(mseQEPlotA[3]), np.divide(mseQEPlotA[3], 2)), color = 'lime', marker = 'x', label = freqset[3])
-    plt.errorbar(varset, mseQEPlotA[4], yerr = np.minimum(stdQEPlotA[4], np.sqrt(mseQEPlotA[4]), np.divide(mseQEPlotA[4], 2)), color = 'orange', marker = 'o', label = freqset[4])
-    plt.errorbar(varset, mseQEPlotA[5], yerr = np.minimum(stdQEPlotA[5], np.sqrt(mseQEPlotA[5]), np.divide(mseQEPlotA[5], 2)), color = 'gold', marker = 'x', label = freqset[5])
-    plt.legend(loc = 'best')
-    plt.yscale('log')
-    plt.xlabel("Value of " + "%s" % graphset[index])
-    plt.ylabel("EMSE of Gaussian Mechanism")
-    plt.savefig("Graph_" + "%s" % cifarset[dataIndex] + "_vary_" + "%s" % parset[index] + "_q.png")
-    plt.clf()
-
-def runLoopVaryEps(dataIndex, index, dim, num, newImages, labels, GS):
-    runLoop(dataIndex, index, epsset, dim, num, -1, dtaconst, newImages, labels, GS)
-
-def runLoopVaryDta(dataIndex, index, dim, num, newImages, labels, GS):
-    runLoop(dataIndex, index, dtaset, dim, num, epsconst, -1, newImages, labels, GS)
+def runLoopVaryDta(dataIndex, idx, dim, num, newImages, labels, GS):
+    runLoop(dataIndex, idx, dtaset, dim, num, epsconst, -1, newImages, labels, GS)
 
 runLoopVaryEps(0, 0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoopVaryDta(0, 1, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
@@ -765,5 +655,112 @@ runLoopVaryDta(1, 1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCi
 
 runLoopVaryEps(2, 0, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 runLoopVaryDta(2, 1, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
+
+for idx in range(2):
+
+    PLTable1 = PrettyTable(["PL1 Cifar-10", "Dispersion", "Q", "I\u00B2"])
+    PLTable1.add_row(["10 labels", percLossDispPlot[idx, 0], percLossQPlot[idx, 0], percLossI2Plot[idx, 0]])
+    PLTable1.add_row(["5 labels", percLossDispPlot[idx, 1], percLossQPlot[idx, 1], percLossI2Plot[idx, 1]])
+    PLTable1.add_row(["2 labels", percLossDispPlot[idx, 2], percLossQPlot[idx, 2], percLossI2Plot[idx, 2]])
+    PLTable1.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
+    PLTable1.add_row(["10 labels", percLossDispPlot[2+idx, 0], percLossQPlot[2+idx, 0], percLossI2Plot[2+idx, 0]])
+    PLTable1.add_row(["5 labels", percLossDispPlot[2+idx, 1], percLossQPlot[2+idx, 1], percLossI2Plot[2+idx, 1]])
+    PLTable1.add_row(["2 labels", percLossDispPlot[2+idx, 2], percLossQPlot[2+idx, 2], percLossI2Plot[2+idx, 2]])
+    PLTable1.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
+    PLTable1.add_row(["10 labels", percLossDispPlot[4+idx, 0], percLossQPlot[4+idx, 0], percLossI2Plot[4+idx, 0]])
+    PLTable1.add_row(["5 labels", percLossDispPlot[4+idx, 1], percLossQPlot[4+idx, 1], percLossI2Plot[4+idx, 1]])
+    PLTable1.add_row(["2 labels", percLossDispPlot[4+idx, 2], percLossQPlot[4+idx, 2], percLossI2Plot[4+idx, 2]])
+
+    PLData1 = PLTable1.get_string()
+    with open("Table_6_" + "%s" % parset[idx] + "_pl1.txt", "w") as table6:
+        table6.write(PLData1)
+
+    PLTable2 = PrettyTable(["PL2 Cifar-10", "Dispersion", "Q", "I\u00B2"])
+    PLTable2.add_row(["SH: 10v5", percLossDispPlot[idx, 3], percLossQPlot[idx, 3], percLossI2Plot[idx, 3]])
+    PLTable2.add_row(["SH: 5v2", percLossDispPlot[idx, 4], percLossQPlot[idx, 4], percLossI2Plot[idx, 4]])
+    PLTable2.add_row(["Non-SH: 10v5", percLossDispPlot[idx, 5], percLossQPlot[idx, 5], percLossI2Plot[idx, 5]])
+    PLTable2.add_row(["Non-SH: 5v2", percLossDispPlot[idx, 6], percLossQPlot[idx, 6], percLossI2Plot[idx, 6]])
+    PLTable2.add_row(["Cifar-100", "Dispersion", "Q", "I\u00B2"])
+    PLTable2.add_row(["SH: 10v5", percLossDispPlot[2+idx, 3], percLossQPlot[2+idx, 3], percLossI2Plot[2+idx, 3]])
+    PLTable2.add_row(["SH: 5v2", percLossDispPlot[2+idx, 4], percLossQPlot[2+idx, 4], percLossI2Plot[2+idx, 4]])
+    PLTable2.add_row(["Non-SH: 10v5", percLossDispPlot[2+idx, 5], percLossQPlot[2+idx, 5], percLossI2Plot[2+idx, 5]])
+    PLTable2.add_row(["Non-SH: 5v2", percLossDispPlot[2+idx, 6], percLossQPlot[2+idx, 6], percLossI2Plot[2+idx, 6]])
+    PLTable2.add_row(["Fashion-MNIST", "Dispersion", "Q", "I\u00B2"])
+    PLTable2.add_row(["SH: 10v5", percLossDispPlot[4+idx, 3], percLossQPlot[4+idx, 3], percLossI2Plot[4+idx, 3]])
+    PLTable2.add_row(["SH: 5v2", percLossDispPlot[4+idx, 4], percLossQPlot[4+idx, 4], percLossI2Plot[4+idx, 4]])
+    PLTable2.add_row(["Non-SH: 10v5", percLossDispPlot[4+idx, 5], percLossQPlot[4+idx, 5], percLossI2Plot[4+idx, 5]])
+    PLTable2.add_row(["Non-SH: 5v2", percLossDispPlot[4+idx, 6], percLossQPlot[4+idx, 6], percLossI2Plot[4+idx, 6]])
+
+    PLEpsData2 = PLTable2.get_string()
+    with open("Table_7_" + "%s" % parset[idx] + "_pl2.txt", "w") as table7:
+        table7.write(PLEpsData2)
+
+    if idx == 0:
+        varset = epsset
+    else:
+        varset = dtaset
+
+    for fi in range(6):
+        if fi % 2 == 0:
+            plt.errorbar(varset, mseDisp[idx, fi], yerr = np.minimum(stdDisp[idx, fi], np.sqrt(mseDisp[idx, fi]), np.divide(mseDisp[idx, fi], 2)), color = 'blue', marker = 'o', label = cifarset[0])
+            plt.errorbar(varset, mseDisp[2+idx, fi], yerr = np.minimum(stdDisp[2+idx, fi], np.sqrt(mseDisp[2+idx, fi]), np.divide(mseDisp[2+idx, fi], 2)), color = 'green', marker = 'o', label = cifarset[1])
+            plt.errorbar(varset, mseDisp[4+idx, fi], yerr = np.minimum(stdDisp[4+idx, fi], np.sqrt(mseDisp[4+idx, fi]), np.divide(mseDisp[4+idx, fi], 2)), color = 'orange', marker = 'o', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_disp.png")
+            plt.clf()
+
+            plt.errorbar(varset, mseQ[idx, fi], yerr = np.minimum(stdQ[idx, fi], np.sqrt(mseQ[idx, fi]), np.divide(mseQ[idx, fi], 2)), color = 'blue', marker = 'o', label = cifarset[0])
+            plt.errorbar(varset, mseQ[2+idx, fi], yerr = np.minimum(stdQ[2+idx, fi], np.sqrt(mseQ[2+idx, fi]), np.divide(mseQ[2+idx, fi], 2)), color = 'green', marker = 'o', label = cifarset[1])
+            plt.errorbar(varset, mseQ[4+idx, fi], yerr = np.minimum(stdQ[4+idx, fi], np.sqrt(mseQ[4+idx, fi]), np.divide(mseQ[4+idx, fi], 2)), color = 'orange', marker = 'o', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_q.png")
+            plt.clf()
+
+            plt.errorbar(varset, mseI2[idx, fi], yerr = np.minimum(stdI2[idx, fi], np.sqrt(mseI2[idx, fi]), np.divide(mseI2[idx, fi], 2)), color = 'blue', marker = 'o', label = cifarset[0])
+            plt.errorbar(varset, mseI2[2+idx, fi], yerr = np.minimum(stdI2[2+idx, fi], np.sqrt(mseI2[2+idx, fi]), np.divide(mseI2[2+idx, fi], 2)), color = 'green', marker = 'o', label = cifarset[1])
+            plt.errorbar(varset, mseI2[4+idx, fi], yerr = np.minimum(stdI2[4+idx, fi], np.sqrt(mseI2[4+idx, fi]), np.divide(mseI2[4+idx, fi], 2)), color = 'orange', marker = 'o', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_i2.png")
+            plt.clf()
+        
+        else:
+            plt.errorbar(varset, mseDisp[idx, fi], yerr = np.minimum(stdDisp[idx, fi], np.sqrt(mseDisp[idx, fi]), np.divide(mseDisp[idx, fi], 2)), color = 'blueviolet', marker = 'x', label = cifarset[0])
+            plt.errorbar(varset, mseDisp[2+idx, fi], yerr = np.minimum(stdDisp[2+idx, fi], np.sqrt(mseDisp[2+idx, fi]), np.divide(mseDisp[2+idx, fi], 2)), color = 'lime', marker = 'x', label = cifarset[1])
+            plt.errorbar(varset, mseDisp[4+idx, fi], yerr = np.minimum(stdDisp[4+idx, fi], np.sqrt(mseDisp[4+idx, fi]), np.divide(mseDisp[4+idx, fi], 2)), color = 'gold', marker = 'x', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_disp.png")
+            plt.clf()
+
+            plt.errorbar(varset, mseQ[idx, fi], yerr = np.minimum(stdQ[idx, fi], np.sqrt(mseQ[idx, fi]), np.divide(mseQ[idx, fi], 2)), color = 'blueviolet', marker = 'x', label = cifarset[0])
+            plt.errorbar(varset, mseQ[2+idx, fi], yerr = np.minimum(stdQ[2+idx, fi], np.sqrt(mseQ[2+idx, fi]), np.divide(mseQ[2+idx, fi], 2)), color = 'lime', marker = 'x', label = cifarset[1])
+            plt.errorbar(varset, mseQ[4+idx, fi], yerr = np.minimum(stdQ[4+idx, fi], np.sqrt(mseQ[4+idx, fi]), np.divide(mseQ[4+idx, fi], 2)), color = 'gold', marker = 'x', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_q.png")
+            plt.clf()
+
+            plt.errorbar(varset, mseI2[idx, fi], yerr = np.minimum(stdI2[idx, fi], np.sqrt(mseI2[idx, fi]), np.divide(mseI2[idx, fi], 2)), color = 'blueviolet', marker = 'x', label = cifarset[0])
+            plt.errorbar(varset, mseI2[2+idx, fi], yerr = np.minimum(stdI2[2+idx, fi], np.sqrt(mseI2[2+idx, fi]), np.divide(mseI2[2+idx, fi], 2)), color = 'lime', marker = 'x', label = cifarset[1])
+            plt.errorbar(varset, mseI2[4+idx, fi], yerr = np.minimum(stdI2[4+idx, fi], np.sqrt(mseI2[4+idx, fi]), np.divide(mseI2[4+idx, fi], 2)), color = 'gold', marker = 'x', label = cifarset[2])
+            plt.legend(loc = 'best')
+            plt.yscale('log')
+            plt.xlabel("Value of " + "%s" % graphset[idx])
+            plt.ylabel("EMSE of Gaussian Mechanism")
+            plt.savefig("Graph_" + "%s" % freqset[fi] + "_vary_" + "%s" % parset[idx] + "_q.png")
+            plt.clf()
 
 print("Finished.\n")
