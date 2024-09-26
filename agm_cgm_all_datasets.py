@@ -384,7 +384,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                     mseI2TTableATemp[rep] = mseI2T
                     mseCTableATemp[rep] = mseC
 
-                mseI2EPlotATemp[rep] = mseI2E
+                mseI2EPlotATemp[fi, val, rep] = mseI2E
 
             else:
                 if fi == 0 and val == 0 and idx == 1: 
