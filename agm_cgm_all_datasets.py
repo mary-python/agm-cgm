@@ -247,8 +247,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             wImageArray = np.zeros((sampleSize, dim))
 
             for j in range(0, sampleSize):
-                wVectorSquared = np.power(wVector[j], 2)
-                weight[j] = np.divide(1.0, wVectorSquared)
+                weight[j] = np.divide(1.0, wVector[j])
 
                 # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
                 wImageArray[j] = np.multiply(weight[j], imageArray[j])
@@ -267,7 +266,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             mseQEList = np.zeros(sampleSize)
             mseTList = np.zeros(sampleSize, dtype = np.float64)
             mseQTList = np.zeros(sampleSize, dtype = np.float64)
-            weightedTrueDisp = np.zeros(sampleSize)
+            I2TrueDenom = np.zeros(sampleSize)
             noisyQ = np.zeros(sampleSize)
 
             # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
@@ -286,7 +285,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 # INCORPORATING WEIGHTS FOR STATISTICS ON Q
                 trueDisp = np.power(trueDiff, 2)
                 wTrueDisp = np.power(wTrueDiff, 2)
-                weightedTrueDisp[j] = np.multiply(weight[j], wTrueDisp)
+                I2TrueDenom[j] = np.multiply(weight[j], wTrueDisp)
                 noisyVar = np.power(noisyDiff, 2)
                 wNoisyVar = np.power(wNoisyDiff, 2)
                 weightedNoisyVar = np.multiply(weight[j], wNoisyVar)
@@ -297,7 +296,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
                 # EMSE = MSE OF FORMULA OF DISPERSION OR Q
                 mseEList[j] = np.power(np.subtract(noisyDisp, trueDisp), 2)
-                mseQEList[j] = np.power(np.subtract(noisyQ[j], weightedTrueDisp[j]), 2)
+                mseQEList[j] = np.power(np.subtract(noisyQ[j], I2TrueDenom[j]), 2)
 
                 # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING TMSE USING VARIABLES DEFINED ABOVE
                 doubleTrueDiff = np.multiply(2, trueDiff)
@@ -313,9 +312,9 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 extraTermSquared = np.power(extraTerm, 2)
                 wExtraTermSquared = np.power(wExtraTerm, 2)
                 mseTList[j] = np.sum(extraTermSquared)
-                mseQTList[j] = np.sum(wExtraTermSquared)
+                mseQTList[j] = np.sum(wExtraTermSquared)               
 
-            wTDSum = np.sum(weightedTrueDisp)
+            wTDSum = np.sum(I2TrueDenom)
             noisyQSum = np.sum(noisyQ)
             mseE = np.sum(mseEList)
             mseT = np.sum(mseTList)
@@ -353,11 +352,12 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             noisyI2 = np.add(I2Noise, xi3)
 
             # COMPUTE EMSE AND TMSE
-            diffEI2 = np.subtract(noisyI2, trueI2)
-            mseI2E = np.power(diffEI2, 2)
-            diffTI2Prep = np.subtract(xi3, I2Noise)
-            diffTI2 = np.add(diffTI2Prep, trueI2)
-            mseI2T = np.power(diffTI2, 2)
+            for j in range(0, sampleSize):
+                diffEI2 = np.subtract(noisyI2, trueI2)
+                mseI2E = np.power(diffEI2, 2)
+                diffTI2Prep = np.subtract(xi3, I2Noise)
+                diffTI2 = np.add(diffTI2Prep, trueI2)
+                mseI2T = np.power(diffTI2, 2)
 
             # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
@@ -593,7 +593,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
     def computePercLoss(a, b):
         percLoss = np.divide(np.subtract(a, b), a)*100
-        return np.round(np.mean(percLoss), 4)
+        return round(np.mean(percLoss), 4)
 
     percLossDispTable[0] = computePercLoss(mseDispEPlotA[4], mseDispEPlotA[5])
     percLossDispTable[1] = computePercLoss(mseDispEPlotA[2], mseDispEPlotA[3])
@@ -648,7 +648,7 @@ runLoopVaryDta(2, 1, dimFashion, numFashion, newImagesFashion, labelsFashion, GS
 
 for idx in range(2):
 
-    PLTable1 = PrettyTable(["Privacy Loss", "Dispersion", "Q", "I\u00B2"])
+    PLTable1 = PrettyTable(["Privacy Loss (%)", "Dispersion", "Q", "I\u00B2"])
     PLTable1.add_row(["Cifar-10", "", "", ""])
     PLTable1.add_row(["10 labels", percLossDisp[idx, 0], percLossQ[idx, 0], percLossI2[idx, 0]])
     PLTable1.add_row(["5 labels", percLossDisp[idx, 1], percLossQ[idx, 1], percLossI2[idx, 1]])
@@ -666,7 +666,7 @@ for idx in range(2):
     with open("Table_6_" + "%s" % parset[idx] + "_pl1.txt", "w") as table6:
         table6.write(PLData1)
 
-    PLTable2 = PrettyTable(["Privacy Loss", "Dispersion", "Q", "I\u00B2"])
+    PLTable2 = PrettyTable(["Privacy Loss (%)", "Dispersion", "Q", "I\u00B2"])
     PLTable2.add_row(["Cifar-10", "", "", ""])
     PLTable2.add_row(["SH: 10v5", percLossDisp[idx, 3], percLossQ[idx, 3], percLossI2[idx, 3]])
     PLTable2.add_row(["SH: 5v2", percLossDisp[idx, 4], percLossQ[idx, 4], percLossI2[idx, 4]])
