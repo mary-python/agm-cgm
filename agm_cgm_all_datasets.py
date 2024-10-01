@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from math import erf
 from numpy.random import normal
 from prettytable import PrettyTable
+from sigfig import round
 
 # INITIALISING SEED FOR RANDOM SAMPLING
 print("\nStarting...")
@@ -243,7 +244,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
             wVector = np.var(imageArray, axis=1)
             weight = np.zeros(sampleSize)
-            wImageArray = np.zeros((sampleSize, dim))       
+            wImageArray = np.zeros((sampleSize, dim))
 
             for j in range(0, sampleSize):
                 wVectorSquared = np.power(wVector[j], 2)
@@ -266,6 +267,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             mseQEList = np.zeros(sampleSize)
             mseTList = np.zeros(sampleSize, dtype = np.float64)
             mseQTList = np.zeros(sampleSize, dtype = np.float64)
+            weightedTrueDisp = np.zeros(sampleSize)
+            noisyQ = np.zeros(sampleSize)
 
             # ADDING FIRST NOISE TERM TO MU DERIVED FROM GAUSSIAN DISTRIBUTION WITH MEAN 0 AND VARIANCE SIGMA SQUARED
             for i in range(0, dim):
@@ -283,18 +286,18 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 # INCORPORATING WEIGHTS FOR STATISTICS ON Q
                 trueDisp = np.power(trueDiff, 2)
                 wTrueDisp = np.power(wTrueDiff, 2)
-                weightedTrueDisp = np.multiply(weight[j], wTrueDisp)
+                weightedTrueDisp[j] = np.multiply(weight[j], wTrueDisp)
                 noisyVar = np.power(noisyDiff, 2)
                 wNoisyVar = np.power(wNoisyDiff, 2)
                 weightedNoisyVar = np.multiply(weight[j], wNoisyVar)
 
                 xi2 = normal(0, sigma**2)
                 noisyDisp = np.add(noisyVar, xi2)
-                noisyQ = np.add(weightedNoisyVar, xi2)
+                noisyQ[j] = np.add(weightedNoisyVar, xi2)
 
                 # EMSE = MSE OF FORMULA OF DISPERSION OR Q
                 mseEList[j] = np.power(np.subtract(noisyDisp, trueDisp), 2)
-                mseQEList[j] = np.power(np.subtract(noisyQ, weightedTrueDisp), 2)
+                mseQEList[j] = np.power(np.subtract(noisyQ[j], weightedTrueDisp[j]), 2)
 
                 # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING TMSE USING VARIABLES DEFINED ABOVE
                 doubleTrueDiff = np.multiply(2, trueDiff)
@@ -312,6 +315,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 mseTList[j] = np.sum(extraTermSquared)
                 mseQTList[j] = np.sum(wExtraTermSquared)
 
+            wTDSum = np.sum(weightedTrueDisp)
+            noisyQSum = np.sum(noisyQ)
             mseE = np.sum(mseEList)
             mseT = np.sum(mseTList)
             mseQE = np.sum(mseQEList)
@@ -337,30 +342,22 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                     mseQETableCTemp[rep] = mseQE
                     mseQTTableCTemp[rep] = mseQT
 
-            mseI2EList = np.zeros(sampleSize)
-            mseI2TList = np.zeros(sampleSize)
+            # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
+            trueI2Prep = np.divide(sampleSize-1, wTDSum)
+            trueI2 = np.subtract(1, trueI2Prep)
+            I2Prep = np.divide(sampleSize-1, noisyQSum)
+            I2Noise = np.subtract(1, I2Prep)
 
-            for j in range(0, sampleSize):
+            # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
+            xi3 = normal(0, sigma**2)
+            noisyI2 = np.add(I2Noise, xi3)
 
-                # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
-                trueI2Prep = np.divide(sampleSize-1, weightedTrueDisp)
-                trueI2 = np.subtract(1, trueI2Prep)
-                I2Prep = np.divide(sampleSize-1, noisyQ)
-                I2True = np.subtract(1, I2Prep)
-
-                # ADD THIRD NOISE TERM BASED ON LEMMA 6.2
-                xi3 = normal(0, sigma**2)
-                noisyI2 = np.add(I2True, xi3)
-
-                # COMPUTE EMSE AND TMSE
-                diffEI2 = np.subtract(noisyI2, trueI2)
-                mseI2EList[j] = np.power(diffEI2, 2)
-                diffTI2Prep = np.subtract(xi3, I2True)
-                diffTI2 = np.add(diffTI2Prep, trueI2)
-                mseI2TList[j] = np.power(diffTI2, 2)
-
-            mseI2E = np.sum(mseI2EList)
-            mseI2T = np.sum(mseI2TList)
+            # COMPUTE EMSE AND TMSE
+            diffEI2 = np.subtract(noisyI2, trueI2)
+            mseI2E = np.power(diffEI2, 2)
+            diffTI2Prep = np.subtract(xi3, I2Noise)
+            diffTI2 = np.add(diffTI2Prep, trueI2)
+            mseI2T = np.power(diffTI2, 2)
 
             # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
@@ -453,49 +450,49 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 mseCentralTableA = np.mean(mseCTableATemp)
                 mseCentralTableC = np.mean(mseCTableCTemp)
 
-                mseDispTable[dataIndex, 0] = round(mseDispETableA, 14)
-                mseDispTable[dataIndex, 1] = round(mseDispETableC, 12)
-                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 14)
-                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 12)
-                mseQTable[dataIndex, 0] = round(mseQETableA, 14)
-                mseQTable[dataIndex, 1] = round(mseQETableC, 12)
-                mseQTable[dataIndex, 2] = round(mseQTTableA, 14)
-                mseQTable[dataIndex, 3] = round(mseQTTableC, 11)
-                mseI2Table[dataIndex, 0] = round(mseI2ETableA)
-                mseI2Table[dataIndex, 1] = round(mseI2ETableC)
-                mseI2Table[dataIndex, 2] = round(mseI2TTableA)
-                mseI2Table[dataIndex, 3] = round(mseI2TTableC)
-                mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 3)
-                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 1)
+                mseDispTable[dataIndex, 0] = round(mseDispETableA, 4)
+                mseDispTable[dataIndex, 1] = round(mseDispETableC, 4)
+                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 4)
+                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 4)
+                mseQTable[dataIndex, 0] = round(mseQETableA, 4)
+                mseQTable[dataIndex, 1] = round(mseQETableC, 4)
+                mseQTable[dataIndex, 2] = round(mseQTTableA, 4)
+                mseQTable[dataIndex, 3] = round(mseQTTableC, 4)
+                mseI2Table[dataIndex, 0] = round(mseI2ETableA, 4)
+                mseI2Table[dataIndex, 1] = round(mseI2ETableC, 4)
+                mseI2Table[dataIndex, 2] = round(mseI2TTableA, 4)
+                mseI2Table[dataIndex, 3] = round(mseI2TTableC, 4)
+                mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 4)
+                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 4)
 
-                mseDispTable[dataIndex, 4] = np.round(np.divide(mseDispETableA, mseDispETableC), 7)
-                mseDispTable[dataIndex, 5] = np.round(np.divide(mseDispTTableA, mseDispTTableC), 10)
-                mseDispTable[dataIndex, 6] = np.round(np.divide(mseDispETableA, mseDispTTableA), 4)
-                mseDispTable[dataIndex, 7] = np.round(np.divide(mseDispETableC, mseDispTTableC), 4)
-                mseQTable[dataIndex, 4] = np.round(np.divide(mseQETableA, mseQETableC), 9)
-                mseQTable[dataIndex, 5] = np.round(np.divide(mseQTTableA, mseQTTableC), 7)
-                mseQTable[dataIndex, 6] = np.round(np.divide(mseQETableA, mseQTTableA), 4)
-                mseQTable[dataIndex, 7] = np.round(np.divide(mseQETableC, mseQTTableC), 4)
-                mseI2Table[dataIndex, 4] = np.round(np.divide(mseI2ETableA, mseI2ETableC), 7)
-                mseI2Table[dataIndex, 5] = np.round(np.divide(mseI2TTableA, mseI2TTableC), 7)
-                mseI2Table[dataIndex, 6] = np.round(np.divide(mseI2ETableA, mseI2TTableA), 4)
-                mseI2Table[dataIndex, 7] = np.round(np.divide(mseI2ETableC, mseI2TTableC), 4)
-                mseCentralTable[dataIndex, 2] = np.round(np.divide(mseCentralTableA, mseCentralTableC), 7)
+                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 4)
+                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 4)
+                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 4)
+                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 4)
+                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 4)
+                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 4)
+                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 4)
+                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 4)
+                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 4)
+                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 4)
+                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 4)
+                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 4)
+                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 4)
 
-                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 16)
-                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 13)
-                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 16)
-                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 13)
-                stdQTable[dataIndex, 0] = round(np.std(mseQETableATemp), 16)
-                stdQTable[dataIndex, 1] = round(np.std(mseQETableCTemp), 13)
-                stdQTable[dataIndex, 2] = round(np.std(mseQTTableATemp), 16)
-                stdQTable[dataIndex, 3] = round(np.std(mseQTTableCTemp), 13)
-                stdI2Table[dataIndex, 0] = round(np.std(mseI2ETableATemp))
-                stdI2Table[dataIndex, 1] = round(np.std(mseI2ETableCTemp))
-                stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp))
-                stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp))
-                stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 3)
-                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 1)
+                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 4)
+                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 4)
+                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 4)
+                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 4)
+                stdQTable[dataIndex, 0] = round(np.std(mseQETableATemp), 4)
+                stdQTable[dataIndex, 1] = round(np.std(mseQETableCTemp), 4)
+                stdQTable[dataIndex, 2] = round(np.std(mseQTTableATemp), 4)
+                stdQTable[dataIndex, 3] = round(np.std(mseQTTableCTemp), 4)
+                stdI2Table[dataIndex, 0] = round(np.std(mseI2ETableATemp), 4)
+                stdI2Table[dataIndex, 1] = round(np.std(mseI2ETableCTemp), 4)
+                stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp), 4)
+                stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp), 4)
+                stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 4)
+                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 4)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
