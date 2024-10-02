@@ -253,7 +253,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 wImageArray[j] = np.multiply(weight[j], imageArray[j])
 
             mu = np.mean(imageArray, axis=0)
-            wSumMu = np.sum(wImageArray, axis=0)
+            wSumMu = (np.sum(wImageArray, axis=0))/sampleSize
 
             # DIVIDING SUM OF WEIGHTED VECTORS BY SUM OF WEIGHTS
             sumWeight = np.sum(weight)
@@ -277,10 +277,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
             # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
             for j in range(0, sampleSize):
-                trueDiff = np.sum(np.subtract(imageArray[j], mu))
-                wTrueDiff = np.sum(np.subtract(imageArray[j], wMu))
-                noisyDiff = np.sum(np.subtract(imageArray[j], noisyMu))
-                wNoisyDiff = np.sum(np.subtract(imageArray[j], wNoisyMu))
+                trueDiff = (np.sum(np.subtract(imageArray[j], mu)))/dim
+                wTrueDiff = (np.sum(np.subtract(imageArray[j], wMu)))/dim
+                noisyDiff = (np.sum(np.subtract(imageArray[j], noisyMu)))/dim
+                wNoisyDiff = (np.sum(np.subtract(imageArray[j], wNoisyMu)))/dim
 
                 # INCORPORATING WEIGHTS FOR STATISTICS ON Q
                 trueDisp = np.power(trueDiff, 2)
@@ -311,15 +311,15 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 wExtraTerm = np.add(weightedMult, xi2)
                 extraTermSquared = np.power(extraTerm, 2)
                 wExtraTermSquared = np.power(wExtraTerm, 2)
-                mseTList[j] = np.sum(extraTermSquared)
-                mseQTList[j] = np.sum(wExtraTermSquared)               
+                mseTList[j] = (np.sum(extraTermSquared))/dim
+                mseQTList[j] = (np.sum(wExtraTermSquared))/dim    
 
-            wTDSum = np.sum(I2TrueDenom)
-            noisyQSum = np.sum(noisyQ)
-            mseE = np.sum(mseEList)
-            mseT = np.sum(mseTList)
-            mseQE = np.sum(mseQEList)
-            mseQT = np.sum(mseQTList)
+            wTDSum = (np.sum(I2TrueDenom))/sampleSize
+            noisyQSum = (np.sum(noisyQ))/sampleSize
+            mseE = (np.sum(mseEList))/sampleSize
+            mseT = (np.sum(mseTList))/sampleSize
+            mseQE = (np.sum(mseQEList))/sampleSize
+            mseQT = (np.sum(mseQTList))/sampleSize
 
             if ACindex == 0:
 
@@ -559,16 +559,16 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
         ACTable.add_row(["Cifar-10", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[0, 0], mseQTable[0, 0], mseI2Table[0, 0]])
-        ACTable.add_row(["TMSE", mseDispTable[0, 1], mseQTable[0, 1], mseI2Table[0, 1]])
+        ACTable.add_row(["EMSE", mseDispTable[0, 4], mseQTable[0, 4], mseI2Table[0, 4]])
+        ACTable.add_row(["TMSE", mseDispTable[0, 5], mseQTable[0, 5], mseI2Table[0, 5]])
         ACTable.add_row(["CMSE", mseCentralTable[0, 2], mseCentralTable[0, 2], mseCentralTable[0, 2]])
         ACTable.add_row(["Cifar-100", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[1, 0], mseQTable[1, 0], mseI2Table[1, 0]])
-        ACTable.add_row(["TMSE", mseDispTable[1, 1], mseQTable[1, 1], mseI2Table[1, 1]])
+        ACTable.add_row(["EMSE", mseDispTable[1, 4], mseQTable[1, 4], mseI2Table[1, 4]])
+        ACTable.add_row(["TMSE", mseDispTable[1, 5], mseQTable[1, 5], mseI2Table[1, 5]])
         ACTable.add_row(["CMSE", mseCentralTable[1, 2], mseCentralTable[1, 2], mseCentralTable[1, 2]])
         ACTable.add_row(["Fashion-MNIST", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[2, 0], mseQTable[2, 0], mseI2Table[2, 0]])
-        ACTable.add_row(["TMSE", mseDispTable[2, 1], mseQTable[2, 1], mseI2Table[2, 1]])
+        ACTable.add_row(["EMSE", mseDispTable[2, 4], mseQTable[2, 4], mseI2Table[2, 4]])
+        ACTable.add_row(["TMSE", mseDispTable[2, 5], mseQTable[2, 5], mseI2Table[2, 5]])
         ACTable.add_row(["CMSE", mseCentralTable[2, 2], mseCentralTable[2, 2], mseCentralTable[2, 2]])
         
         ACData = ACTable.get_string()
@@ -577,14 +577,14 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
         ETTable.add_row(["Cifar-10", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[0, 2], mseQTable[0, 2], mseI2Table[0, 2]])
-        ETTable.add_row(["CGM", mseDispTable[0, 3], mseQTable[0, 3], mseI2Table[0, 3]])
+        ETTable.add_row(["AGM", mseDispTable[0, 6], mseQTable[0, 6], mseI2Table[0, 6]])
+        ETTable.add_row(["CGM", mseDispTable[0, 7], mseQTable[0, 7], mseI2Table[0, 7]])
         ETTable.add_row(["Cifar-100", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[1, 2], mseQTable[1, 2], mseI2Table[1, 2]])
-        ETTable.add_row(["CGM", mseDispTable[1, 3], mseQTable[1, 3], mseI2Table[1, 3]])
+        ETTable.add_row(["AGM", mseDispTable[1, 6], mseQTable[1, 6], mseI2Table[1, 6]])
+        ETTable.add_row(["CGM", mseDispTable[1, 7], mseQTable[1, 7], mseI2Table[1, 7]])
         ETTable.add_row(["Fashion-MNIST", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[2, 2], mseQTable[2, 2], mseI2Table[2, 2]])
-        ETTable.add_row(["CGM", mseDispTable[2, 3], mseQTable[2, 3], mseI2Table[2, 3]])
+        ETTable.add_row(["AGM", mseDispTable[2, 6], mseQTable[2, 6], mseI2Table[2, 6]])
+        ETTable.add_row(["CGM", mseDispTable[2, 7], mseQTable[2, 7], mseI2Table[2, 7]])
         
         ETData = ETTable.get_string()
         with open("Table_5_et.txt", "w") as table5:
