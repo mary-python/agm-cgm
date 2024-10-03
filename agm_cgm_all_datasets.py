@@ -309,8 +309,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
                 extraTerm = np.add(multiply, xi2)
                 wExtraTerm = np.add(weightedMult, xi2)
-                mseTList[j] = np.power(np.divide(np.sum(extraTerm), dim), 2)
-                mseQTList[j] = np.power(np.divide(np.sum(wExtraTerm), dim), 2)  
+                extraTermSquared = np.power(extraTerm, 2)
+                wExtraTermSquared = np.power(wExtraTerm, 2)
+                mseTList[j] = np.divide(np.sum(extraTermSquared), dim)
+                mseQTList[j] = np.divide(np.sum(wExtraTermSquared), dim)  
 
             wTDSum = np.divide(np.sum(I2TrueDenom), sampleSize)
             noisyQSum = np.divide(np.sum(noisyQ), sampleSize)
