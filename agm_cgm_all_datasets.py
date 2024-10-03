@@ -31,10 +31,10 @@ GSCifar = float(mp.sqrt(dimCifar))/numCifar
 GSFashion = float(mp.sqrt(dimFashion))/numFashion
 
 # INITIALISING OTHER PARAMETERS AND CONSTANTS
-cifarset = np.array(['Cifar-10', 'Cifar-100', 'Fashion-MNIST'])
+cifarset = np.array(['Cifar_10', 'Cifar_100', 'Fashion'])
 parset = np.array(['eps', 'dta'])
 graphset = np.array(['$\mathit{\u03b5}$', '$\mathit{\u03b4}$'])
-labelset = np.array(['10_labels', '5_labels', '2_labels'])
+labelset = np.array(['10 labels', '5 labels', '2 labels'])
 R = 10
 
 # ADAPTATION OF UNPICKLING OF CIFAR-10 FILES BY KRIZHEVSKY
@@ -242,7 +242,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
         def computeMSE(ACindex, rep, fi, imageArray, sigma, centralSigma):
 
             # INITIAL COMPUTATION OF WEIGHTED MEAN FOR Q BASED ON VECTOR VARIANCE
-            wVector = np.var(imageArray, axis=1)
+            wVector = np.var(imageArray, axis = 1)
             weight = np.zeros(sampleSize)
             wImageArray = np.zeros((sampleSize, dim))
 
@@ -253,11 +253,11 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 wImageArray[j] = np.multiply(weight[j], imageArray[j])
 
             mu = np.mean(imageArray, axis=0)
-            wSumMu = (np.sum(wImageArray, axis=0))/sampleSize
+            wSumMu = np.divide(np.sum(wImageArray, axis = 0), sampleSize)
 
             # DIVIDING SUM OF WEIGHTED VECTORS BY SUM OF WEIGHTS
             sumWeight = np.sum(weight)
-            wMu = (wSumMu)/sumWeight
+            wMu = np.divide(wSumMu, sumWeight)
 
             noisyMu = np.zeros(dim)
             wNoisyMu = np.zeros(dim)
@@ -277,10 +277,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
             # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
             for j in range(0, sampleSize):
-                trueDiff = (np.sum(np.subtract(imageArray[j], mu)))/dim
-                wTrueDiff = (np.sum(np.subtract(imageArray[j], wMu)))/dim
-                noisyDiff = (np.sum(np.subtract(imageArray[j], noisyMu)))/dim
-                wNoisyDiff = (np.sum(np.subtract(imageArray[j], wNoisyMu)))/dim
+                trueDiff = np.divide(np.sum(np.subtract(imageArray[j], mu)), dim)
+                wTrueDiff = np.divide(np.sum(np.subtract(imageArray[j], wMu)), dim)
+                noisyDiff = np.divide(np.sum(np.subtract(imageArray[j], noisyMu)), dim)
+                wNoisyDiff = np.divide(np.sum(np.subtract(imageArray[j], wNoisyMu)), dim)
 
                 # INCORPORATING WEIGHTS FOR STATISTICS ON Q
                 trueDisp = np.power(trueDiff, 2)
@@ -295,8 +295,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 noisyQ[j] = np.add(weightedNoisyVar, xi2)
 
                 # EMSE = MSE OF FORMULA OF DISPERSION OR Q
-                mseEList[j] = np.power(np.subtract(noisyDisp, trueDisp), 2)
-                mseQEList[j] = np.power(np.subtract(noisyQ[j], I2TrueDenom[j]), 2)
+                mseEList[j] = np.subtract(noisyDisp, trueDisp)
+                mseQEList[j] = np.subtract(noisyQ[j], I2TrueDenom[j])
 
                 # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING TMSE USING VARIABLES DEFINED ABOVE
                 doubleTrueDiff = np.multiply(2, trueDiff)
@@ -309,17 +309,15 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
                 extraTerm = np.add(multiply, xi2)
                 wExtraTerm = np.add(weightedMult, xi2)
-                extraTermSquared = np.power(extraTerm, 2)
-                wExtraTermSquared = np.power(wExtraTerm, 2)
-                mseTList[j] = (np.sum(extraTermSquared))/dim
-                mseQTList[j] = (np.sum(wExtraTermSquared))/dim    
+                mseTList[j] = np.divide(np.sum(extraTerm), dim)
+                mseQTList[j] = np.divide(np.sum(wExtraTerm), dim)    
 
-            wTDSum = (np.sum(I2TrueDenom))/sampleSize
-            noisyQSum = (np.sum(noisyQ))/sampleSize
-            mseE = (np.sum(mseEList))/sampleSize
-            mseT = (np.sum(mseTList))/sampleSize
-            mseQE = (np.sum(mseQEList))/sampleSize
-            mseQT = (np.sum(mseQTList))/sampleSize
+            wTDSum = np.divide(np.sum(I2TrueDenom), sampleSize)
+            noisyQSum = np.divide(np.sum(noisyQ), sampleSize)
+            mseE = np.power(np.divide(np.sum(mseEList), sampleSize), 2)
+            mseT = np.power(np.divide(np.sum(mseTList), sampleSize), 2)
+            mseQE = np.power(np.divide(np.sum(mseQEList), sampleSize), 2)
+            mseQT = np.power(np.divide(np.sum(mseQTList), sampleSize), 2)
 
             if ACindex == 0:
 
@@ -351,13 +349,19 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             xi3 = normal(0, sigma**2)
             noisyI2 = np.add(I2Noise, xi3)
 
+            mseI2EList = np.zeros(sampleSize)
+            mseI2TList = np.zeros(sampleSize)
+
             # COMPUTE EMSE AND TMSE
             for j in range(0, sampleSize):
                 diffEI2 = np.subtract(noisyI2, trueI2)
-                mseI2E = np.power(diffEI2, 2)
+                mseI2EList[j] = np.divide(diffEI2, dim)
                 diffTI2Prep = np.subtract(xi3, I2Noise)
                 diffTI2 = np.add(diffTI2Prep, trueI2)
-                mseI2T = np.power(diffTI2, 2)
+                mseI2TList[j] = np.divide(diffTI2, dim)
+
+            mseI2E = np.power(np.divide(np.sum(mseI2EList), sampleSize), 2)
+            mseI2T = np.power(np.divide(np.sum(mseI2TList), sampleSize), 2)
 
             # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
@@ -463,21 +467,21 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 mseI2Table[dataIndex, 2] = round(mseI2TTableA, 4)
                 mseI2Table[dataIndex, 3] = round(mseI2TTableC, 4)
                 mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 4)
-                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 4)
+                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 3)
 
-                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 4)
-                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 4)
-                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 4)
-                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 4)
-                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 4)
-                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 4)
-                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 4)
-                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 4)
-                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 4)
-                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 4)
-                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 4)
-                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 4)
-                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 4)
+                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 6)
+                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 6)
+                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 6)
+                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 6)
+                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 5)
+                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 5)
+                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 5)
+                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 5)
+                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 5)
+                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 5)
+                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 5)
+                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 5)
+                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 5)
 
                 stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 4)
                 stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 4)
@@ -492,7 +496,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp), 4)
                 stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp), 4)
                 stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 4)
-                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 4)
+                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 3)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
@@ -692,68 +696,121 @@ for idx in range(2):
     else:
         varset = dtaset
 
-    for li in range(3):
-        eq = 2*li
-        uneq = (2*li) + 1
+    plt.errorbar(varset, mseDisp[idx, 0], yerr = np.minimum(stdDisp[idx, 0], np.sqrt(mseDisp[idx, 0]), np.divide(mseDisp[idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseDisp[idx, 1], yerr = np.minimum(stdDisp[idx, 1], np.sqrt(mseDisp[idx, 1]), np.divide(mseDisp[idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseDisp[idx, 2], yerr = np.minimum(stdDisp[idx, 2], np.sqrt(mseDisp[idx, 2]), np.divide(mseDisp[idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseDisp[idx, 3], yerr = np.minimum(stdDisp[idx, 3], np.sqrt(mseDisp[idx, 3]), np.divide(mseDisp[idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseDisp[idx, 4], yerr = np.minimum(stdDisp[idx, 4], np.sqrt(mseDisp[idx, 4]), np.divide(mseDisp[idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseDisp[idx, 5], yerr = np.minimum(stdDisp[idx, 5], np.sqrt(mseDisp[idx, 5]), np.divide(mseDisp[idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[0] + "_vary_" + "%s" % parset[idx] + "_disp.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseDisp[idx, eq], yerr = np.minimum(stdDisp[idx, eq], np.sqrt(mseDisp[idx, eq]), np.divide(mseDisp[idx, eq], 2)), color = 'blue', marker = 'o', label = f"{cifarset[0]}: equal")
-        plt.errorbar(varset, mseDisp[idx, uneq], yerr = np.minimum(stdDisp[idx, uneq], np.sqrt(mseDisp[idx, uneq]), np.divide(mseDisp[idx, uneq], 2)), color = 'blueviolet', marker = 'x', label = f"{cifarset[0]}: unequal")
-        plt.errorbar(varset, mseDisp[2+idx, eq], yerr = np.minimum(stdDisp[2+idx, eq], np.sqrt(mseDisp[2+idx, eq]), np.divide(mseDisp[2+idx, eq], 2)), color = 'green', marker = 'o', label = f"{cifarset[1]}: equal")
-        plt.errorbar(varset, mseDisp[2+idx, uneq], yerr = np.minimum(stdDisp[2+idx, uneq], np.sqrt(mseDisp[2+idx, uneq]), np.divide(mseDisp[2+idx, uneq], 2)), color = 'lime', marker = 'x', label = f"{cifarset[1]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Cifars_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_disp.png")
-        plt.clf()
+    plt.errorbar(varset, mseQ[idx, 0], yerr = np.minimum(stdQ[idx, 0], np.sqrt(mseQ[idx, 0]), np.divide(mseQ[idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseQ[idx, 1], yerr = np.minimum(stdQ[idx, 1], np.sqrt(mseQ[idx, 1]), np.divide(mseQ[idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseQ[idx, 2], yerr = np.minimum(stdQ[idx, 2], np.sqrt(mseQ[idx, 2]), np.divide(mseQ[idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseQ[idx, 3], yerr = np.minimum(stdQ[idx, 3], np.sqrt(mseQ[idx, 3]), np.divide(mseQ[idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseQ[idx, 4], yerr = np.minimum(stdQ[idx, 4], np.sqrt(mseQ[idx, 4]), np.divide(mseQ[idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseQ[idx, 5], yerr = np.minimum(stdQ[idx, 5], np.sqrt(mseQ[idx, 5]), np.divide(mseQ[idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[0] + "_vary_" + "%s" % parset[idx] + "_q.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseQ[idx, eq], yerr = np.minimum(stdQ[idx, eq], np.sqrt(mseQ[idx, eq]), np.divide(mseQ[idx, eq], 2)), color = 'blue', marker = 'o', label = f"{cifarset[0]}: equal")
-        plt.errorbar(varset, mseQ[idx, uneq], yerr = np.minimum(stdQ[idx, uneq], np.sqrt(mseQ[idx, uneq]), np.divide(mseQ[idx, uneq], 2)), color = 'blueviolet', marker = 'x', label = f"{cifarset[0]}: unequal")
-        plt.errorbar(varset, mseQ[2+idx, eq], yerr = np.minimum(stdQ[2+idx, eq], np.sqrt(mseQ[2+idx, eq]), np.divide(mseQ[2+idx, eq], 2)), color = 'green', marker = 'o', label = f"{cifarset[1]}: equal")
-        plt.errorbar(varset, mseQ[2+idx, uneq], yerr = np.minimum(stdQ[2+idx, uneq], np.sqrt(mseQ[2+idx, uneq]), np.divide(mseQ[2+idx, uneq], 2)), color = 'lime', marker = 'x', label = f"{cifarset[1]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Cifars_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_q.png")
-        plt.clf()
+    plt.errorbar(varset, mseI2[idx, 0], yerr = np.minimum(stdI2[idx, 0], np.sqrt(mseI2[idx, 0]), np.divide(mseI2[idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseI2[idx, 1], yerr = np.minimum(stdI2[idx, 1], np.sqrt(mseI2[idx, 1]), np.divide(mseI2[idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseI2[idx, 2], yerr = np.minimum(stdI2[idx, 2], np.sqrt(mseI2[idx, 2]), np.divide(mseI2[idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseI2[idx, 3], yerr = np.minimum(stdI2[idx, 3], np.sqrt(mseI2[idx, 3]), np.divide(mseI2[idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseI2[idx, 4], yerr = np.minimum(stdI2[idx, 4], np.sqrt(mseI2[idx, 4]), np.divide(mseI2[idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseI2[idx, 5], yerr = np.minimum(stdI2[idx, 5], np.sqrt(mseI2[idx, 5]), np.divide(mseI2[idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[0] + "_vary_" + "%s" % parset[idx] + "_i2.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseI2[idx, eq], yerr = np.minimum(stdI2[idx, eq], np.sqrt(mseI2[idx, eq]), np.divide(mseI2[idx, eq], 2)), color = 'blue', marker = 'o', label = f"{cifarset[0]}: equal")
-        plt.errorbar(varset, mseI2[idx, uneq], yerr = np.minimum(stdI2[idx, uneq], np.sqrt(mseI2[idx, uneq]), np.divide(mseI2[idx, uneq], 2)), color = 'blueviolet', marker = 'x', label = f"{cifarset[0]}: unequal")
-        plt.errorbar(varset, mseI2[2+idx, eq], yerr = np.minimum(stdI2[2+idx, eq], np.sqrt(mseI2[2+idx, eq]), np.divide(mseI2[2+idx, eq], 2)), color = 'green', marker = 'o', label = f"{cifarset[1]}: equal")
-        plt.errorbar(varset, mseI2[2+idx, uneq], yerr = np.minimum(stdI2[2+idx, uneq], np.sqrt(mseI2[2+idx, uneq]), np.divide(mseI2[2+idx, uneq], 2)), color = 'lime', marker = 'x', label = f"{cifarset[1]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Cifars_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_i2.png")
-        plt.clf()
+    plt.errorbar(varset, mseDisp[2+idx, 0], yerr = np.minimum(stdDisp[2+idx, 0], np.sqrt(mseDisp[2+idx, 0]), np.divide(mseDisp[2+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseDisp[2+idx, 1], yerr = np.minimum(stdDisp[2+idx, 1], np.sqrt(mseDisp[2+idx, 1]), np.divide(mseDisp[2+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseDisp[2+idx, 2], yerr = np.minimum(stdDisp[2+idx, 2], np.sqrt(mseDisp[2+idx, 2]), np.divide(mseDisp[2+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseDisp[2+idx, 3], yerr = np.minimum(stdDisp[2+idx, 3], np.sqrt(mseDisp[2+idx, 3]), np.divide(mseDisp[2+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseDisp[2+idx, 4], yerr = np.minimum(stdDisp[2+idx, 4], np.sqrt(mseDisp[2+idx, 4]), np.divide(mseDisp[2+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseDisp[2+idx, 5], yerr = np.minimum(stdDisp[2+idx, 5], np.sqrt(mseDisp[2+idx, 5]), np.divide(mseDisp[2+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[1] + "_vary_" + "%s" % parset[idx] + "_disp.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseDisp[4+idx, eq], yerr = np.minimum(stdDisp[4+idx, eq], np.sqrt(mseDisp[4+idx, eq]), np.divide(mseDisp[4+idx, eq], 2)), color = 'orange', marker = 'o', label = f"{cifarset[2]}: equal")
-        plt.errorbar(varset, mseDisp[4+idx, uneq], yerr = np.minimum(stdDisp[4+idx, uneq], np.sqrt(mseDisp[4+idx, uneq]), np.divide(mseDisp[4+idx, uneq], 2)), color = 'gold', marker = 'x', label = f"{cifarset[2]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Fashion_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_disp.png")
-        plt.clf()
+    plt.errorbar(varset, mseQ[2+idx, 0], yerr = np.minimum(stdQ[2+idx, 0], np.sqrt(mseQ[2+idx, 0]), np.divide(mseQ[2+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseQ[2+idx, 1], yerr = np.minimum(stdQ[2+idx, 1], np.sqrt(mseQ[2+idx, 1]), np.divide(mseQ[2+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseQ[2+idx, 2], yerr = np.minimum(stdQ[2+idx, 2], np.sqrt(mseQ[2+idx, 2]), np.divide(mseQ[2+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseQ[2+idx, 3], yerr = np.minimum(stdQ[2+idx, 3], np.sqrt(mseQ[2+idx, 3]), np.divide(mseQ[2+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseQ[2+idx, 4], yerr = np.minimum(stdQ[2+idx, 4], np.sqrt(mseQ[2+idx, 4]), np.divide(mseQ[2+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseQ[2+idx, 5], yerr = np.minimum(stdQ[2+idx, 5], np.sqrt(mseQ[2+idx, 5]), np.divide(mseQ[2+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[1] + "_vary_" + "%s" % parset[idx] + "_q.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseQ[4+idx, eq], yerr = np.minimum(stdQ[4+idx, eq], np.sqrt(mseQ[4+idx, eq]), np.divide(mseQ[4+idx, eq], 2)), color = 'orange', marker = 'o', label = f"{cifarset[2]}: equal")
-        plt.errorbar(varset, mseQ[4+idx, uneq], yerr = np.minimum(stdQ[4+idx, uneq], np.sqrt(mseQ[4+idx, uneq]), np.divide(mseQ[4+idx, uneq], 2)), color = 'gold', marker = 'x', label = f"{cifarset[2]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Fashion_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_q.png")
-        plt.clf()
+    plt.errorbar(varset, mseI2[2+idx, 0], yerr = np.minimum(stdI2[2+idx, 0], np.sqrt(mseI2[2+idx, 0]), np.divide(mseI2[2+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseI2[2+idx, 1], yerr = np.minimum(stdI2[2+idx, 1], np.sqrt(mseI2[2+idx, 1]), np.divide(mseI2[2+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseI2[2+idx, 2], yerr = np.minimum(stdI2[2+idx, 2], np.sqrt(mseI2[2+idx, 2]), np.divide(mseI2[2+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseI2[2+idx, 3], yerr = np.minimum(stdI2[2+idx, 3], np.sqrt(mseI2[2+idx, 3]), np.divide(mseI2[2+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseI2[2+idx, 4], yerr = np.minimum(stdI2[2+idx, 4], np.sqrt(mseI2[2+idx, 4]), np.divide(mseI2[2+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseI2[2+idx, 5], yerr = np.minimum(stdI2[2+idx, 5], np.sqrt(mseI2[2+idx, 5]), np.divide(mseI2[2+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[1] + "_vary_" + "%s" % parset[idx] + "_i2.png")
+    plt.clf()
 
-        plt.errorbar(varset, mseI2[4+idx, eq], yerr = np.minimum(stdI2[4+idx, eq], np.sqrt(mseI2[4+idx, eq]), np.divide(mseI2[4+idx, eq], 2)), color = 'orange', marker = 'o', label = f"{cifarset[2]}: equal")
-        plt.errorbar(varset, mseI2[4+idx, uneq], yerr = np.minimum(stdI2[4+idx, uneq], np.sqrt(mseI2[4+idx, uneq]), np.divide(mseI2[4+idx, uneq], 2)), color = 'gold', marker = 'x', label = f"{cifarset[2]}: unequal")
-        plt.legend(loc = 'best')
-        plt.yscale('log')
-        plt.xlabel("Value of " + "%s" % graphset[idx])
-        plt.ylabel("EMSE of Gaussian Mechanism")
-        plt.savefig("Graph_Fashion_" + "%s" % labelset[li] + "_vary_" + "%s" % parset[idx] + "_i2.png")
-        plt.clf()
+    plt.errorbar(varset, mseDisp[4+idx, 0], yerr = np.minimum(stdDisp[4+idx, 0], np.sqrt(mseDisp[4+idx, 0]), np.divide(mseDisp[4+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseDisp[4+idx, 1], yerr = np.minimum(stdDisp[4+idx, 1], np.sqrt(mseDisp[4+idx, 1]), np.divide(mseDisp[4+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseDisp[4+idx, 2], yerr = np.minimum(stdDisp[4+idx, 2], np.sqrt(mseDisp[4+idx, 2]), np.divide(mseDisp[4+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseDisp[4+idx, 3], yerr = np.minimum(stdDisp[4+idx, 3], np.sqrt(mseDisp[4+idx, 3]), np.divide(mseDisp[4+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseDisp[4+idx, 4], yerr = np.minimum(stdDisp[4+idx, 4], np.sqrt(mseDisp[4+idx, 4]), np.divide(mseDisp[4+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseDisp[4+idx, 5], yerr = np.minimum(stdDisp[4+idx, 5], np.sqrt(mseDisp[4+idx, 5]), np.divide(mseDisp[4+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[2] + "_vary_" + "%s" % parset[idx] + "_disp.png")
+    plt.clf()
+
+    plt.errorbar(varset, mseQ[4+idx, 0], yerr = np.minimum(stdQ[4+idx, 0], np.sqrt(mseQ[4+idx, 0]), np.divide(mseQ[4+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseQ[4+idx, 1], yerr = np.minimum(stdQ[4+idx, 1], np.sqrt(mseQ[4+idx, 1]), np.divide(mseQ[4+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseQ[4+idx, 2], yerr = np.minimum(stdQ[4+idx, 2], np.sqrt(mseQ[4+idx, 2]), np.divide(mseQ[4+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseQ[4+idx, 3], yerr = np.minimum(stdQ[4+idx, 3], np.sqrt(mseQ[4+idx, 3]), np.divide(mseQ[4+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseQ[4+idx, 4], yerr = np.minimum(stdQ[4+idx, 4], np.sqrt(mseQ[4+idx, 4]), np.divide(mseQ[4+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseQ[4+idx, 5], yerr = np.minimum(stdQ[4+idx, 5], np.sqrt(mseQ[4+idx, 5]), np.divide(mseQ[4+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[2] + "_vary_" + "%s" % parset[idx] + "_q.png")
+    plt.clf()
+
+    plt.errorbar(varset, mseI2[4+idx, 0], yerr = np.minimum(stdI2[4+idx, 0], np.sqrt(mseI2[4+idx, 0]), np.divide(mseI2[4+idx, 0], 2)), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+    plt.errorbar(varset, mseI2[4+idx, 1], yerr = np.minimum(stdI2[4+idx, 1], np.sqrt(mseI2[4+idx, 1]), np.divide(mseI2[4+idx, 1], 2)), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+    plt.errorbar(varset, mseI2[4+idx, 2], yerr = np.minimum(stdI2[4+idx, 2], np.sqrt(mseI2[4+idx, 2]), np.divide(mseI2[4+idx, 2], 2)), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+    plt.errorbar(varset, mseI2[4+idx, 3], yerr = np.minimum(stdI2[4+idx, 3], np.sqrt(mseI2[4+idx, 3]), np.divide(mseI2[4+idx, 3], 2)), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+    plt.errorbar(varset, mseI2[4+idx, 4], yerr = np.minimum(stdI2[4+idx, 4], np.sqrt(mseI2[4+idx, 4]), np.divide(mseI2[4+idx, 4], 2)), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+    plt.errorbar(varset, mseI2[4+idx, 5], yerr = np.minimum(stdI2[4+idx, 5], np.sqrt(mseI2[4+idx, 5]), np.divide(mseI2[4+idx, 5], 2)), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+    plt.legend(loc = 'best')
+    plt.yscale('log')
+    plt.xlabel("Value of " + "%s" % graphset[idx])
+    plt.ylabel("EMSE of Gaussian Mechanism")
+    plt.savefig("Graph_" + "%s" % cifarset[2] + "_vary_" + "%s" % parset[idx] + "_i2.png")
+    plt.clf()
 
 print("Finished.\n")
