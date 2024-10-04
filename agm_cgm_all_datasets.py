@@ -252,8 +252,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 # MULTIPLYING EACH VECTOR BY ITS CORRESPONDING WEIGHTED MEAN
                 wImageArray[j] = np.multiply(weight[j], imageArray[j])
 
-            mu = np.mean(imageArray, axis=0)
-            wSumMu = np.divide(np.sum(wImageArray, axis = 0), sampleSize)
+            mu = np.mean(imageArray, axis = 0)
+            wSumMu = np.mean(wImageArray, axis = 0)
 
             # DIVIDING SUM OF WEIGHTED VECTORS BY SUM OF WEIGHTS
             sumWeight = np.sum(weight)
@@ -277,10 +277,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
             # FIRST SUBTRACTION BETWEEN CIFAR-10 VECTOR OF EACH CLIENT AND NOISY MEAN ACCORDING TO THEOREM FOR DISPERSION
             for j in range(0, sampleSize):
-                trueDiff = np.divide(np.sum(np.subtract(imageArray[j], mu)), dim)
-                wTrueDiff = np.divide(np.sum(np.subtract(imageArray[j], wMu)), dim)
-                noisyDiff = np.divide(np.sum(np.subtract(imageArray[j], noisyMu)), dim)
-                wNoisyDiff = np.divide(np.sum(np.subtract(imageArray[j], wNoisyMu)), dim)
+                trueDiff = np.mean(np.subtract(imageArray[j], mu))
+                wTrueDiff = np.mean(np.subtract(imageArray[j], wMu))
+                noisyDiff = np.mean(np.subtract(imageArray[j], noisyMu))
+                wNoisyDiff = np.mean(np.subtract(imageArray[j], wNoisyMu))
 
                 # INCORPORATING WEIGHTS FOR STATISTICS ON Q
                 trueDisp = np.power(trueDiff, 2)
@@ -295,8 +295,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 noisyQ[j] = np.add(weightedNoisyVar, xi2)
 
                 # EMSE = MSE OF FORMULA OF DISPERSION OR Q
-                mseEList[j] = np.power(np.subtract(noisyDisp, trueDisp), 2)
-                mseQEList[j] = np.power(np.subtract(noisyQ[j], I2TrueDenom[j]), 2)
+                mseEList[j] = np.subtract(noisyDisp, trueDisp)
+                mseQEList[j] = np.subtract(noisyQ[j], I2TrueDenom[j])
 
                 # ADDING SECOND NOISE TERM TO EXPRESSION OF DISPERSION AND COMPUTING TMSE USING VARIABLES DEFINED ABOVE
                 doubleTrueDiff = np.multiply(2, trueDiff)
@@ -309,17 +309,15 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
                 extraTerm = np.add(multiply, xi2)
                 wExtraTerm = np.add(weightedMult, xi2)
-                extraTermSquared = np.power(extraTerm, 2)
-                wExtraTermSquared = np.power(wExtraTerm, 2)
-                mseTList[j] = np.divide(np.sum(extraTermSquared), dim)
-                mseQTList[j] = np.divide(np.sum(wExtraTermSquared), dim)  
+                mseTList[j] = np.mean(extraTerm)
+                mseQTList[j] = np.mean(wExtraTerm) 
 
-            wTDSum = np.divide(np.sum(I2TrueDenom), sampleSize)
-            noisyQSum = np.divide(np.sum(noisyQ), sampleSize)
-            mseE = np.divide(np.sum(mseEList), sampleSize)
-            mseT = np.divide(np.sum(mseTList), sampleSize)
-            mseQE = np.divide(np.sum(mseQEList), sampleSize)
-            mseQT = np.divide(np.sum(mseQTList), sampleSize)
+            wTDSum = np.mean(I2TrueDenom)
+            noisyQSum = np.mean(noisyQ)
+            mseE = np.power(np.mean(mseEList), 2)
+            mseT = np.power(np.mean(mseTList), 2)
+            mseQE = np.power(np.mean(mseQEList), 2)
+            mseQT = np.power(np.mean(mseQTList), 2)
 
             if ACindex == 0:
 
@@ -362,8 +360,8 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 diffTI2 = np.add(diffTI2Prep, trueI2)
                 mseI2TList[j] = np.divide(diffTI2, dim)
 
-            mseI2E = np.power(np.divide(np.sum(mseI2EList), sampleSize), 2)
-            mseI2T = np.power(np.divide(np.sum(mseI2TList), sampleSize), 2)
+            mseI2E = np.power(np.mean(mseI2EList), 2)
+            mseI2T = np.power(np.mean(mseI2TList), 2)
 
             # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
@@ -456,10 +454,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 mseCentralTableA = np.mean(mseCTableATemp)
                 mseCentralTableC = np.mean(mseCTableCTemp)
 
-                mseDispTable[dataIndex, 0] = round(mseDispETableA, 4)
-                mseDispTable[dataIndex, 1] = round(mseDispETableC, 4)
-                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 4)
-                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 4)
+                mseDispTable[dataIndex, 0] = round(mseDispETableA, 6)
+                mseDispTable[dataIndex, 1] = round(mseDispETableC, 6)
+                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 6)
+                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 6)
                 mseQTable[dataIndex, 0] = round(mseQETableA, 4)
                 mseQTable[dataIndex, 1] = round(mseQETableC, 4)
                 mseQTable[dataIndex, 2] = round(mseQTTableA, 4)
@@ -469,26 +467,26 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 mseI2Table[dataIndex, 2] = round(mseI2TTableA, 4)
                 mseI2Table[dataIndex, 3] = round(mseI2TTableC, 4)
                 mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 4)
-                mseCentralTable[dataIndex, 1] = round(mseCentralTableC, 3)
+                mseCentralTable[dataIndex, 1] = np.round(mseCentralTableC)
 
-                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 6)
-                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 6)
-                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 6)
-                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 6)
-                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 5)
-                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 5)
-                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 5)
-                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 5)
-                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 5)
-                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 5)
-                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 5)
-                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 5)
-                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 5)
+                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 4)
+                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 4)
+                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 4)
+                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 4)
+                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 4)
+                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 4)
+                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 4)
+                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 4)
+                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 4)
+                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 4)
+                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 4)
+                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 4)
+                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 4)
 
-                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 4)
-                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 4)
-                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 4)
-                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 4)
+                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 6)
+                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 6)
+                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 6)
+                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 6)
                 stdQTable[dataIndex, 0] = round(np.std(mseQETableATemp), 4)
                 stdQTable[dataIndex, 1] = round(np.std(mseQETableCTemp), 4)
                 stdQTable[dataIndex, 2] = round(np.std(mseQTTableATemp), 4)
@@ -498,7 +496,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp), 4)
                 stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp), 4)
                 stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 4)
-                stdCentralTable[dataIndex, 1] = round(np.std(mseCTableCTemp), 3)
+                stdCentralTable[dataIndex, 1] = np.round(np.std(mseCTableCTemp))
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
