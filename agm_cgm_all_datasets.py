@@ -505,37 +505,6 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             stdQEPlotA[fi, val] = np.std(mseQEPlotATemp[fi, val])
             stdI2EPlotA[fi, val] = np.std(mseI2EPlotATemp[fi, val])
 
-            if fi == 0 and val == 0 and idx == 0:
-
-                # EXPERIMENT 3: STATISTICAL HETEROGENEITY
-                def computePercChange(a, b):
-                    percChange = np.divide(np.subtract(a, b), a)*100
-                    return round(np.mean(percChange), 4)
-
-                percChangeDispTable[0] = computePercChange(mseDispEPlotA[4], mseDispEPlotA[5])
-                percChangeDispTable[1] = computePercChange(mseDispEPlotA[2], mseDispEPlotA[3])
-                percChangeDispTable[2] = computePercChange(mseDispEPlotA[0], mseDispEPlotA[1])
-                percChangeDispTable[3] = computePercChange(mseDispEPlotA[0], mseDispEPlotA[2])
-                percChangeDispTable[4] = computePercChange(mseDispEPlotA[2], mseDispEPlotA[4])
-                percChangeDispTable[5] = computePercChange(mseDispEPlotA[1], mseDispEPlotA[3])
-                percChangeDispTable[6] = computePercChange(mseDispEPlotA[3], mseDispEPlotA[5])
-
-                percChangeQTable[0] = computePercChange(mseQEPlotA[4], mseQEPlotA[5])
-                percChangeQTable[1] = computePercChange(mseQEPlotA[2], mseQEPlotA[3])
-                percChangeQTable[2] = computePercChange(mseQEPlotA[0], mseQEPlotA[1])
-                percChangeQTable[3] = computePercChange(mseQEPlotA[0], mseQEPlotA[2])
-                percChangeQTable[4] = computePercChange(mseQEPlotA[2], mseQEPlotA[4])
-                percChangeQTable[5] = computePercChange(mseQEPlotA[1], mseQEPlotA[3])
-                percChangeQTable[6] = computePercChange(mseQEPlotA[3], mseQEPlotA[5])
-
-                percChangeI2Table[0] = computePercChange(mseI2EPlotA[4], mseI2EPlotA[5])
-                percChangeI2Table[1] = computePercChange(mseI2EPlotA[2], mseI2EPlotA[3])
-                percChangeI2Table[2] = computePercChange(mseI2EPlotA[0], mseI2EPlotA[1])
-                percChangeI2Table[3] = computePercChange(mseI2EPlotA[0], mseI2EPlotA[2])
-                percChangeI2Table[4] = computePercChange(mseI2EPlotA[2], mseI2EPlotA[4])
-                percChangeI2Table[5] = computePercChange(mseI2EPlotA[1], mseI2EPlotA[3])
-                percChangeI2Table[6] = computePercChange(mseI2EPlotA[3], mseI2EPlotA[5])
-
     # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
     if idx == 0:
         DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
@@ -624,6 +593,35 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
         ETData = ETTable.get_string()
         with open("Table_5_et.txt", "w") as table5:
             table5.write(ETData)
+    
+    # EXPERIMENT 3: STATISTICAL HETEROGENEITY
+    def computePercChange(a, b):
+        percChange = np.divide(np.subtract(a, b), a)*100
+        return round(np.mean(percChange), 4)
+
+    percChangeDispTable[0] = computePercChange(mseDispEPlotA[4], mseDispEPlotA[5])
+    percChangeDispTable[1] = computePercChange(mseDispEPlotA[2], mseDispEPlotA[3])
+    percChangeDispTable[2] = computePercChange(mseDispEPlotA[0], mseDispEPlotA[1])
+    percChangeDispTable[3] = computePercChange(mseDispEPlotA[0], mseDispEPlotA[2])
+    percChangeDispTable[4] = computePercChange(mseDispEPlotA[2], mseDispEPlotA[4])
+    percChangeDispTable[5] = computePercChange(mseDispEPlotA[1], mseDispEPlotA[3])
+    percChangeDispTable[6] = computePercChange(mseDispEPlotA[3], mseDispEPlotA[5])
+
+    percChangeQTable[0] = computePercChange(mseQEPlotA[4], mseQEPlotA[5])
+    percChangeQTable[1] = computePercChange(mseQEPlotA[2], mseQEPlotA[3])
+    percChangeQTable[2] = computePercChange(mseQEPlotA[0], mseQEPlotA[1])
+    percChangeQTable[3] = computePercChange(mseQEPlotA[0], mseQEPlotA[2])
+    percChangeQTable[4] = computePercChange(mseQEPlotA[2], mseQEPlotA[4])
+    percChangeQTable[5] = computePercChange(mseQEPlotA[1], mseQEPlotA[3])
+    percChangeQTable[6] = computePercChange(mseQEPlotA[3], mseQEPlotA[5])
+
+    percChangeI2Table[0] = computePercChange(mseI2EPlotA[4], mseI2EPlotA[5])
+    percChangeI2Table[1] = computePercChange(mseI2EPlotA[2], mseI2EPlotA[3])
+    percChangeI2Table[2] = computePercChange(mseI2EPlotA[0], mseI2EPlotA[1])
+    percChangeI2Table[3] = computePercChange(mseI2EPlotA[0], mseI2EPlotA[2])
+    percChangeI2Table[4] = computePercChange(mseI2EPlotA[2], mseI2EPlotA[4])
+    percChangeI2Table[5] = computePercChange(mseI2EPlotA[1], mseI2EPlotA[3])
+    percChangeI2Table[6] = computePercChange(mseI2EPlotA[3], mseI2EPlotA[5])
         
     copyIndex = (2*dataIndex) + idx
 
