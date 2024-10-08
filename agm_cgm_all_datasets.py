@@ -119,6 +119,21 @@ percChangeDisp = np.zeros((2*C, T2))
 percChangeQ = np.zeros((2*C, T2))
 percChangeI2 = np.zeros((2*C, T2))
 
+mseDispETableATemp = np.zeros(2*R)
+mseDispETableCTemp = np.zeros(2*R)
+mseDispTTableATemp = np.zeros(2*R)
+mseDispTTableCTemp = np.zeros(2*R)
+mseQETableATemp = np.zeros(2*R)
+mseQETableCTemp = np.zeros(2*R)
+mseQTTableATemp = np.zeros(2*R)
+mseQTTableCTemp = np.zeros(2*R)
+mseI2ETableATemp = np.zeros(2*R)
+mseI2ETableCTemp = np.zeros(2*R)
+mseI2TTableATemp = np.zeros(2*R)
+mseI2TTableCTemp = np.zeros(2*R)
+mseCTableATemp = np.zeros(2*R)
+mseCTableCTemp = np.zeros(2*R)
+
 def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
     V = len(varset)
@@ -134,21 +149,6 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
     percChangeI2Table = np.zeros(T2)
 
     for val in range(len(varset)):
-
-        mseDispETableATemp = np.zeros(R)
-        mseDispETableCTemp = np.zeros(R)
-        mseDispTTableATemp = np.zeros(R)
-        mseDispTTableCTemp = np.zeros(R)
-        mseQETableATemp = np.zeros(R)
-        mseQETableCTemp = np.zeros(R)
-        mseQTTableATemp = np.zeros(R)
-        mseQTTableCTemp = np.zeros(R)
-        mseI2ETableATemp = np.zeros(R)
-        mseI2ETableCTemp = np.zeros(R)
-        mseI2TTableATemp = np.zeros(R)
-        mseI2TTableCTemp = np.zeros(R)
-        mseCTableATemp = np.zeros(R)
-        mseCTableCTemp = np.zeros(R)
 
         mseDispEPlotATemp = np.zeros((2*L, V, R))
         mseQEPlotATemp = np.zeros((2*L, V, R))
@@ -318,26 +318,27 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             mseT = np.power(np.mean(mseTList), 2)
             mseQE = np.power(np.mean(mseQEList), 2)
             mseQT = np.power(np.mean(mseQTList), 2)
+            doublerep = (R*idx) + rep
 
             if ACindex == 0:
 
                 # TABLES ASSUME UNIFORM DATA
-                if fi == 0 and val == 0 and idx == 1:
-                    mseDispETableATemp[rep] = mseE
-                    mseDispTTableATemp[rep] = mseT
-                    mseQETableATemp[rep] = mseQE
-                    mseQTTableATemp[rep] = mseQT
+                if fi == 0 and val == 0:
+                    mseDispETableATemp[doublerep] = mseE
+                    mseDispTTableATemp[doublerep] = mseT
+                    mseQETableATemp[doublerep] = mseQE
+                    mseQTTableATemp[doublerep] = mseQT
 
                 # STATISTICAL HETEROGENEITY GRAPHS
                 mseDispEPlotATemp[fi, val, rep] = mseE
                 mseQEPlotATemp[fi, val, rep] = mseQE
 
             else:
-                if fi == 0 and val == 0 and idx == 1:
-                    mseDispETableCTemp[rep] = mseE
-                    mseDispTTableCTemp[rep] = mseT
-                    mseQETableCTemp[rep] = mseQE
-                    mseQTTableCTemp[rep] = mseQT
+                if fi == 0 and val == 0:
+                    mseDispETableCTemp[doublerep] = mseE
+                    mseDispTTableCTemp[doublerep] = mseT
+                    mseQETableCTemp[doublerep] = mseQE
+                    mseQTTableCTemp[doublerep] = mseQT
 
             # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
             trueI2Prep = np.divide(sampleSize-1, wTDSum)
@@ -368,18 +369,18 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
             mseC = xiCentral**2
 
             if ACindex == 0:
-                if fi == 0 and val == 0 and idx == 1:
-                    mseI2ETableATemp[rep] = mseI2E
-                    mseI2TTableATemp[rep] = mseI2T
-                    mseCTableATemp[rep] = mseC
+                if fi == 0 and val == 0:
+                    mseI2ETableATemp[doublerep] = mseI2E
+                    mseI2TTableATemp[doublerep] = mseI2T
+                    mseCTableATemp[doublerep] = mseC
 
                 mseI2EPlotATemp[fi, val, rep] = mseI2E
 
             else:
-                if fi == 0 and val == 0 and idx == 1:
-                    mseI2ETableCTemp[rep] = mseI2E
-                    mseI2TTableCTemp[rep] = mseI2T
-                    mseCTableCTemp[rep] = mseC
+                if fi == 0 and val == 0:
+                    mseI2ETableCTemp[doublerep] = mseI2E
+                    mseI2TTableCTemp[doublerep] = mseI2T
+                    mseCTableCTemp[doublerep] = mseC
 
         # EXPERIMENT 3: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
         # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
@@ -597,7 +598,7 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
     # EXPERIMENT 3: STATISTICAL HETEROGENEITY
     def computePercChange(a, b):
         percChange = np.divide(np.subtract(a, b), a)*100
-        return round(np.mean(percChange), 3)
+        return np.mean(percChange)
 
     percChangeDispTable[0] = computePercChange(mseDispEPlotA[4], mseDispEPlotA[5])
     percChangeDispTable[1] = computePercChange(mseDispEPlotA[2], mseDispEPlotA[3])
@@ -654,17 +655,17 @@ for idx in range(2):
 
     PCTable1 = PrettyTable(["Change in MSE (%)", "Dispersion", "Q", "I\u00B2"])
     PCTable1.add_row(["Cifar-10", "", "", ""])
-    PCTable1.add_row(["10 labels", "%+f" % percChangeDisp[idx, 0], "%+f" % percChangeQ[idx, 0], "%+f" % percChangeI2[idx, 0]])
-    PCTable1.add_row(["5 labels", "%+f" % percChangeDisp[idx, 1], "%+f" % percChangeQ[idx, 1], "%+f" % percChangeI2[idx, 1]])
-    PCTable1.add_row(["2 labels", "%+f" % percChangeDisp[idx, 2], "%+f" % percChangeQ[idx, 2], "%+f" % percChangeI2[idx, 2]])
+    PCTable1.add_row(["10 labels", "%+.1f" % percChangeDisp[idx, 0], "%+.1f" % percChangeQ[idx, 0], "%+.1f" % percChangeI2[idx, 0]])
+    PCTable1.add_row(["5 labels", "%+.1f" % percChangeDisp[idx, 1], "%+.1f" % percChangeQ[idx, 1], "%+.1f" % percChangeI2[idx, 1]])
+    PCTable1.add_row(["2 labels", "%+.1f" % percChangeDisp[idx, 2], "%+.1f" % percChangeQ[idx, 2], "%+.1f" % percChangeI2[idx, 2]])
     PCTable1.add_row(["Cifar-100", "", "", ""])
-    PCTable1.add_row(["10 labels", "%+f" % percChangeDisp[2+idx, 0], "%+f" % percChangeQ[2+idx, 0], "%+f" % percChangeI2[2+idx, 0]])
-    PCTable1.add_row(["5 labels", "%+f" % percChangeDisp[2+idx, 1], "%+f" % percChangeQ[2+idx, 1], "%+f" % percChangeI2[2+idx, 1]])
-    PCTable1.add_row(["2 labels", "%+f" % percChangeDisp[2+idx, 2], "%+f" % percChangeQ[2+idx, 2], "%+f" % percChangeI2[2+idx, 2]])
+    PCTable1.add_row(["10 labels", "%+.1f" % percChangeDisp[2+idx, 0], "%+.1f" % percChangeQ[2+idx, 0], "%+.1f" % percChangeI2[2+idx, 0]])
+    PCTable1.add_row(["5 labels", "%+.1f" % percChangeDisp[2+idx, 1], "%+.1f" % percChangeQ[2+idx, 1], "%+.1f" % percChangeI2[2+idx, 1]])
+    PCTable1.add_row(["2 labels", "%+.1f" % percChangeDisp[2+idx, 2], "%+.1f" % percChangeQ[2+idx, 2], "%+.1f" % percChangeI2[2+idx, 2]])
     PCTable1.add_row(["Fashion-MNIST", "", "", ""])
-    PCTable1.add_row(["10 labels", "%+f" % percChangeDisp[4+idx, 0], "%+f" % percChangeQ[4+idx, 0], "%+f" % percChangeI2[4+idx, 0]])
-    PCTable1.add_row(["5 labels", "%+f" % percChangeDisp[4+idx, 1], "%+f" % percChangeQ[4+idx, 1], "%+f" % percChangeI2[4+idx, 1]])
-    PCTable1.add_row(["2 labels", "%+f" % percChangeDisp[4+idx, 2], "%+f" % percChangeQ[4+idx, 2], "%+f" % percChangeI2[4+idx, 2]])
+    PCTable1.add_row(["10 labels", "%+.1f" % percChangeDisp[4+idx, 0], "%+.1f" % percChangeQ[4+idx, 0], "%+.1f" % percChangeI2[4+idx, 0]])
+    PCTable1.add_row(["5 labels", "%+.1f" % percChangeDisp[4+idx, 1], "%+.1f" % percChangeQ[4+idx, 1], "%+.1f" % percChangeI2[4+idx, 1]])
+    PCTable1.add_row(["2 labels", "%+.1f" % percChangeDisp[4+idx, 2], "%+.1f" % percChangeQ[4+idx, 2], "%+.1f" % percChangeI2[4+idx, 2]])
 
     PCData1 = PCTable1.get_string()
     with open("Table_6_" + "%s" % parset[idx] + "_pl1.txt", "w") as table6:
@@ -672,20 +673,20 @@ for idx in range(2):
 
     PCTable2 = PrettyTable(["Change in MSE (%)", "Dispersion", "Q", "I\u00B2"])
     PCTable2.add_row(["Cifar-10", "", "", ""])
-    PCTable2.add_row(["SH: 10v5", "%+f" % percChangeDisp[idx, 3], "%+f" % percChangeQ[idx, 3], "%+f" % percChangeI2[idx, 3]])
-    PCTable2.add_row(["SH: 5v2", "%+f" % percChangeDisp[idx, 4], "%+f" % percChangeQ[idx, 4], "%+f" % percChangeI2[idx, 4]])
-    PCTable2.add_row(["Non-SH: 10v5", "%+f" % percChangeDisp[idx, 5], "%+f" % percChangeQ[idx, 5], "%+f" % percChangeI2[idx, 5]])
-    PCTable2.add_row(["Non-SH: 5v2", "%+f" % percChangeDisp[idx, 6], "%+f" % percChangeQ[idx, 6], "%+f" % percChangeI2[idx, 6]])
+    PCTable2.add_row(["SH: 10v5", "%+.1f" % percChangeDisp[idx, 3], "%+.1f" % percChangeQ[idx, 3], "%+.1f" % percChangeI2[idx, 3]])
+    PCTable2.add_row(["SH: 5v2", "%+.1f" % percChangeDisp[idx, 4], "%+.1f" % percChangeQ[idx, 4], "%+.1f" % percChangeI2[idx, 4]])
+    PCTable2.add_row(["Non-SH: 10v5", "%+.1f" % percChangeDisp[idx, 5], "%+.1f" % percChangeQ[idx, 5], "%+.1f" % percChangeI2[idx, 5]])
+    PCTable2.add_row(["Non-SH: 5v2", "%+.1f" % percChangeDisp[idx, 6], "%+.1f" % percChangeQ[idx, 6], "%+.1f" % percChangeI2[idx, 6]])
     PCTable2.add_row(["Cifar-100", "", "", ""])
-    PCTable2.add_row(["SH: 10v5", "%+f" % percChangeDisp[2+idx, 3], "%+f" % percChangeQ[2+idx, 3], "%+f" % percChangeI2[2+idx, 3]])
-    PCTable2.add_row(["SH: 5v2", "%+f" % percChangeDisp[2+idx, 4], "%+f" % percChangeQ[2+idx, 4], "%+f" % percChangeI2[2+idx, 4]])
-    PCTable2.add_row(["Non-SH: 10v5", "%+f" % percChangeDisp[2+idx, 5], "%+f" % percChangeQ[2+idx, 5], "%+f" % percChangeI2[2+idx, 5]])
-    PCTable2.add_row(["Non-SH: 5v2", "%+f" % percChangeDisp[2+idx, 6], "%+f" % percChangeQ[2+idx, 6], "%+f" % percChangeI2[2+idx, 6]])
+    PCTable2.add_row(["SH: 10v5", "%+.1f" % percChangeDisp[2+idx, 3], "%+.1f" % percChangeQ[2+idx, 3], "%+.1f" % percChangeI2[2+idx, 3]])
+    PCTable2.add_row(["SH: 5v2", "%+.1f" % percChangeDisp[2+idx, 4], "%+.1f" % percChangeQ[2+idx, 4], "%+.1f" % percChangeI2[2+idx, 4]])
+    PCTable2.add_row(["Non-SH: 10v5", "%+.1f" % percChangeDisp[2+idx, 5], "%+.1f" % percChangeQ[2+idx, 5], "%+.1f" % percChangeI2[2+idx, 5]])
+    PCTable2.add_row(["Non-SH: 5v2", "%+.1f" % percChangeDisp[2+idx, 6], "%+.1f" % percChangeQ[2+idx, 6], "%+.1f" % percChangeI2[2+idx, 6]])
     PCTable2.add_row(["Fashion-MNIST", "", "", ""])
-    PCTable2.add_row(["SH: 10v5", "%+f" % percChangeDisp[4+idx, 3], "%+f" % percChangeQ[4+idx, 3], "%+f" % percChangeI2[4+idx, 3]])
-    PCTable2.add_row(["SH: 5v2", "%+f" % percChangeDisp[4+idx, 4], "%+f" % percChangeQ[4+idx, 4], "%+f" % percChangeI2[4+idx, 4]])
-    PCTable2.add_row(["Non-SH: 10v5", "%+f" % percChangeDisp[4+idx, 5], "%+f" % percChangeQ[4+idx, 5], "%+f" % percChangeI2[4+idx, 5]])
-    PCTable2.add_row(["Non-SH: 5v2", "%+f" % percChangeDisp[4+idx, 6], "%+f" % percChangeQ[4+idx, 6], "%+f" % percChangeI2[4+idx, 6]])
+    PCTable2.add_row(["SH: 10v5", "%+.1f" % percChangeDisp[4+idx, 3], "%+.1f" % percChangeQ[4+idx, 3], "%+.1f" % percChangeI2[4+idx, 3]])
+    PCTable2.add_row(["SH: 5v2", "%+.1f" % percChangeDisp[4+idx, 4], "%+.1f" % percChangeQ[4+idx, 4], "%+.1f" % percChangeI2[4+idx, 4]])
+    PCTable2.add_row(["Non-SH: 10v5", "%+.1f" % percChangeDisp[4+idx, 5], "%+.1f" % percChangeQ[4+idx, 5], "%+.1f" % percChangeI2[4+idx, 5]])
+    PCTable2.add_row(["Non-SH: 5v2", "%+.1f" % percChangeDisp[4+idx, 6], "%+.1f" % percChangeQ[4+idx, 6], "%+.1f" % percChangeI2[4+idx, 6]])
 
     PCEpsData2 = PCTable2.get_string()
     with open("Table_7_" + "%s" % parset[idx] + "_pl2.txt", "w") as table7:
