@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from math import erf
 from numpy.random import normal
 from prettytable import PrettyTable
-from sigfig import round
 
 # INITIALISING SEED FOR RANDOM SAMPLING
 print("\nStarting...")
@@ -102,7 +101,6 @@ mseDispTable = np.zeros((C, 3*T1))
 mseQTable = np.zeros((C, 3*T1))
 mseI2Table = np.zeros((C, 3*T1))
 mseCentralTable = np.zeros((C, C))
-
 stdDispTable = np.zeros((C, T1))
 stdQTable = np.zeros((C, T1))
 stdI2Table = np.zeros((C, T1))
@@ -114,25 +112,24 @@ mseI2 = np.zeros((2*C, 2*L, E))
 stdDisp = np.zeros((2*C, 2*L, E))
 stdQ = np.zeros((2*C, 2*L, E))
 stdI2 = np.zeros((2*C, 2*L, E))
-
 percChangeDisp = np.zeros((2*C, T2))
 percChangeQ = np.zeros((2*C, T2))
 percChangeI2 = np.zeros((2*C, T2))
 
-mseDispETableATemp = np.zeros(2*R)
-mseDispETableCTemp = np.zeros(2*R)
-mseDispTTableATemp = np.zeros(2*R)
-mseDispTTableCTemp = np.zeros(2*R)
-mseQETableATemp = np.zeros(2*R)
-mseQETableCTemp = np.zeros(2*R)
-mseQTTableATemp = np.zeros(2*R)
-mseQTTableCTemp = np.zeros(2*R)
-mseI2ETableATemp = np.zeros(2*R)
-mseI2ETableCTemp = np.zeros(2*R)
-mseI2TTableATemp = np.zeros(2*R)
-mseI2TTableCTemp = np.zeros(2*R)
-mseCTableATemp = np.zeros(2*R)
-mseCTableCTemp = np.zeros(2*R)
+mseDispETableA = np.zeros(2*R)
+mseDispETableC = np.zeros(2*R)
+mseDispTTableA = np.zeros(2*R)
+mseDispTTableC = np.zeros(2*R)
+mseQETableA = np.zeros(2*R)
+mseQETableC = np.zeros(2*R)
+mseQTTableA = np.zeros(2*R)
+mseQTTableC = np.zeros(2*R)
+mseI2ETableA = np.zeros(2*R)
+mseI2ETableC = np.zeros(2*R)
+mseI2TTableA = np.zeros(2*R)
+mseI2TTableC = np.zeros(2*R)
+mseCTableA = np.zeros(2*R)
+mseCTableC = np.zeros(2*R)
 
 def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
@@ -324,10 +321,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
                 # TABLES ASSUME UNIFORM DATA
                 if fi == 0 and val == 0:
-                    mseDispETableATemp[doublerep] = mseE
-                    mseDispTTableATemp[doublerep] = mseT
-                    mseQETableATemp[doublerep] = mseQE
-                    mseQTTableATemp[doublerep] = mseQT
+                    mseDispETableA[doublerep] = mseE
+                    mseDispTTableA[doublerep] = mseT
+                    mseQETableA[doublerep] = mseQE
+                    mseQTTableA[doublerep] = mseQT
 
                 # STATISTICAL HETEROGENEITY GRAPHS
                 mseDispEPlotATemp[fi, val, rep] = mseE
@@ -335,10 +332,10 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
             else:
                 if fi == 0 and val == 0:
-                    mseDispETableCTemp[doublerep] = mseE
-                    mseDispTTableCTemp[doublerep] = mseT
-                    mseQETableCTemp[doublerep] = mseQE
-                    mseQTTableCTemp[doublerep] = mseQT
+                    mseDispETableC[doublerep] = mseE
+                    mseDispTTableC[doublerep] = mseT
+                    mseQETableC[doublerep] = mseQE
+                    mseQTTableC[doublerep] = mseQT
 
             # COMPUTE I^2'' and I^2 USING SIMPLE FORMULA AT BOTTOM OF LEMMA 6.2
             trueI2Prep = np.divide(sampleSize-1, wTDSum)
@@ -370,17 +367,17 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
             if ACindex == 0:
                 if fi == 0 and val == 0:
-                    mseI2ETableATemp[doublerep] = mseI2E
-                    mseI2TTableATemp[doublerep] = mseI2T
-                    mseCTableATemp[doublerep] = mseC
+                    mseI2ETableA[doublerep] = mseI2E
+                    mseI2TTableA[doublerep] = mseI2T
+                    mseCTableA[doublerep] = mseC
 
                 mseI2EPlotATemp[fi, val, rep] = mseI2E
 
             else:
                 if fi == 0 and val == 0:
-                    mseI2ETableCTemp[doublerep] = mseI2E
-                    mseI2TTableCTemp[doublerep] = mseI2T
-                    mseCTableCTemp[doublerep] = mseC
+                    mseI2ETableC[doublerep] = mseI2E
+                    mseI2TTableC[doublerep] = mseI2T
+                    mseCTableC[doublerep] = mseC
 
         # EXPERIMENT 3: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
         # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
@@ -440,64 +437,49 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
                 computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
             if fi == 0 and val == 0 and idx == 1:
-                mseDispETableA = np.mean(mseDispETableATemp)
-                mseDispETableC = np.mean(mseDispETableCTemp)
-                mseDispTTableA = np.mean(mseDispTTableATemp)
-                mseDispTTableC = np.mean(mseDispTTableCTemp)
-                mseQETableA = np.mean(mseQETableATemp)
-                mseQETableC = np.mean(mseQETableCTemp)
-                mseQTTableA = np.mean(mseQTTableATemp)
-                mseQTTableC = np.mean(mseQTTableCTemp)
-                mseI2ETableA = np.mean(mseI2ETableATemp)
-                mseI2ETableC = np.mean(mseI2ETableCTemp)
-                mseI2TTableA = np.mean(mseI2TTableATemp)
-                mseI2TTableC = np.mean(mseI2TTableCTemp)
-                mseCentralTableA = np.mean(mseCTableATemp)
-                mseCentralTableC = np.mean(mseCTableCTemp)
+                mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
+                mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
+                mseDispTable[dataIndex, 2] = np.mean(mseDispTTableA)
+                mseDispTable[dataIndex, 3] = np.mean(mseDispTTableC)
+                mseQTable[dataIndex, 0] = np.mean(mseQETableA)
+                mseQTable[dataIndex, 1] = np.mean(mseQETableC)
+                mseQTable[dataIndex, 2] = np.mean(mseQTTableA)
+                mseQTable[dataIndex, 3] = np.mean(mseQTTableC)
+                mseI2Table[dataIndex, 0] = np.mean(mseI2ETableA)
+                mseI2Table[dataIndex, 1] = np.mean(mseI2ETableC)
+                mseI2Table[dataIndex, 2] = np.mean(mseI2TTableA)
+                mseI2Table[dataIndex, 3] = np.mean(mseI2TTableC)
+                mseCentralTable[dataIndex, 0] = np.mean(mseCTableA)
+                mseCentralTable[dataIndex, 1] = np.mean(mseCTableC)
 
-                mseDispTable[dataIndex, 0] = round(mseDispETableA, 5)
-                mseDispTable[dataIndex, 1] = round(mseDispETableC, 5)
-                mseDispTable[dataIndex, 2] = round(mseDispTTableA, 5)
-                mseDispTable[dataIndex, 3] = round(mseDispTTableC, 5)
-                mseQTable[dataIndex, 0] = round(mseQETableA, 3)
-                mseQTable[dataIndex, 1] = round(mseQETableC, 3)
-                mseQTable[dataIndex, 2] = round(mseQTTableA, 3)
-                mseQTable[dataIndex, 3] = round(mseQTTableC, 3)
-                mseI2Table[dataIndex, 0] = round(mseI2ETableA, 3)
-                mseI2Table[dataIndex, 1] = round(mseI2ETableC, 3)
-                mseI2Table[dataIndex, 2] = round(mseI2TTableA, 3)
-                mseI2Table[dataIndex, 3] = round(mseI2TTableC, 3)
-                mseCentralTable[dataIndex, 0] = round(mseCentralTableA, 3)
-                mseCentralTable[dataIndex, 1] = int(mseCentralTableC)
+                mseDispTable[dataIndex, 4] = np.divide(mseDispTable[dataIndex, 0], mseDispTable[dataIndex, 1])
+                mseDispTable[dataIndex, 5] = np.divide(mseDispTable[dataIndex, 2], mseDispTable[dataIndex, 3])
+                mseDispTable[dataIndex, 6] = np.divide(mseDispTable[dataIndex, 0], mseDispTable[dataIndex, 2])
+                mseDispTable[dataIndex, 7] = np.divide(mseDispTable[dataIndex, 1], mseDispTable[dataIndex, 3])
+                mseQTable[dataIndex, 4] = np.divide(mseQTable[dataIndex, 0], mseQTable[dataIndex, 1])
+                mseQTable[dataIndex, 5] = np.divide(mseQTable[dataIndex, 2], mseQTable[dataIndex, 3])
+                mseQTable[dataIndex, 6] = np.divide(mseQTable[dataIndex, 0], mseQTable[dataIndex, 2])
+                mseQTable[dataIndex, 7] = np.divide(mseQTable[dataIndex, 1], mseQTable[dataIndex, 3])
+                mseI2Table[dataIndex, 4] = np.divide(mseI2Table[dataIndex, 0], mseI2Table[dataIndex, 1])
+                mseI2Table[dataIndex, 5] = np.divide(mseI2Table[dataIndex, 2], mseI2Table[dataIndex, 3])
+                mseI2Table[dataIndex, 6] = np.divide(mseI2Table[dataIndex, 0], mseI2Table[dataIndex, 2])
+                mseI2Table[dataIndex, 7] = np.divide(mseI2Table[dataIndex, 1], mseI2Table[dataIndex, 3])
+                mseCentralTable[dataIndex, 2] = np.divide(mseCentralTable[dataIndex, 0], mseCentralTable[dataIndex, 1])
 
-                mseDispTable[dataIndex, 4] = round(np.divide(mseDispETableA, mseDispETableC), 3)
-                mseDispTable[dataIndex, 5] = round(np.divide(mseDispTTableA, mseDispTTableC), 3)
-                mseDispTable[dataIndex, 6] = round(np.divide(mseDispETableA, mseDispTTableA), 3)
-                mseDispTable[dataIndex, 7] = round(np.divide(mseDispETableC, mseDispTTableC), 3)
-                mseQTable[dataIndex, 4] = round(np.divide(mseQETableA, mseQETableC), 3)
-                mseQTable[dataIndex, 5] = round(np.divide(mseQTTableA, mseQTTableC), 3)
-                mseQTable[dataIndex, 6] = round(np.divide(mseQETableA, mseQTTableA), 3)
-                mseQTable[dataIndex, 7] = round(np.divide(mseQETableC, mseQTTableC), 3)
-                mseI2Table[dataIndex, 4] = round(np.divide(mseI2ETableA, mseI2ETableC), 3)
-                mseI2Table[dataIndex, 5] = round(np.divide(mseI2TTableA, mseI2TTableC), 3)
-                mseI2Table[dataIndex, 6] = round(np.divide(mseI2ETableA, mseI2TTableA), 3)
-                mseI2Table[dataIndex, 7] = round(np.divide(mseI2ETableC, mseI2TTableC), 3)
-                mseCentralTable[dataIndex, 2] = round(np.divide(mseCentralTableA, mseCentralTableC), 3)
-
-                stdDispTable[dataIndex, 0] = round(np.std(mseDispETableATemp), 5)
-                stdDispTable[dataIndex, 1] = round(np.std(mseDispETableCTemp), 5)
-                stdDispTable[dataIndex, 2] = round(np.std(mseDispTTableATemp), 5)
-                stdDispTable[dataIndex, 3] = round(np.std(mseDispTTableCTemp), 5)
-                stdQTable[dataIndex, 0] = round(np.std(mseQETableATemp), 3)
-                stdQTable[dataIndex, 1] = round(np.std(mseQETableCTemp), 3)
-                stdQTable[dataIndex, 2] = round(np.std(mseQTTableATemp), 3)
-                stdQTable[dataIndex, 3] = round(np.std(mseQTTableCTemp), 3)
-                stdI2Table[dataIndex, 0] = round(np.std(mseI2ETableATemp), 3)
-                stdI2Table[dataIndex, 1] = round(np.std(mseI2ETableCTemp), 3)
-                stdI2Table[dataIndex, 2] = round(np.std(mseI2TTableATemp), 3)
-                stdI2Table[dataIndex, 3] = round(np.std(mseI2TTableCTemp), 3)
-                stdCentralTable[dataIndex, 0] = round(np.std(mseCTableATemp), 3)
-                stdCentralTable[dataIndex, 1] = int(np.std(mseCTableCTemp))
+                stdDispTable[dataIndex, 0] = np.std(mseDispETableA)
+                stdDispTable[dataIndex, 1] = np.std(mseDispETableC)
+                stdDispTable[dataIndex, 2] = np.std(mseDispTTableA)
+                stdDispTable[dataIndex, 3] = np.std(mseDispTTableC)
+                stdQTable[dataIndex, 0] = np.std(mseQETableA)
+                stdQTable[dataIndex, 1] = np.std(mseQETableC)
+                stdQTable[dataIndex, 2] = np.std(mseQTTableA)
+                stdQTable[dataIndex, 3] = np.std(mseQTTableC)
+                stdI2Table[dataIndex, 0] = np.std(mseI2ETableA)
+                stdI2Table[dataIndex, 1] = np.std(mseI2ETableC)
+                stdI2Table[dataIndex, 2] = np.std(mseI2TTableA)
+                stdI2Table[dataIndex, 3] = np.std(mseI2TTableC)
+                stdCentralTable[dataIndex, 0] = np.std(mseCTableA)
+                stdCentralTable[dataIndex, 1] = np.std(mseCTableC)
 
             mseDispEPlotA[fi, val] = np.mean(mseDispEPlotATemp[fi, val])
             mseQEPlotA[fi, val] = np.mean(mseQEPlotATemp[fi, val])
@@ -510,17 +492,17 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
     if idx == 1:
         DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
         DispTable.add_row(["Cifar-10", "", "", "", ""])
-        DispTable.add_row(["EMSE", mseDispTable[0, 0], mseDispTable[0, 1], stdDispTable[0, 0], stdDispTable[0, 1]])
-        DispTable.add_row(["TMSE", mseDispTable[0, 2], mseDispTable[0, 3], stdDispTable[0, 2], stdDispTable[0, 3]])
-        DispTable.add_row(["CMSE", mseCentralTable[0, 0], mseCentralTable[0, 1], stdCentralTable[0, 0], stdCentralTable[0, 1]])
+        DispTable.add_row(["EMSE", "%.4f" % mseDispTable[0, 0], "%.4f" % mseDispTable[0, 1], "%.4f" % stdDispTable[0, 0], "%.4f" % stdDispTable[0, 1]])
+        DispTable.add_row(["TMSE", "%.4f" % mseDispTable[0, 2], "%.4f" % mseDispTable[0, 3], "%.4f" % stdDispTable[0, 2], "%.4f" % stdDispTable[0, 3]])
+        DispTable.add_row(["CMSE", "%.4f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.4f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
         DispTable.add_row(["Cifar-100", "", "", "", ""])
-        DispTable.add_row(["EMSE", mseDispTable[1, 0], mseDispTable[1, 1], stdDispTable[1, 0], stdDispTable[1, 1]])
-        DispTable.add_row(["TMSE", mseDispTable[1, 2], mseDispTable[1, 3], stdDispTable[1, 2], stdDispTable[1, 3]])
-        DispTable.add_row(["CMSE", mseCentralTable[1, 0], mseCentralTable[1, 1], stdCentralTable[1, 0], stdCentralTable[1, 1]])
+        DispTable.add_row(["EMSE", "%.4f" % mseDispTable[1, 0], "%.4f" % mseDispTable[1, 1], "%.4f" % stdDispTable[1, 0], "%.4f" % stdDispTable[1, 1]])
+        DispTable.add_row(["TMSE", "%.4f" % mseDispTable[1, 2], "%.4f" % mseDispTable[1, 3], "%.4f" % stdDispTable[1, 2], "%.4f" % stdDispTable[1, 3]])
+        DispTable.add_row(["CMSE", "%.4f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.4f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
         DispTable.add_row(["Fashion-MNIST", "", "", "", ""])
-        DispTable.add_row(["EMSE", mseDispTable[2, 0], mseDispTable[2, 1], stdDispTable[2, 0], stdDispTable[2, 1]])
-        DispTable.add_row(["TMSE", mseDispTable[2, 2], mseDispTable[2, 3], stdDispTable[2, 2], stdDispTable[2, 3]])
-        DispTable.add_row(["CMSE", mseCentralTable[2, 0], mseCentralTable[2, 1], stdCentralTable[2, 0], stdCentralTable[2, 1]])
+        DispTable.add_row(["EMSE", "%.4f" % mseDispTable[2, 0], "%.4f" % mseDispTable[2, 1], "%.4f" % stdDispTable[2, 0], "%.4f" % stdDispTable[2, 1]])
+        DispTable.add_row(["TMSE", "%.4f" % mseDispTable[2, 2], "%.4f" % mseDispTable[2, 3], "%.4f" % stdDispTable[2, 2], "%.4f" % stdDispTable[2, 3]])
+        DispTable.add_row(["CMSE", "%.4f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.4f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
         
         DispData = DispTable.get_string()
         with open("Table_1_disp.txt", "w") as table1:
@@ -528,17 +510,17 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
         QTable.add_row(["Cifar-10", "", "", "", ""])
-        QTable.add_row(["EMSE", mseQTable[0, 0], mseQTable[0, 1], stdQTable[0, 0], stdQTable[0, 1]])
-        QTable.add_row(["TMSE", mseQTable[0, 2], mseQTable[0, 3], stdQTable[0, 2], stdQTable[0, 3]])
-        QTable.add_row(["CMSE", mseCentralTable[0, 0], mseCentralTable[0, 1], stdCentralTable[0, 0], stdCentralTable[0, 1]])
+        QTable.add_row(["EMSE", "%.2f" % mseQTable[0, 0], "%.2f" % mseQTable[0, 1], "%.2f" % stdQTable[0, 0], "%.2f" % stdQTable[0, 1]])
+        QTable.add_row(["TMSE", "%.2f" % mseQTable[0, 2], "%.2f" % mseQTable[0, 3], "%.2f" % stdQTable[0, 2], "%.2f" % stdQTable[0, 3]])
+        QTable.add_row(["CMSE", "%.2f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.2f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
         QTable.add_row(["Cifar-100", "", "", "", ""])
-        QTable.add_row(["EMSE", mseQTable[1, 0], mseQTable[1, 1], stdQTable[1, 0], stdQTable[1, 1]])
-        QTable.add_row(["TMSE", mseQTable[1, 2], mseQTable[1, 3], stdQTable[1, 2], stdQTable[1, 3]])
-        QTable.add_row(["CMSE", mseCentralTable[1, 0], mseCentralTable[1, 1], stdCentralTable[1, 0], stdCentralTable[1, 1]])
+        QTable.add_row(["EMSE", "%.2f" % mseQTable[1, 0], "%.2f" % mseQTable[1, 1], "%.2f" % stdQTable[1, 0], "%.2f" % stdQTable[1, 1]])
+        QTable.add_row(["TMSE", "%.2f" % mseQTable[1, 2], "%.2f" % mseQTable[1, 3], "%.2f" % stdQTable[1, 2], "%.2f" % stdQTable[1, 3]])
+        QTable.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
         QTable.add_row(["Fashion-MNIST", "", "", "", ""])
-        QTable.add_row(["EMSE", mseQTable[2, 0], mseQTable[2, 1], stdQTable[2, 0], stdQTable[2, 1]])
-        QTable.add_row(["TMSE", mseQTable[2, 2], mseQTable[2, 3], stdQTable[2, 2], stdQTable[2, 3]])
-        QTable.add_row(["CMSE", mseCentralTable[2, 0], mseCentralTable[2, 1], stdCentralTable[2, 0], stdCentralTable[2, 1]])
+        QTable.add_row(["EMSE", "%.2f" % mseQTable[2, 0], "%.2f" % mseQTable[2, 1], "%.2f" % stdQTable[2, 0], "%.2f" % stdQTable[2, 1]])
+        QTable.add_row(["TMSE", "%.2f" % mseQTable[2, 2], "%.2f" % mseQTable[2, 3], "%.2f" % stdQTable[2, 2], "%.2f" % stdQTable[2, 3]])
+        QTable.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
         
         QData = QTable.get_string()
         with open("Table_2_q.txt", "w") as table2:
@@ -546,17 +528,17 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         I2Table = PrettyTable(["I\u00B2", "AGM", "CGM", "SD AGM", "SD CGM"])
         I2Table.add_row(["Cifar-10", "", "", "", ""])
-        I2Table.add_row(["EMSE", mseI2Table[0, 0], mseI2Table[0, 1], stdI2Table[0, 0], stdI2Table[0, 1]])
-        I2Table.add_row(["TMSE", mseI2Table[0, 2], mseI2Table[0, 3], stdI2Table[0, 2], stdI2Table[0, 3]])
-        I2Table.add_row(["CMSE", mseCentralTable[0, 0], mseCentralTable[0, 1], stdCentralTable[0, 0], stdCentralTable[0, 1]])
+        I2Table.add_row(["EMSE", "%.2f" % mseI2Table[0, 0], "%.2f" % mseI2Table[0, 1], "%.2f" % [0, 0], "%.2f" % stdI2Table[0, 1]])
+        I2Table.add_row(["TMSE", "%.2f" % mseI2Table[0, 2], "%.2f" % mseI2Table[0, 3], "%.2f" % stdI2Table[0, 2], "%.2f" % stdI2Table[0, 3]])
+        I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.2f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
         I2Table.add_row(["Cifar-100", "", "", "", ""])
-        I2Table.add_row(["EMSE", mseI2Table[1, 0], mseI2Table[1, 1], stdI2Table[1, 0], stdI2Table[1, 1]])
-        I2Table.add_row(["TMSE", mseI2Table[1, 2], mseI2Table[1, 3], stdI2Table[1, 2], stdI2Table[1, 3]])
-        I2Table.add_row(["CMSE", mseCentralTable[1, 0], mseCentralTable[1, 1], stdCentralTable[1, 0], stdCentralTable[1, 1]])
+        I2Table.add_row(["EMSE", "%.2f" % mseI2Table[1, 0], "%.2f" % mseI2Table[1, 1], "%.2f" % stdI2Table[1, 0], "%.2f" % stdI2Table[1, 1]])
+        I2Table.add_row(["TMSE", "%.2f" % mseI2Table[1, 2], "%.2f" % mseI2Table[1, 3], "%.2f" % stdI2Table[1, 2], "%.2f" % stdI2Table[1, 3]])
+        I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
         I2Table.add_row(["Fashion-MNIST", "", "", "", ""])
-        I2Table.add_row(["EMSE", mseI2Table[2, 0], mseI2Table[2, 1], stdI2Table[2, 0], stdI2Table[2, 1]])
-        I2Table.add_row(["TMSE", mseI2Table[2, 2], mseI2Table[2, 3], stdI2Table[2, 2], stdI2Table[2, 3]])
-        I2Table.add_row(["CMSE", mseCentralTable[2, 0], mseCentralTable[2, 1], stdCentralTable[2, 0], stdCentralTable[2, 1]])
+        I2Table.add_row(["EMSE", "%.2f" % mseI2Table[2, 0], "%.2f" % mseI2Table[2, 1], "%.2f" % stdI2Table[2, 0], "%.2f" % stdI2Table[2, 1]])
+        I2Table.add_row(["TMSE", "%.2f" % mseI2Table[2, 2], "%.2f" % mseI2Table[2, 3], "%.2f" % stdI2Table[2, 2], "%.2f" % stdI2Table[2, 3]])
+        I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
         
         I2Data = I2Table.get_string()
         with open("Table_3_i2.txt", "w") as table3:
@@ -564,17 +546,17 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
         ACTable.add_row(["Cifar-10", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[0, 4], mseQTable[0, 4], mseI2Table[0, 4]])
-        ACTable.add_row(["TMSE", mseDispTable[0, 5], mseQTable[0, 5], mseI2Table[0, 5]])
-        ACTable.add_row(["CMSE", mseCentralTable[0, 2], mseCentralTable[0, 2], mseCentralTable[0, 2]])
+        ACTable.add_row(["EMSE", "%.4f" % mseDispTable[0, 4], "%.4f" % mseQTable[0, 4], "%.4f" % mseI2Table[0, 4]])
+        ACTable.add_row(["TMSE", "%.4f" % mseDispTable[0, 5], "%.4f" % mseQTable[0, 5], "%.4f" % mseI2Table[0, 5]])
+        ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[0, 2], "%.4f" % mseCentralTable[0, 2], "%.4f" % mseCentralTable[0, 2]])
         ACTable.add_row(["Cifar-100", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[1, 4], mseQTable[1, 4], mseI2Table[1, 4]])
-        ACTable.add_row(["TMSE", mseDispTable[1, 5], mseQTable[1, 5], mseI2Table[1, 5]])
-        ACTable.add_row(["CMSE", mseCentralTable[1, 2], mseCentralTable[1, 2], mseCentralTable[1, 2]])
+        ACTable.add_row(["EMSE", "%.4f" % mseDispTable[1, 4], "%.4f" % mseQTable[1, 4], "%.4f" % mseI2Table[1, 4]])
+        ACTable.add_row(["TMSE", "%.4f" %  mseDispTable[1, 5], "%.4f" % mseQTable[1, 5], "%.4f" % mseI2Table[1, 5]])
+        ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[1, 2], "%.4f" % mseCentralTable[1, 2], "%.4f" % mseCentralTable[1, 2]])
         ACTable.add_row(["Fashion-MNIST", "", "", ""])
-        ACTable.add_row(["EMSE", mseDispTable[2, 4], mseQTable[2, 4], mseI2Table[2, 4]])
-        ACTable.add_row(["TMSE", mseDispTable[2, 5], mseQTable[2, 5], mseI2Table[2, 5]])
-        ACTable.add_row(["CMSE", mseCentralTable[2, 2], mseCentralTable[2, 2], mseCentralTable[2, 2]])
+        ACTable.add_row(["EMSE", "%.4f" % mseDispTable[2, 4], "%.4f" % mseQTable[2, 4], "%.4f" % mseI2Table[2, 4]])
+        ACTable.add_row(["TMSE", "%.4f" % mseDispTable[2, 5], "%.4f" % mseQTable[2, 5], "%.4f" % mseI2Table[2, 5]])
+        ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2]])
         
         ACData = ACTable.get_string()
         with open("Table_4_ac.txt", "w") as table4:
@@ -582,14 +564,14 @@ def runLoop(dataIndex, idx, varset, dim, num, eps, dta, newImages, labels, GS):
 
         ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
         ETTable.add_row(["Cifar-10", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[0, 6], mseQTable[0, 6], mseI2Table[0, 6]])
-        ETTable.add_row(["CGM", mseDispTable[0, 7], mseQTable[0, 7], mseI2Table[0, 7]])
+        ETTable.add_row(["AGM", "%.4f" % mseDispTable[0, 6], "%.4f" % mseQTable[0, 6], "%.4f" % mseI2Table[0, 6]])
+        ETTable.add_row(["CGM", "%.4f" % mseDispTable[0, 7], "%.4f" % mseQTable[0, 7], "%.4f" % mseI2Table[0, 7]])
         ETTable.add_row(["Cifar-100", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[1, 6], mseQTable[1, 6], mseI2Table[1, 6]])
-        ETTable.add_row(["CGM", mseDispTable[1, 7], mseQTable[1, 7], mseI2Table[1, 7]])
+        ETTable.add_row(["AGM", "%.4f" % mseDispTable[1, 6], "%.4f" % mseQTable[1, 6], "%.4f" % mseI2Table[1, 6]])
+        ETTable.add_row(["CGM", "%.4f" % mseDispTable[1, 7], "%.4f" % mseQTable[1, 7], "%.4f" % mseI2Table[1, 7]])
         ETTable.add_row(["Fashion-MNIST", "", "", ""])
-        ETTable.add_row(["AGM", mseDispTable[2, 6], mseQTable[2, 6], mseI2Table[2, 6]])
-        ETTable.add_row(["CGM", mseDispTable[2, 7], mseQTable[2, 7], mseI2Table[2, 7]])
+        ETTable.add_row(["AGM", "%.4f" % mseDispTable[2, 6], "%.4f" % mseQTable[2, 6], "%.4f" % mseI2Table[2, 6]])
+        ETTable.add_row(["CGM", "%.4f" % mseDispTable[2, 7], "%.4f" % mseQTable[2, 7], "%.4f" % mseI2Table[2, 7]])
         
         ETData = ETTable.get_string()
         with open("Table_5_et.txt", "w") as table5:
