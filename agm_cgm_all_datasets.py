@@ -605,7 +605,7 @@ runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 
-PCTable1 = PrettyTable(["Change in MSE (%)", "Dispersion", "Q", "I\u00B2"])
+PCTable1 = PrettyTable(["Change in EMSE (%)", "Dispersion", "Q", "I\u00B2"])
 PCTable1.add_row(["Cifar-10", "", "", ""])
 PCTable1.add_row(["10 labels", "%+.1f" % percChangeDisp[0, 0], "%+.1f" % percChangeQ[0, 0], "%+.1f" % percChangeI2[0, 0]])
 PCTable1.add_row(["5 labels", "%+.1f" % percChangeDisp[0, 1], "%+.1f" % percChangeQ[0, 1], "%+.1f" % percChangeI2[0, 1]])
@@ -623,7 +623,7 @@ PCData1 = PCTable1.get_string()
 with open("Table_6_pc1.txt", "w") as table6:
     table6.write(PCData1)
 
-PCTable2 = PrettyTable(["Change in MSE (%)", "Dispersion", "Q", "I\u00B2"])
+PCTable2 = PrettyTable(["Change in EMSE (%)", "Dispersion", "Q", "I\u00B2"])
 PCTable2.add_row(["Cifar-10", "", "", ""])
 PCTable2.add_row(["SH: 10v5", "%+.1f" % percChangeDisp[0, 3], "%+.1f" % percChangeQ[0, 3], "%+.1f" % percChangeI2[0, 3]])
 PCTable2.add_row(["SH: 5v2", "%+.1f" % percChangeDisp[0, 4], "%+.1f" % percChangeQ[0, 4], "%+.1f" % percChangeI2[0, 4]])
