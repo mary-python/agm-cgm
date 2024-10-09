@@ -306,7 +306,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             if ACindex == 0:
 
                 # TABLES ASSUME UNIFORM DATA
-                if fi == 0 and val == 0:
+                if fi == 0 and val == 3:
                     mseDispETableA[rep] = mseE
                     mseDispTTableA[rep] = mseT
                     mseQETableA[rep] = mseQE
@@ -317,7 +317,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseQEPlotATemp[fi, val, rep] = mseQE
 
             else:
-                if fi == 0 and val == 0:
+                if fi == 0 and val == 3:
                     mseDispETableC[rep] = mseE
                     mseDispTTableC[rep] = mseT
                     mseQETableC[rep] = mseQE
@@ -352,7 +352,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             mseC = xiCentral**2
 
             if ACindex == 0:
-                if fi == 0 and val == 0:
+                if fi == 0 and val == 3:
                     mseI2ETableA[rep] = mseI2E
                     mseI2TTableA[rep] = mseI2T
                     mseCTableA[rep] = mseC
@@ -360,7 +360,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseI2EPlotATemp[fi, val, rep] = mseI2E
 
             else:
-                if fi == 0 and val == 0:
+                if fi == 0 and val == 3:
                     mseI2ETableC[rep] = mseI2E
                     mseI2TTableC[rep] = mseI2T
                     mseCTableC[rep] = mseC
@@ -422,7 +422,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 computeMSE(0, rep, fi, imageArray, sigma, centralSigma)
                 computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
-            if fi == 0 and val == 0:
+            if fi == 0 and val == 3:
                 mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
                 mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
                 mseDispTable[dataIndex, 2] = np.mean(mseDispTTableA)
