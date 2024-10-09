@@ -13,7 +13,7 @@ np.random.seed(3820672)
 
 # ARRAY STORING VALUES OF EPSILON
 epsset = np.array([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5])
-dta = 0.25
+dta = 0.1
 
 # SETTING DIMENSIONS OF DATASETS
 dimCifar = 3072
@@ -306,7 +306,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             if ACindex == 0:
 
                 # TABLES ASSUME UNIFORM DATA
-                if fi == 0 and val == 3:
+                if fi == 0 and val == 0:
                     mseDispETableA[rep] = mseE
                     mseDispTTableA[rep] = mseT
                     mseQETableA[rep] = mseQE
@@ -317,7 +317,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseQEPlotATemp[fi, val, rep] = mseQE
 
             else:
-                if fi == 0 and val == 3:
+                if fi == 0 and val == 0:
                     mseDispETableC[rep] = mseE
                     mseDispTTableC[rep] = mseT
                     mseQETableC[rep] = mseQE
@@ -352,7 +352,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             mseC = xiCentral**2
 
             if ACindex == 0:
-                if fi == 0 and val == 3:
+                if fi == 0 and val == 0:
                     mseI2ETableA[rep] = mseI2E
                     mseI2TTableA[rep] = mseI2T
                     mseCTableA[rep] = mseC
@@ -360,7 +360,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseI2EPlotATemp[fi, val, rep] = mseI2E
 
             else:
-                if fi == 0 and val == 3:
+                if fi == 0 and val == 0:
                     mseI2ETableC[rep] = mseI2E
                     mseI2TTableC[rep] = mseI2T
                     mseCTableC[rep] = mseC
@@ -422,7 +422,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 computeMSE(0, rep, fi, imageArray, sigma, centralSigma)
                 computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
-            if fi == 0 and val == 3:
+            if fi == 0 and val == 0:
                 mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
                 mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
                 mseDispTable[dataIndex, 2] = np.mean(mseDispTTableA)
@@ -531,17 +531,17 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
     ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
     ACTable.add_row(["Cifar-10", "", "", ""])
-    ACTable.add_row(["EMSE", "%.6f" % mseDispTable[0, 4], "%.6f" % mseQTable[0, 4], "%.6f" % mseI2Table[0, 4]])
-    ACTable.add_row(["TMSE", "%.6f" % mseDispTable[0, 5], "%.6f" % mseQTable[0, 5], "%.6f" % mseI2Table[0, 5]])
-    ACTable.add_row(["CMSE", "%.6f" % mseCentralTable[0, 2], "%.6f" % mseCentralTable[0, 2], "%.6f" % mseCentralTable[0, 2]])
+    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[0, 4], "%.5f" % mseQTable[0, 4], "%.5f" % mseI2Table[0, 4]])
+    ACTable.add_row(["TMSE", "%.5f" % mseDispTable[0, 5], "%.5f" % mseQTable[0, 5], "%.5f" % mseI2Table[0, 5]])
+    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2]])
     ACTable.add_row(["Cifar-100", "", "", ""])
-    ACTable.add_row(["EMSE", "%.6f" % mseDispTable[1, 4], "%.6f" % mseQTable[1, 4], "%.6f" % mseI2Table[1, 4]])
-    ACTable.add_row(["TMSE", "%.6f" %  mseDispTable[1, 5], "%.6f" % mseQTable[1, 5], "%.6f" % mseI2Table[1, 5]])
-    ACTable.add_row(["CMSE", "%.6f" % mseCentralTable[1, 2], "%.6f" % mseCentralTable[1, 2], "%.6f" % mseCentralTable[1, 2]])
+    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[1, 4], "%.5f" % mseQTable[1, 4], "%.5f" % mseI2Table[1, 4]])
+    ACTable.add_row(["TMSE", "%.5f" %  mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
+    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2]])
     ACTable.add_row(["Fashion-MNIST", "", "", ""])
-    ACTable.add_row(["EMSE", "%.6f" % mseDispTable[2, 4], "%.6f" % mseQTable[2, 4], "%.6f" % mseI2Table[2, 4]])
-    ACTable.add_row(["TMSE", "%.6f" % mseDispTable[2, 5], "%.6f" % mseQTable[2, 5], "%.6f" % mseI2Table[2, 5]])
-    ACTable.add_row(["CMSE", "%.6f" % mseCentralTable[2, 2], "%.6f" % mseCentralTable[2, 2], "%.6f" % mseCentralTable[2, 2]])
+    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[2, 4], "%.5f" % mseQTable[2, 4], "%.5f" % mseI2Table[2, 4]])
+    ACTable.add_row(["TMSE", "%.5f" % mseDispTable[2, 5], "%.5f" % mseQTable[2, 5], "%.5f" % mseI2Table[2, 5]])
+    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2]])
         
     ACData = ACTable.get_string()
     with open("Table_4_ac.txt", "w") as table4:
