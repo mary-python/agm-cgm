@@ -347,7 +347,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             mseI2E = np.power(np.mean(mseI2EList), 2)
             mseI2T = np.power(np.mean(mseI2TList), 2)
 
-            # EXPERIMENT 2: WHAT IS THE COST OF A DISTRIBUTED SETTING?
+            # EXPERIMENT 1: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
             mseC = xiCentral**2
 
@@ -365,7 +365,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                     mseI2TTableC[rep] = mseI2T
                     mseCTableC[rep] = mseC
 
-        # EXPERIMENT 3: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
+        # EXPERIMENT 2: SAMPLE APPROX 2% OF CLIENTS THEN SPLIT INTO CASES BY STATISTICAL HETEROGENEITY
         # 1. EQUAL NUMBERS OF EACH OF 10 LABELS [1:1:1:1:1:1:1:1:1:1]
         # 2. UNEQUAL NUMBERS OF EACH OF 10 LABELS [91:1:1:1:1:1:1:1:1:1]
         # 3. EQUAL NUMBERS OF EACH OF 5 LABELS [1:1:1:1:1:0:0:0:0:0]
@@ -422,6 +422,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 computeMSE(0, rep, fi, imageArray, sigma, centralSigma)
                 computeMSE(1, rep, fi, imageArray, classicSigma, classicCentralSigma)
 
+            # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
             if fi == 0 and val == 0:
                 mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
                 mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
@@ -473,96 +474,8 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             stdDispEPlotA[fi, val] = np.std(mseDispEPlotATemp[fi, val])
             stdQEPlotA[fi, val] = np.std(mseQEPlotATemp[fi, val])
             stdI2EPlotA[fi, val] = np.std(mseI2EPlotATemp[fi, val])
-
-    # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
-    DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
-    DispTable.add_row(["Cifar-10", "", "", "", ""])
-    DispTable.add_row(["EMSE", "%.3e" % mseDispTable[0, 0], "%.3e" % mseDispTable[0, 1], "%.3e" % stdDispTable[0, 0], "%.3e" % stdDispTable[0, 1]])
-    DispTable.add_row(["TMSE", "%.3e" % mseDispTable[0, 2], "%.3e" % mseDispTable[0, 3], "%.3e" % stdDispTable[0, 2], "%.3e" % stdDispTable[0, 3]])
-    DispTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
-    DispTable.add_row(["Cifar-100", "", "", "", ""])
-    DispTable.add_row(["EMSE", "%.3e" % mseDispTable[1, 0], "%.3e" % mseDispTable[1, 1], "%.3e" % stdDispTable[1, 0], "%.3e" % stdDispTable[1, 1]])
-    DispTable.add_row(["TMSE", "%.3e" % mseDispTable[1, 2], "%.3e" % mseDispTable[1, 3], "%.3e" % stdDispTable[1, 2], "%.3e" % stdDispTable[1, 3]])
-    DispTable.add_row(["CMSE", "%.3f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.3f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
-    DispTable.add_row(["Fashion-MNIST", "", "", "", ""])
-    DispTable.add_row(["EMSE", "%.3e" % mseDispTable[2, 0], "%.3e" % mseDispTable[2, 1], "%.3e" % stdDispTable[2, 0], "%.3e" % stdDispTable[2, 1]])
-    DispTable.add_row(["TMSE", "%.3e" % mseDispTable[2, 2], "%.3e" % mseDispTable[2, 3], "%.3e" % stdDispTable[2, 2], "%.3e" % stdDispTable[2, 3]])
-    DispTable.add_row(["CMSE", "%.3f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.3f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
-
-    DispData = DispTable.get_string()
-    with open("Table_1_disp.txt", "w") as table1:
-        table1.write(DispData)
-
-    QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
-    QTable.add_row(["Cifar-10", "", "", "", ""])
-    QTable.add_row(["EMSE", "%.3e" % mseQTable[0, 0], "%.3e" % mseQTable[0, 1], "%.3e" % stdQTable[0, 0], "%.3e" % stdQTable[0, 1]])
-    QTable.add_row(["TMSE", "%.3e" % mseQTable[0, 2], "%.3e" % mseQTable[0, 3], "%.3e" % stdQTable[0, 2], "%.3e" % stdQTable[0, 3]])
-    QTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
-    QTable.add_row(["Cifar-100", "", "", "", ""])
-    QTable.add_row(["EMSE", "%.3e" % mseQTable[1, 0], "%.3e" % mseQTable[1, 1], "%.3e" % stdQTable[1, 0], "%.3e" % stdQTable[1, 1]])
-    QTable.add_row(["TMSE", "%.3e" % mseQTable[1, 2], "%.3e" % mseQTable[1, 3], "%.3e" % stdQTable[1, 2], "%.3e" % stdQTable[1, 3]])
-    QTable.add_row(["CMSE", "%.3f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.3f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
-    QTable.add_row(["Fashion-MNIST", "", "", "", ""])
-    QTable.add_row(["EMSE", "%.3e" % mseQTable[2, 0], "%.3e" % mseQTable[2, 1], "%.3e" % stdQTable[2, 0], "%.3e" % stdQTable[2, 1]])
-    QTable.add_row(["TMSE", "%.3e" % mseQTable[2, 2], "%.3e" % mseQTable[2, 3], "%.3e" % stdQTable[2, 2], "%.3e" % stdQTable[2, 3]])
-    QTable.add_row(["CMSE", "%.3f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.3f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
-
-    QData = QTable.get_string()
-    with open("Table_2_q.txt", "w") as table2:
-        table2.write(QData)
-
-    I2Table = PrettyTable(["I\u00B2", "AGM", "CGM", "SD AGM", "SD CGM"])
-    I2Table.add_row(["Cifar-10", "", "", "", ""])
-    I2Table.add_row(["EMSE", "%.3e" % mseI2Table[0, 0], "%.3e" % mseI2Table[0, 1], "%.3e" % stdI2Table[0, 0], "%.3e" % stdI2Table[0, 1]])
-    I2Table.add_row(["TMSE", "%.3e" % mseI2Table[0, 2], "%.3e" % mseI2Table[0, 3], "%.3e" % stdI2Table[0, 2], "%.3e" % stdI2Table[0, 3]])
-    I2Table.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
-    I2Table.add_row(["Cifar-100", "", "", "", ""])
-    I2Table.add_row(["EMSE", "%.3e" % mseI2Table[1, 0], "%.3e" % mseI2Table[1, 1], "%.3e" % stdI2Table[1, 0], "%.3e" % stdI2Table[1, 1]])
-    I2Table.add_row(["TMSE", "%.3e" % mseI2Table[1, 2], "%.3e" % mseI2Table[1, 3], "%.3e" % stdI2Table[1, 2], "%.3e" % stdI2Table[1, 3]])
-    I2Table.add_row(["CMSE", "%.3f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.3f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
-    I2Table.add_row(["Fashion-MNIST", "", "", "", ""])
-    I2Table.add_row(["EMSE", "%.3e" % mseI2Table[2, 0], "%.3e" % mseI2Table[2, 1], "%.3e" % stdI2Table[2, 0], "%.3e" % stdI2Table[2, 1]])
-    I2Table.add_row(["TMSE", "%.3e" % mseI2Table[2, 2], "%.3e" % mseI2Table[2, 3], "%.3e" % stdI2Table[2, 2], "%.3e" % stdI2Table[2, 3]])
-    I2Table.add_row(["CMSE", "%.3f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.3f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
-
-    I2Data = I2Table.get_string()
-    with open("Table_3_i2.txt", "w") as table3:
-        table3.write(I2Data)
-
-    ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
-    ACTable.add_row(["Cifar-10", "", "", ""])
-    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[0, 4], "%.5f" % mseQTable[0, 4], "%.5f" % mseI2Table[0, 4]])
-    ACTable.add_row(["TMSE", "%.5f" % mseDispTable[0, 5], "%.5f" % mseQTable[0, 5], "%.5f" % mseI2Table[0, 5]])
-    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2]])
-    ACTable.add_row(["Cifar-100", "", "", ""])
-    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[1, 4], "%.5f" % mseQTable[1, 4], "%.5f" % mseI2Table[1, 4]])
-    ACTable.add_row(["TMSE", "%.5f" %  mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
-    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2]])
-    ACTable.add_row(["Fashion-MNIST", "", "", ""])
-    ACTable.add_row(["EMSE", "%.5f" % mseDispTable[2, 4], "%.5f" % mseQTable[2, 4], "%.5f" % mseI2Table[2, 4]])
-    ACTable.add_row(["TMSE", "%.5f" % mseDispTable[2, 5], "%.5f" % mseQTable[2, 5], "%.5f" % mseI2Table[2, 5]])
-    ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2]])
-        
-    ACData = ACTable.get_string()
-    with open("Table_4_ac.txt", "w") as table4:
-        table4.write(ACData)
-
-    ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
-    ETTable.add_row(["Cifar-10", "", "", ""])
-    ETTable.add_row(["AGM", "%.4f" % mseDispTable[0, 6], "%.4f" % mseQTable[0, 6], "%.4f" % mseI2Table[0, 6]])
-    ETTable.add_row(["CGM", "%.4f" % mseDispTable[0, 7], "%.4f" % mseQTable[0, 7], "%.4f" % mseI2Table[0, 7]])
-    ETTable.add_row(["Cifar-100", "", "", ""])
-    ETTable.add_row(["AGM", "%.4f" % mseDispTable[1, 6], "%.4f" % mseQTable[1, 6], "%.4f" % mseI2Table[1, 6]])
-    ETTable.add_row(["CGM", "%.4f" % mseDispTable[1, 7], "%.4f" % mseQTable[1, 7], "%.4f" % mseI2Table[1, 7]])
-    ETTable.add_row(["Fashion-MNIST", "", "", ""])
-    ETTable.add_row(["AGM", "%.4f" % mseDispTable[2, 6], "%.4f" % mseQTable[2, 6], "%.4f" % mseI2Table[2, 6]])
-    ETTable.add_row(["CGM", "%.4f" % mseDispTable[2, 7], "%.4f" % mseQTable[2, 7], "%.4f" % mseI2Table[2, 7]])
-        
-    ETData = ETTable.get_string()
-    with open("Table_5_et.txt", "w") as table5:
-        table5.write(ETData)
     
-    # EXPERIMENT 3: STATISTICAL HETEROGENEITY
+    # EXPERIMENT 2: STATISTICAL HETEROGENEITY
     def computePercChange(a, b):
         percChange = np.divide(np.subtract(a, b), a)*100
         return np.mean(percChange)
@@ -604,6 +517,93 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
+
+DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
+DispTable.add_row(["Cifar-10", "", "", "", ""])
+DispTable.add_row(["EMSE", "%.3e" % mseDispTable[0, 0], "%.3e" % mseDispTable[0, 1], "%.3e" % stdDispTable[0, 0], "%.3e" % stdDispTable[0, 1]])
+DispTable.add_row(["TMSE", "%.3e" % mseDispTable[0, 2], "%.3e" % mseDispTable[0, 3], "%.3e" % stdDispTable[0, 2], "%.3e" % stdDispTable[0, 3]])
+DispTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+DispTable.add_row(["Cifar-100", "", "", "", ""])
+DispTable.add_row(["EMSE", "%.3e" % mseDispTable[1, 0], "%.3e" % mseDispTable[1, 1], "%.3e" % stdDispTable[1, 0], "%.3e" % stdDispTable[1, 1]])
+DispTable.add_row(["TMSE", "%.3e" % mseDispTable[1, 2], "%.3e" % mseDispTable[1, 3], "%.3e" % stdDispTable[1, 2], "%.3e" % stdDispTable[1, 3]])
+DispTable.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+DispTable.add_row(["Fashion-MNIST", "", "", "", ""])
+DispTable.add_row(["EMSE", "%.3e" % mseDispTable[2, 0], "%.3e" % mseDispTable[2, 1], "%.3e" % stdDispTable[2, 0], "%.3e" % stdDispTable[2, 1]])
+DispTable.add_row(["TMSE", "%.3e" % mseDispTable[2, 2], "%.3e" % mseDispTable[2, 3], "%.3e" % stdDispTable[2, 2], "%.3e" % stdDispTable[2, 3]])
+DispTable.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+
+DispData = DispTable.get_string()
+with open("Table_1_disp.txt", "w") as table1:
+    table1.write(DispData)
+
+QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
+QTable.add_row(["Cifar-10", "", "", "", ""])
+QTable.add_row(["EMSE", "%.3e" % mseQTable[0, 0], "%.3e" % mseQTable[0, 1], "%.3e" % stdQTable[0, 0], "%.3e" % stdQTable[0, 1]])
+QTable.add_row(["TMSE", "%.3e" % mseQTable[0, 2], "%.3e" % mseQTable[0, 3], "%.3e" % stdQTable[0, 2], "%.3e" % stdQTable[0, 3]])
+QTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+QTable.add_row(["Cifar-100", "", "", "", ""])
+QTable.add_row(["EMSE", "%.3e" % mseQTable[1, 0], "%.3e" % mseQTable[1, 1], "%.3e" % stdQTable[1, 0], "%.3e" % stdQTable[1, 1]])
+QTable.add_row(["TMSE", "%.3e" % mseQTable[1, 2], "%.3e" % mseQTable[1, 3], "%.3e" % stdQTable[1, 2], "%.3e" % stdQTable[1, 3]])
+QTable.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+QTable.add_row(["Fashion-MNIST", "", "", "", ""])
+QTable.add_row(["EMSE", "%.3e" % mseQTable[2, 0], "%.3e" % mseQTable[2, 1], "%.3e" % stdQTable[2, 0], "%.3e" % stdQTable[2, 1]])
+QTable.add_row(["TMSE", "%.3e" % mseQTable[2, 2], "%.3e" % mseQTable[2, 3], "%.3e" % stdQTable[2, 2], "%.3e" % stdQTable[2, 3]])
+QTable.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+
+QData = QTable.get_string()
+with open("Table_2_q.txt", "w") as table2:
+    table2.write(QData)
+
+I2Table = PrettyTable(["I\u00B2", "AGM", "CGM", "SD AGM", "SD CGM"])
+I2Table.add_row(["Cifar-10", "", "", "", ""])
+I2Table.add_row(["EMSE", "%.3e" % mseI2Table[0, 0], "%.3e" % mseI2Table[0, 1], "%.3e" % stdI2Table[0, 0], "%.3e" % stdI2Table[0, 1]])
+I2Table.add_row(["TMSE", "%.3e" % mseI2Table[0, 2], "%.3e" % mseI2Table[0, 3], "%.3e" % stdI2Table[0, 2], "%.3e" % stdI2Table[0, 3]])
+I2Table.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+I2Table.add_row(["Cifar-100", "", "", "", ""])
+I2Table.add_row(["EMSE", "%.3e" % mseI2Table[1, 0], "%.3e" % mseI2Table[1, 1], "%.3e" % stdI2Table[1, 0], "%.3e" % stdI2Table[1, 1]])
+I2Table.add_row(["TMSE", "%.3e" % mseI2Table[1, 2], "%.3e" % mseI2Table[1, 3], "%.3e" % stdI2Table[1, 2], "%.3e" % stdI2Table[1, 3]])
+I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+I2Table.add_row(["Fashion-MNIST", "", "", "", ""])
+I2Table.add_row(["EMSE", "%.3e" % mseI2Table[2, 0], "%.3e" % mseI2Table[2, 1], "%.3e" % stdI2Table[2, 0], "%.3e" % stdI2Table[2, 1]])
+I2Table.add_row(["TMSE", "%.3e" % mseI2Table[2, 2], "%.3e" % mseI2Table[2, 3], "%.3e" % stdI2Table[2, 2], "%.3e" % stdI2Table[2, 3]])
+I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+
+I2Data = I2Table.get_string()
+with open("Table_3_i2.txt", "w") as table3:
+    table3.write(I2Data)
+
+ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
+ACTable.add_row(["Cifar-10", "", "", ""])
+ACTable.add_row(["EMSE", "%.5f" % mseDispTable[0, 4], "%.5f" % mseQTable[0, 4], "%.5f" % mseI2Table[0, 4]])
+ACTable.add_row(["TMSE", "%.5f" % mseDispTable[0, 5], "%.5f" % mseQTable[0, 5], "%.5f" % mseI2Table[0, 5]])
+ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2]])
+ACTable.add_row(["Cifar-100", "", "", ""])
+ACTable.add_row(["EMSE", "%.5f" % mseDispTable[1, 4], "%.5f" % mseQTable[1, 4], "%.5f" % mseI2Table[1, 4]])
+ACTable.add_row(["TMSE", "%.5f" %  mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
+ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2]])
+ACTable.add_row(["Fashion-MNIST", "", "", ""])
+ACTable.add_row(["EMSE", "%.5f" % mseDispTable[2, 4], "%.5f" % mseQTable[2, 4], "%.5f" % mseI2Table[2, 4]])
+ACTable.add_row(["TMSE", "%.5f" % mseDispTable[2, 5], "%.5f" % mseQTable[2, 5], "%.5f" % mseI2Table[2, 5]])
+ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2]])
+        
+ACData = ACTable.get_string()
+with open("Table_4_ac.txt", "w") as table4:
+    table4.write(ACData)
+
+ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
+ETTable.add_row(["Cifar-10", "", "", ""])
+ETTable.add_row(["AGM", "%.4f" % mseDispTable[0, 6], "%.4f" % mseQTable[0, 6], "%.4f" % mseI2Table[0, 6]])
+ETTable.add_row(["CGM", "%.4f" % mseDispTable[0, 7], "%.4f" % mseQTable[0, 7], "%.4f" % mseI2Table[0, 7]])
+ETTable.add_row(["Cifar-100", "", "", ""])
+ETTable.add_row(["AGM", "%.4f" % mseDispTable[1, 6], "%.4f" % mseQTable[1, 6], "%.4f" % mseI2Table[1, 6]])
+ETTable.add_row(["CGM", "%.4f" % mseDispTable[1, 7], "%.4f" % mseQTable[1, 7], "%.4f" % mseI2Table[1, 7]])
+ETTable.add_row(["Fashion-MNIST", "", "", ""])
+ETTable.add_row(["AGM", "%.4f" % mseDispTable[2, 6], "%.4f" % mseQTable[2, 6], "%.4f" % mseI2Table[2, 6]])
+ETTable.add_row(["CGM", "%.4f" % mseDispTable[2, 7], "%.4f" % mseQTable[2, 7], "%.4f" % mseI2Table[2, 7]])
+        
+ETData = ETTable.get_string()
+with open("Table_5_et.txt", "w") as table5:
+    table5.write(ETData)
 
 PCTable1 = PrettyTable(["Change in EMSE (%)", "Dispersion", "Q", "I\u00B2"])
 PCTable1.add_row(["Cifar-10", "", "", ""])
