@@ -644,121 +644,259 @@ PCData2 = PCTable2.get_string()
 with open("Table_7_pc2.txt", "w") as table7:
     table7.write(PCData2)
 
-plt.errorbar(epsset, mseDisp[0, 0], yerr = np.minimum(stdDisp[0, 0], np.sqrt(mseDisp[0, 0]), np.divide(mseDisp[0, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseDisp[0, 1], yerr = np.minimum(stdDisp[0, 1], np.sqrt(mseDisp[0, 1]), np.divide(mseDisp[0, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseDisp[0, 2], yerr = np.minimum(stdDisp[0, 2], np.sqrt(mseDisp[0, 2]), np.divide(mseDisp[0, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseDisp[0, 3], yerr = np.minimum(stdDisp[0, 3], np.sqrt(mseDisp[0, 3]), np.divide(mseDisp[0, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseDisp[0, 4], yerr = np.minimum(stdDisp[0, 4], np.sqrt(mseDisp[0, 4]), np.divide(mseDisp[0, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseDisp[0, 5], yerr = np.minimum(stdDisp[0, 5], np.sqrt(mseDisp[0, 5]), np.divide(mseDisp[0, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[0] + "_disp.png")
-plt.clf()
+uparray = np.zeros(E, dtype = bool)
+loarray = np.ones(E, dtype = bool)
 
-plt.errorbar(epsset, mseDisp[1, 0], yerr = np.minimum(stdDisp[1, 0], np.sqrt(mseDisp[1, 0]), np.divide(mseDisp[1, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseDisp[1, 1], yerr = np.minimum(stdDisp[1, 1], np.sqrt(mseDisp[1, 1]), np.divide(mseDisp[1, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseDisp[1, 2], yerr = np.minimum(stdDisp[1, 2], np.sqrt(mseDisp[1, 2]), np.divide(mseDisp[1, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseDisp[1, 3], yerr = np.minimum(stdDisp[1, 3], np.sqrt(mseDisp[1, 3]), np.divide(mseDisp[1, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseDisp[1, 4], yerr = np.minimum(stdDisp[1, 4], np.sqrt(mseDisp[1, 4]), np.divide(mseDisp[1, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseDisp[1, 5], yerr = np.minimum(stdDisp[1, 5], np.sqrt(mseDisp[1, 5]), np.divide(mseDisp[1, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[1] + "_disp.png")
-plt.clf()
+fig, ax1 = plt.subplots()
+plotline1a, caplines1a, barlinecols1a = ax1.errorbar(epsset, mseDisp[0, 0], yerr = np.minimum(stdDisp[0, 0], np.sqrt(mseDisp[0, 0]), np.divide(mseDisp[0, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline1b, caplines1b, barlinecols1b = ax1.errorbar(epsset, mseDisp[0, 1], yerr = np.minimum(stdDisp[0, 1], np.sqrt(mseDisp[0, 1]), np.divide(mseDisp[0, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline1c, caplines1c, barlinecols1c = ax1.errorbar(epsset, mseDisp[0, 2], yerr = np.minimum(stdDisp[0, 2], np.sqrt(mseDisp[0, 2]), np.divide(mseDisp[0, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline1d, caplines1d, barlinecols1d = ax1.errorbar(epsset, mseDisp[0, 3], yerr = np.minimum(stdDisp[0, 3], np.sqrt(mseDisp[0, 3]), np.divide(mseDisp[0, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline1e, caplines1e, barlinecols1e = ax1.errorbar(epsset, mseDisp[0, 4], yerr = np.minimum(stdDisp[0, 4], np.sqrt(mseDisp[0, 4]), np.divide(mseDisp[0, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline1f, caplines1f, barlinecols1f = ax1.errorbar(epsset, mseDisp[0, 5], yerr = np.minimum(stdDisp[0, 5], np.sqrt(mseDisp[0, 5]), np.divide(mseDisp[0, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines1a[0].set_marker('')
+caplines1b[0].set_marker('')
+caplines1c[0].set_marker('')
+caplines1d[0].set_marker('')
+caplines1e[0].set_marker('')
+caplines1f[0].set_marker('')
+handles1, labels1 = ax1.get_legend_handles_labels()
+handles1 = [h1[0] for h1 in handles1]
+ax1.legend(handles1, labels1, loc = 'best')
+ax1.set_yscale('log')
+ax1.set_xlabel("Value of $\mathit{\u03b5}$")
+ax1.set_ylabel("EMSE of Gaussian Mechanism")
+ax1.figure.savefig("Graph_" + "%s" % cifarset[0] + "_disp.png")
+ax1.clear()
 
-plt.errorbar(epsset, mseDisp[2, 0], yerr = np.minimum(stdDisp[2, 0], np.sqrt(mseDisp[2, 0]), np.divide(mseDisp[2, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseDisp[2, 1], yerr = np.minimum(stdDisp[2, 1], np.sqrt(mseDisp[2, 1]), np.divide(mseDisp[2, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseDisp[2, 2], yerr = np.minimum(stdDisp[2, 2], np.sqrt(mseDisp[2, 2]), np.divide(mseDisp[2, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseDisp[2, 3], yerr = np.minimum(stdDisp[2, 3], np.sqrt(mseDisp[2, 3]), np.divide(mseDisp[2, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseDisp[2, 4], yerr = np.minimum(stdDisp[2, 4], np.sqrt(mseDisp[2, 4]), np.divide(mseDisp[2, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseDisp[2, 5], yerr = np.minimum(stdDisp[2, 5], np.sqrt(mseDisp[2, 5]), np.divide(mseDisp[2, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[2] + "_disp.png")
-plt.clf()
+fig, ax2 = plt.subplots()
+plotline2a, caplines2a, barlinecols2a = ax2.errorbar(epsset, mseDisp[1, 0], yerr = np.minimum(stdDisp[1, 0], np.sqrt(mseDisp[1, 0]), np.divide(mseDisp[1, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline2b, caplines2b, barlinecols2b = ax2.errorbar(epsset, mseDisp[1, 1], yerr = np.minimum(stdDisp[1, 1], np.sqrt(mseDisp[1, 1]), np.divide(mseDisp[1, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline2c, caplines2c, barlinecols2c = ax2.errorbar(epsset, mseDisp[1, 2], yerr = np.minimum(stdDisp[1, 2], np.sqrt(mseDisp[1, 2]), np.divide(mseDisp[1, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline2d, caplines2d, barlinecols2d = ax2.errorbar(epsset, mseDisp[1, 3], yerr = np.minimum(stdDisp[1, 3], np.sqrt(mseDisp[1, 3]), np.divide(mseDisp[1, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline2e, caplines2e, barlinecols2e = ax2.errorbar(epsset, mseDisp[1, 4], yerr = np.minimum(stdDisp[1, 4], np.sqrt(mseDisp[1, 4]), np.divide(mseDisp[1, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline2f, caplines2f, barlinecols2f = ax2.errorbar(epsset, mseDisp[1, 5], yerr = np.minimum(stdDisp[1, 5], np.sqrt(mseDisp[1, 5]), np.divide(mseDisp[1, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines2a[0].set_marker('')
+caplines2b[0].set_marker('')
+caplines2c[0].set_marker('')
+caplines2d[0].set_marker('')
+caplines2e[0].set_marker('')
+caplines2f[0].set_marker('')
+handles2, labels2 = ax2.get_legend_handles_labels()
+handles2 = [h2[0] for h2 in handles2]
+ax2.legend(handles2, labels2, loc = 'best')
+ax2.set_yscale('log')
+ax2.set_xlabel("Value of $\mathit{\u03b5}$")
+ax2.set_ylabel("EMSE of Gaussian Mechanism")
+ax2.figure.savefig("Graph_" + "%s" % cifarset[1] + "_disp.png")
+ax2.clear()
 
-plt.errorbar(epsset, mseQ[0, 0], yerr = np.minimum(stdQ[0, 0], np.sqrt(mseQ[0, 0]), np.divide(mseQ[0, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseQ[0, 1], yerr = np.minimum(stdQ[0, 1], np.sqrt(mseQ[0, 1]), np.divide(mseQ[0, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseQ[0, 2], yerr = np.minimum(stdQ[0, 2], np.sqrt(mseQ[0, 2]), np.divide(mseQ[0, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseQ[0, 3], yerr = np.minimum(stdQ[0, 3], np.sqrt(mseQ[0, 3]), np.divide(mseQ[0, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseQ[0, 4], yerr = np.minimum(stdQ[0, 4], np.sqrt(mseQ[0, 4]), np.divide(mseQ[0, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseQ[0, 5], yerr = np.minimum(stdQ[0, 5], np.sqrt(mseQ[0, 5]), np.divide(mseQ[0, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[0] + "_q.png")
-plt.clf()
+fig, ax3 = plt.subplots()
+plotline3a, caplines3a, barlinecols3a = ax3.errorbar(epsset, mseDisp[2, 0], yerr = np.minimum(stdDisp[2, 0], np.sqrt(mseDisp[2, 0]), np.divide(mseDisp[2, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline3b, caplines3b, barlinecols3b = ax3.errorbar(epsset, mseDisp[2, 1], yerr = np.minimum(stdDisp[2, 1], np.sqrt(mseDisp[2, 1]), np.divide(mseDisp[2, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline3c, caplines3c, barlinecols3c = ax3.errorbar(epsset, mseDisp[2, 2], yerr = np.minimum(stdDisp[2, 2], np.sqrt(mseDisp[2, 2]), np.divide(mseDisp[2, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline3d, caplines3d, barlinecols3d = ax3.errorbar(epsset, mseDisp[2, 3], yerr = np.minimum(stdDisp[2, 3], np.sqrt(mseDisp[2, 3]), np.divide(mseDisp[2, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline3e, caplines3e, barlinecols3e = ax3.errorbar(epsset, mseDisp[2, 4], yerr = np.minimum(stdDisp[2, 4], np.sqrt(mseDisp[2, 4]), np.divide(mseDisp[2, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline3f, caplines3f, barlinecols3f = ax3.errorbar(epsset, mseDisp[2, 5], yerr = np.minimum(stdDisp[2, 5], np.sqrt(mseDisp[2, 5]), np.divide(mseDisp[2, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines3a[0].set_marker('')
+caplines3b[0].set_marker('')
+caplines3c[0].set_marker('')
+caplines3d[0].set_marker('')
+caplines3e[0].set_marker('')
+caplines3f[0].set_marker('')
+handles3, labels3 = ax3.get_legend_handles_labels()
+handles3 = [h3[0] for h3 in handles3]
+ax3.legend(handles3, labels3, loc = 'best')
+ax3.set_yscale('log')
+ax3.set_xlabel("Value of $\mathit{\u03b5}$")
+ax3.set_ylabel("EMSE of Gaussian Mechanism")
+ax3.figure.savefig("Graph_" + "%s" % cifarset[2] + "_disp.png")
+ax3.clear()
 
-plt.errorbar(epsset, mseQ[1, 0], yerr = np.minimum(stdQ[1, 0], np.sqrt(mseQ[1, 0]), np.divide(mseQ[1, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseQ[1, 1], yerr = np.minimum(stdQ[1, 1], np.sqrt(mseQ[1, 1]), np.divide(mseQ[1, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseQ[1, 2], yerr = np.minimum(stdQ[1, 2], np.sqrt(mseQ[1, 2]), np.divide(mseQ[1, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseQ[1, 3], yerr = np.minimum(stdQ[1, 3], np.sqrt(mseQ[1, 3]), np.divide(mseQ[1, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseQ[1, 4], yerr = np.minimum(stdQ[1, 4], np.sqrt(mseQ[1, 4]), np.divide(mseQ[1, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseQ[1, 5], yerr = np.minimum(stdQ[1, 5], np.sqrt(mseQ[1, 5]), np.divide(mseQ[1, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[1] + "_q.png")
-plt.clf()
+fig, ax4 = plt.subplots()
+plotline4a, caplines4a, barlinecols4a = ax4.errorbar(epsset, mseQ[0, 0], yerr = np.minimum(stdQ[0, 0], np.sqrt(mseQ[0, 0]), np.divide(mseQ[0, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline4b, caplines4b, barlinecols4b = ax4.errorbar(epsset, mseQ[0, 1], yerr = np.minimum(stdQ[0, 1], np.sqrt(mseQ[0, 1]), np.divide(mseQ[0, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline4c, caplines4c, barlinecols4c = ax4.errorbar(epsset, mseQ[0, 2], yerr = np.minimum(stdQ[0, 2], np.sqrt(mseQ[0, 2]), np.divide(mseQ[0, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline4d, caplines4d, barlinecols4d = ax4.errorbar(epsset, mseQ[0, 3], yerr = np.minimum(stdQ[0, 3], np.sqrt(mseQ[0, 3]), np.divide(mseQ[0, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline4e, caplines4e, barlinecols4e = ax4.errorbar(epsset, mseQ[0, 4], yerr = np.minimum(stdQ[0, 4], np.sqrt(mseQ[0, 4]), np.divide(mseQ[0, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline4f, caplines4f, barlinecols4f = ax4.errorbar(epsset, mseQ[0, 5], yerr = np.minimum(stdQ[0, 5], np.sqrt(mseQ[0, 5]), np.divide(mseQ[0, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines4a[0].set_marker('')
+caplines4b[0].set_marker('')
+caplines4c[0].set_marker('')
+caplines4d[0].set_marker('')
+caplines4e[0].set_marker('')
+caplines4f[0].set_marker('')
+handles4, labels4 = ax4.get_legend_handles_labels()
+handles4 = [h4[0] for h4 in handles4]
+ax4.legend(handles4, labels4, loc = 'best')
+ax4.set_yscale('log')
+ax4.set_xlabel("Value of $\mathit{\u03b5}$")
+ax4.set_ylabel("EMSE of Gaussian Mechanism")
+ax4.figure.savefig("Graph_" + "%s" % cifarset[0] + "_q.png")
+ax4.clear()
 
-plt.errorbar(epsset, mseQ[2, 0], yerr = np.minimum(stdQ[2, 0], np.sqrt(mseQ[2, 0]), np.divide(mseQ[2, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseQ[2, 1], yerr = np.minimum(stdQ[2, 1], np.sqrt(mseQ[2, 1]), np.divide(mseQ[2, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseQ[2, 2], yerr = np.minimum(stdQ[2, 2], np.sqrt(mseQ[2, 2]), np.divide(mseQ[2, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseQ[2, 3], yerr = np.minimum(stdQ[2, 3], np.sqrt(mseQ[2, 3]), np.divide(mseQ[2, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseQ[2, 4], yerr = np.minimum(stdQ[2, 4], np.sqrt(mseQ[2, 4]), np.divide(mseQ[2, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseQ[2, 5], yerr = np.minimum(stdQ[2, 5], np.sqrt(mseQ[2, 5]), np.divide(mseQ[2, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[2] + "_q.png")
-plt.clf()
+fig, ax5 = plt.subplots()
+plotline5a, caplines5a, barlinecols5a = ax5.errorbar(epsset, mseQ[1, 0], yerr = np.minimum(stdQ[1, 0], np.sqrt(mseQ[1, 0]), np.divide(mseQ[1, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline5b, caplines5b, barlinecols5b = ax5.errorbar(epsset, mseQ[1, 1], yerr = np.minimum(stdQ[1, 1], np.sqrt(mseQ[1, 1]), np.divide(mseQ[1, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline5c, caplines5c, barlinecols5c = ax5.errorbar(epsset, mseQ[1, 2], yerr = np.minimum(stdQ[1, 2], np.sqrt(mseQ[1, 2]), np.divide(mseQ[1, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline5d, caplines5d, barlinecols5d = ax5.errorbar(epsset, mseQ[1, 3], yerr = np.minimum(stdQ[1, 3], np.sqrt(mseQ[1, 3]), np.divide(mseQ[1, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline5e, caplines5e, barlinecols5e = ax5.errorbar(epsset, mseQ[1, 4], yerr = np.minimum(stdQ[1, 4], np.sqrt(mseQ[1, 4]), np.divide(mseQ[1, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline5f, caplines5f, barlinecols5f = ax5.errorbar(epsset, mseQ[1, 5], yerr = np.minimum(stdQ[1, 5], np.sqrt(mseQ[1, 5]), np.divide(mseQ[1, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines5a[0].set_marker('')
+caplines5b[0].set_marker('')
+caplines5c[0].set_marker('')
+caplines5d[0].set_marker('')
+caplines5e[0].set_marker('')
+caplines5f[0].set_marker('')
+handles5, labels5 = ax5.get_legend_handles_labels()
+handles5 = [h5[0] for h5 in handles5]
+ax5.legend(handles5, labels5, loc = 'best')
+ax5.set_yscale('log')
+ax5.set_xlabel("Value of $\mathit{\u03b5}$")
+ax5.set_ylabel("EMSE of Gaussian Mechanism")
+ax5.figure.savefig("Graph_" + "%s" % cifarset[1] + "_q.png")
+ax5.clear()
 
-plt.errorbar(epsset, mseI2[0, 0], yerr = np.minimum(stdI2[0, 0], np.sqrt(mseI2[0, 0]), np.divide(mseI2[0, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseI2[0, 1], yerr = np.minimum(stdI2[0, 1], np.sqrt(mseI2[0, 1]), np.divide(mseI2[0, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseI2[0, 2], yerr = np.minimum(stdI2[0, 2], np.sqrt(mseI2[0, 2]), np.divide(mseI2[0, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseI2[0, 3], yerr = np.minimum(stdI2[0, 3], np.sqrt(mseI2[0, 3]), np.divide(mseI2[0, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseI2[0, 4], yerr = np.minimum(stdI2[0, 4], np.sqrt(mseI2[0, 4]), np.divide(mseI2[0, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseI2[0, 5], yerr = np.minimum(stdI2[0, 5], np.sqrt(mseI2[0, 5]), np.divide(mseI2[0, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[0] + "_i2.png")
-plt.clf()
+fig, ax6 = plt.subplots()
+plotline6a, caplines6a, barlinecols6a = ax6.errorbar(epsset, mseQ[2, 0], yerr = np.minimum(stdQ[2, 0], np.sqrt(mseQ[2, 0]), np.divide(mseQ[2, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline6b, caplines6b, barlinecols6b = ax6.errorbar(epsset, mseQ[2, 1], yerr = np.minimum(stdQ[2, 1], np.sqrt(mseQ[2, 1]), np.divide(mseQ[2, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline6c, caplines6c, barlinecols6c = ax6.errorbar(epsset, mseQ[2, 2], yerr = np.minimum(stdQ[2, 2], np.sqrt(mseQ[2, 2]), np.divide(mseQ[2, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline6d, caplines6d, barlinecols6d = ax6.errorbar(epsset, mseQ[2, 3], yerr = np.minimum(stdQ[2, 3], np.sqrt(mseQ[2, 3]), np.divide(mseQ[2, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline6e, caplines6e, barlinecols6e = ax6.errorbar(epsset, mseQ[2, 4], yerr = np.minimum(stdQ[2, 4], np.sqrt(mseQ[2, 4]), np.divide(mseQ[2, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline6f, caplines6f, barlinecols6f = ax6.errorbar(epsset, mseQ[2, 5], yerr = np.minimum(stdQ[2, 5], np.sqrt(mseQ[2, 5]), np.divide(mseQ[2, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines6a[0].set_marker('')
+caplines6b[0].set_marker('')
+caplines6c[0].set_marker('')
+caplines6d[0].set_marker('')
+caplines6e[0].set_marker('')
+caplines6f[0].set_marker('')
+handles6, labels6 = ax6.get_legend_handles_labels()
+handles6 = [h6[0] for h6 in handles6]
+ax6.legend(handles6, labels6, loc = 'best')
+ax6.set_yscale('log')
+ax6.set_xlabel("Value of $\mathit{\u03b5}$")
+ax6.set_ylabel("EMSE of Gaussian Mechanism")
+ax6.figure.savefig("Graph_" + "%s" % cifarset[2] + "_q.png")
+ax6.clear()
 
-plt.errorbar(epsset, mseI2[1, 0], yerr = np.minimum(stdI2[1, 0], np.sqrt(mseI2[1, 0]), np.divide(mseI2[1, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseI2[1, 1], yerr = np.minimum(stdI2[1, 1], np.sqrt(mseI2[1, 1]), np.divide(mseI2[1, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseI2[1, 2], yerr = np.minimum(stdI2[1, 2], np.sqrt(mseI2[1, 2]), np.divide(mseI2[1, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseI2[1, 3], yerr = np.minimum(stdI2[1, 3], np.sqrt(mseI2[1, 3]), np.divide(mseI2[1, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseI2[1, 4], yerr = np.minimum(stdI2[1, 4], np.sqrt(mseI2[1, 4]), np.divide(mseI2[1, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseI2[1, 5], yerr = np.minimum(stdI2[1, 5], np.sqrt(mseI2[1, 5]), np.divide(mseI2[1, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[1] + "_i2.png")
-plt.clf()
+fig, ax7 = plt.subplots()
+plotline7a, caplines7a, barlinecols7a = ax7.errorbar(epsset, mseI2[0, 0], yerr = np.minimum(stdI2[0, 0], np.sqrt(mseI2[0, 0]), np.divide(mseI2[0, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline7b, caplines7b, barlinecols7b = ax7.errorbar(epsset, mseI2[0, 1], yerr = np.minimum(stdI2[0, 1], np.sqrt(mseI2[0, 1]), np.divide(mseI2[0, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline7c, caplines7c, barlinecols7c = ax7.errorbar(epsset, mseI2[0, 2], yerr = np.minimum(stdI2[0, 2], np.sqrt(mseI2[0, 2]), np.divide(mseI2[0, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline7d, caplines7d, barlinecols7d = ax7.errorbar(epsset, mseI2[0, 3], yerr = np.minimum(stdI2[0, 3], np.sqrt(mseI2[0, 3]), np.divide(mseI2[0, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline7e, caplines7e, barlinecols7e = ax7.errorbar(epsset, mseI2[0, 4], yerr = np.minimum(stdI2[0, 4], np.sqrt(mseI2[0, 4]), np.divide(mseI2[0, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline7f, caplines7f, barlinecols7f = ax7.errorbar(epsset, mseI2[0, 5], yerr = np.minimum(stdI2[0, 5], np.sqrt(mseI2[0, 5]), np.divide(mseI2[0, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines7a[0].set_marker('')
+caplines7b[0].set_marker('')
+caplines7c[0].set_marker('')
+caplines7d[0].set_marker('')
+caplines7e[0].set_marker('')
+caplines7f[0].set_marker('')
+handles7, labels7 = ax7.get_legend_handles_labels()
+handles7 = [h7[0] for h7 in handles7]
+ax7.legend(handles7, labels7, loc = 'best')
+ax7.set_yscale('log')
+ax7.set_xlabel("Value of $\mathit{\u03b5}$")
+ax7.set_ylabel("EMSE of Gaussian Mechanism")
+ax7.figure.savefig("Graph_" + "%s" % cifarset[0] + "_i2.png")
+ax7.clear()
 
-plt.errorbar(epsset, mseI2[2, 0], yerr = np.minimum(stdI2[2, 0], np.sqrt(mseI2[2, 0]), np.divide(mseI2[2, 0], 2)), lolims = np.zeros(E), color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
-plt.errorbar(epsset, mseI2[2, 1], yerr = np.minimum(stdI2[2, 1], np.sqrt(mseI2[2, 1]), np.divide(mseI2[2, 1], 2)), lolims = np.zeros(E), color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
-plt.errorbar(epsset, mseI2[2, 2], yerr = np.minimum(stdI2[2, 2], np.sqrt(mseI2[2, 2]), np.divide(mseI2[2, 2], 2)), lolims = np.zeros(E), color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
-plt.errorbar(epsset, mseI2[2, 3], yerr = np.minimum(stdI2[2, 3], np.sqrt(mseI2[2, 3]), np.divide(mseI2[2, 3], 2)), lolims = np.zeros(E), color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
-plt.errorbar(epsset, mseI2[2, 4], yerr = np.minimum(stdI2[2, 4], np.sqrt(mseI2[2, 4]), np.divide(mseI2[2, 4], 2)), lolims = np.zeros(E), color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
-plt.errorbar(epsset, mseI2[2, 5], yerr = np.minimum(stdI2[2, 5], np.sqrt(mseI2[2, 5]), np.divide(mseI2[2, 5], 2)), lolims = np.zeros(E), color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
-plt.legend(loc = 'best')
-plt.yscale('log')
-plt.xlabel("Value of $\mathit{\u03b5}$")
-plt.ylabel("EMSE of Gaussian Mechanism")
-plt.savefig("Graph_" + "%s" % cifarset[2] + "_i2.png")
-plt.clf()
+fig, ax8 = plt.subplots()
+plotline8a, caplines8a, barlinecols8a = ax8.errorbar(epsset, mseI2[1, 0], yerr = np.minimum(stdI2[1, 0], np.sqrt(mseI2[1, 0]), np.divide(mseI2[1, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline8b, caplines8b, barlinecols8b = ax8.errorbar(epsset, mseI2[1, 1], yerr = np.minimum(stdI2[1, 1], np.sqrt(mseI2[1, 1]), np.divide(mseI2[1, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline8c, caplines8c, barlinecols8c = ax8.errorbar(epsset, mseI2[1, 2], yerr = np.minimum(stdI2[1, 2], np.sqrt(mseI2[1, 2]), np.divide(mseI2[1, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline8d, caplines8d, barlinecols8d = ax8.errorbar(epsset, mseI2[1, 3], yerr = np.minimum(stdI2[1, 3], np.sqrt(mseI2[1, 3]), np.divide(mseI2[1, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline8e, caplines8e, barlinecols8e = ax8.errorbar(epsset, mseI2[1, 4], yerr = np.minimum(stdI2[1, 4], np.sqrt(mseI2[1, 4]), np.divide(mseI2[1, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline8f, caplines8f, barlinecols8f = ax8.errorbar(epsset, mseI2[1, 5], yerr = np.minimum(stdI2[1, 5], np.sqrt(mseI2[1, 5]), np.divide(mseI2[1, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines8a[0].set_marker('')
+caplines8b[0].set_marker('')
+caplines8c[0].set_marker('')
+caplines8d[0].set_marker('')
+caplines8e[0].set_marker('')
+caplines8f[0].set_marker('')
+handles8, labels8 = ax8.get_legend_handles_labels()
+handles8 = [h8[0] for h8 in handles8]
+ax8.legend(handles8, labels8, loc = 'best')
+ax8.set_yscale('log')
+ax8.set_xlabel("Value of $\mathit{\u03b5}$")
+ax8.set_ylabel("EMSE of Gaussian Mechanism")
+ax8.figure.savefig("Graph_" + "%s" % cifarset[1] + "_i2.png")
+ax8.clear()
+
+fig, ax9 = plt.subplots()
+plotline9a, caplines9a, barlinecols9a = ax9.errorbar(epsset, mseI2[2, 0], yerr = np.minimum(stdI2[2, 0], np.sqrt(mseI2[2, 0]), np.divide(mseI2[2, 0], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
+plotline9b, caplines9b, barlinecols9b = ax9.errorbar(epsset, mseI2[2, 1], yerr = np.minimum(stdI2[2, 1], np.sqrt(mseI2[2, 1]), np.divide(mseI2[2, 1], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'blueviolet', marker = 'x', label = f"{labelset[0]}: unequal")
+plotline9c, caplines9c, barlinecols9c = ax9.errorbar(epsset, mseI2[2, 2], yerr = np.minimum(stdI2[2, 2], np.sqrt(mseI2[2, 2]), np.divide(mseI2[2, 2], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'green', marker = 'o', label = f"{labelset[1]}: equal")
+plotline9d, caplines9d, barlinecols9d = ax9.errorbar(epsset, mseI2[2, 3], yerr = np.minimum(stdI2[2, 3], np.sqrt(mseI2[2, 3]), np.divide(mseI2[2, 3], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'lime', marker = 'x', label = f"{labelset[1]}: unequal")
+plotline9e, caplines9e, barlinecols9e = ax9.errorbar(epsset, mseI2[2, 4], yerr = np.minimum(stdI2[2, 4], np.sqrt(mseI2[2, 4]), np.divide(mseI2[2, 4], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'orange', marker = 'o', label = f"{labelset[2]}: equal")
+plotline9f, caplines9f, barlinecols9f = ax9.errorbar(epsset, mseI2[2, 5], yerr = np.minimum(stdI2[2, 5], np.sqrt(mseI2[2, 5]), np.divide(mseI2[2, 5], 2)),
+                                                     uplims = uparray, lolims = loarray, color = 'gold', marker = 'x', label = f"{labelset[2]}: unequal")
+caplines9a[0].set_marker('')
+caplines9b[0].set_marker('')
+caplines9c[0].set_marker('')
+caplines9d[0].set_marker('')
+caplines9e[0].set_marker('')
+caplines9f[0].set_marker('')
+handles9, labels9 = ax9.get_legend_handles_labels()
+handles9 = [h9[0] for h9 in handles9]
+ax9.legend(handles9, labels9, loc = 'best')
+ax9.set_yscale('log')
+ax9.set_xlabel("Value of $\mathit{\u03b5}$")
+ax9.set_ylabel("EMSE of Gaussian Mechanism")
+ax9.figure.savefig("Graph_" + "%s" % cifarset[2] + "_i2.png")
+ax9.clear()
 
 print("Finished.\n")
