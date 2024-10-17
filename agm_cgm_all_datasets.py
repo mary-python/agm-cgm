@@ -671,7 +671,7 @@ handles1 = [h1[0] for h1 in handles1]
 ax1.legend(handles1, labels1, loc = 'best')
 ax1.set_yscale('log')
 ax1.set_xlabel("Value of $\mathit{\u03b5}$")
-ax1.set_ylabel("EMSE of Gaussian Mechanism")
+ax1.set_ylabel("EMSE of AGM")
 ax1.figure.savefig("Graph_" + "%s" % cifarset[0] + "_a.png")
 ax1.clear()
 
@@ -699,7 +699,7 @@ handles2 = [h2[0] for h2 in handles2]
 ax2.legend(handles2, labels2, loc = 'best')
 ax2.set_yscale('log')
 ax2.set_xlabel("Value of $\mathit{\u03b5}$")
-ax2.set_ylabel("EMSE of Gaussian Mechanism")
+ax2.set_ylabel("EMSE of AGM")
 ax2.figure.savefig("Graph_" + "%s" % cifarset[1] + "_a.png")
 ax2.clear()
 
@@ -727,7 +727,7 @@ handles3 = [h3[0] for h3 in handles3]
 ax3.legend(handles3, labels3, loc = 'best')
 ax3.set_yscale('log')
 ax3.set_xlabel("Value of $\mathit{\u03b5}$")
-ax3.set_ylabel("EMSE of Gaussian Mechanism")
+ax3.set_ylabel("EMSE of AGM")
 ax3.figure.savefig("Graph_" + "%s" % cifarset[2] + "_a.png")
 ax3.clear()
 
@@ -755,7 +755,7 @@ handles4 = [h4[0] for h4 in handles4]
 ax4.legend(handles4, labels4, loc = 'best')
 ax4.set_yscale('log')
 ax4.set_xlabel("Value of $\mathit{\u03b5}$")
-ax4.set_ylabel("EMSE of Gaussian Mechanism")
+ax4.set_ylabel("EMSE of AGM")
 ax4.figure.savefig("Graph_" + "%s" % cifarset[0] + "_b.png")
 ax4.clear()
 
@@ -783,7 +783,7 @@ handles5 = [h5[0] for h5 in handles5]
 ax5.legend(handles5, labels5, loc = 'best')
 ax5.set_yscale('log')
 ax5.set_xlabel("Value of $\mathit{\u03b5}$")
-ax5.set_ylabel("EMSE of Gaussian Mechanism")
+ax5.set_ylabel("EMSE of AGM")
 ax5.figure.savefig("Graph_" + "%s" % cifarset[1] + "_b.png")
 ax5.clear()
 
@@ -811,7 +811,7 @@ handles6 = [h6[0] for h6 in handles6]
 ax6.legend(handles6, labels6, loc = 'best')
 ax6.set_yscale('log')
 ax6.set_xlabel("Value of $\mathit{\u03b5}$")
-ax6.set_ylabel("EMSE of Gaussian Mechanism")
+ax6.set_ylabel("EMSE of AGM")
 ax6.figure.savefig("Graph_" + "%s" % cifarset[2] + "_b.png")
 ax6.clear()
 
@@ -839,7 +839,7 @@ handles7 = [h7[0] for h7 in handles7]
 ax7.legend(handles7, labels7, loc = 'best')
 ax7.set_yscale('log')
 ax7.set_xlabel("Value of $\mathit{\u03b5}$")
-ax7.set_ylabel("EMSE of Gaussian Mechanism")
+ax7.set_ylabel("EMSE of AGM")
 ax7.figure.savefig("Graph_" + "%s" % cifarset[0] + "_c.png")
 ax7.clear()
 
@@ -867,7 +867,7 @@ handles8 = [h8[0] for h8 in handles8]
 ax8.legend(handles8, labels8, loc = 'best')
 ax8.set_yscale('log')
 ax8.set_xlabel("Value of $\mathit{\u03b5}$")
-ax8.set_ylabel("EMSE of Gaussian Mechanism")
+ax8.set_ylabel("EMSE of AGM")
 ax8.figure.savefig("Graph_" + "%s" % cifarset[1] + "_c.png")
 ax8.clear()
 
@@ -895,7 +895,7 @@ handles9 = [h9[0] for h9 in handles9]
 ax9.legend(handles9, labels9, loc = 'best')
 ax9.set_yscale('log')
 ax9.set_xlabel("Value of $\mathit{\u03b5}$")
-ax9.set_ylabel("EMSE of Gaussian Mechanism")
+ax9.set_ylabel("EMSE of AGM")
 ax9.figure.savefig("Graph_" + "%s" % cifarset[2] + "_c.png")
 ax9.clear()
 
