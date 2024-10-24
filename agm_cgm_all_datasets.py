@@ -305,7 +305,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseQTList[j] = np.power(np.mean(wExtraTerm), 2)
 
             wTDMin = np.min(I2TrueDenom)
-            tDMin = np.divide(wTDMin, np.min(weight))
+            tDMin = np.divide(wTDMin, np.max(weight))
             wTDSum = np.mean(I2TrueDenom)
             noisyQSum = np.mean(noisyQ)
             mseE = np.mean(mseEList)
