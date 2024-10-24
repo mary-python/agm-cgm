@@ -92,7 +92,7 @@ C = len(cifarset)
 T1 = 4
 T2 = 7
 
-trueTable = np.zeros((C, 2))
+trueTable = np.zeros((C, C))
 mseDispTable = np.zeros((C, 2*T1))
 mseQTable = np.zeros((C, 2*T1))
 mseI2Table = np.zeros((C, 2*T1))
@@ -126,6 +126,8 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
     for val in range(E):
 
+        minDispTableA = np.zeros(R)
+        minDispTableC = np.zeros(R)
         minQTableA = np.zeros(R)
         minQTableC = np.zeros(R)
         minI2TableA = np.zeros(R)
@@ -303,7 +305,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseQTList[j] = np.power(np.mean(wExtraTerm), 2)
 
             wTDMin = np.min(I2TrueDenom)
-            wTDMax = np.max(I2TrueDenom)
+            tDMin = np.divide(wTDMin, np.min(weight))
             wTDSum = np.mean(I2TrueDenom)
             noisyQSum = np.mean(noisyQ)
             mseE = np.mean(mseEList)
@@ -316,6 +318,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 # TABLES ASSUME UNIFORM DATA
                 if fi == 0 and val == 0:
                     minQTableA[rep] = wTDMin
+                    minDispTableA[rep] = tDMin
                     mseDispETableA[rep] = mseE
                     mseDispTTableA[rep] = mseT
                     mseQETableA[rep] = mseQE
@@ -328,6 +331,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             else:
                 if fi == 0 and val == 0:
                     minQTableC[rep] = wTDMin
+                    minDispTableC[rep] = tDMin
                     mseDispETableC[rep] = mseE
                     mseDispTTableC[rep] = mseT
                     mseQETableC[rep] = mseQE
@@ -436,8 +440,9 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
             if fi == 0 and val == 0:
-                trueTable[dataIndex, 0] = min(np.min(minQTableA), np.min(minQTableC))
-                trueTable[dataIndex, 1] = min(np.min(minI2TableA), np.min(minI2TableC))
+                trueTable[dataIndex, 0] = min(np.min(minDispTableA), np.min(minDispTableC))
+                trueTable[dataIndex, 1] = min(np.min(minQTableA), np.min(minQTableC))
+                trueTable[dataIndex, 2] = min(np.min(minI2TableA), np.min(minI2TableC))
                 mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
                 mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
                 mseDispTable[dataIndex, 2] = np.mean(mseDispTTableA)
@@ -532,10 +537,10 @@ runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 
-TrueTable = PrettyTable(["True Values", "Q", "I\u00B2"])
-TrueTable.add_row(["Cifar-10", "%.3e" % trueTable[0, 0], "%.3f" % trueTable[0, 1]])
-TrueTable.add_row(["Cifar-100", "%.3e" % trueTable[1, 0], "%.3f" % trueTable[1, 1]])
-TrueTable.add_row(["Fashion-MNIST", "%.3e" % trueTable[2, 0], "%.3f" % trueTable[2, 1]])
+TrueTable = PrettyTable(["True Values", "Dispersion", "Q", "I\u00B2"])
+TrueTable.add_row(["Cifar-10", "%.3e" % trueTable[0, 0], "%.3e" % trueTable[0, 1], "%.3f" % trueTable[0, 2]])
+TrueTable.add_row(["Cifar-100", "%.3e" % trueTable[0, 1], "%.3e" % trueTable[1, 1], "%.3f" % trueTable[1, 2]])
+TrueTable.add_row(["Fashion-MNIST", "%.3e" % trueTable[0, 2], "%.3e" % trueTable[2, 1], "%.3f" % trueTable[2, 2]])
 
 TrueData = TrueTable.get_string()
 with open("Table_0_true.txt", "w") as table0:
