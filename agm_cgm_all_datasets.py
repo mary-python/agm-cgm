@@ -537,14 +537,14 @@ runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 
-TrueTable = PrettyTable(["True Values", "Dispersion", "Q", "I\u00B2"])
-TrueTable.add_row(["Cifar-10", "%.3e" % trueTable[0, 0], "%.3e" % trueTable[0, 1], "%.3f" % trueTable[0, 2]])
-TrueTable.add_row(["Cifar-100", "%.3e" % trueTable[0, 1], "%.3e" % trueTable[1, 1], "%.3f" % trueTable[1, 2]])
-TrueTable.add_row(["Fashion-MNIST", "%.3e" % trueTable[0, 2], "%.3e" % trueTable[2, 1], "%.3f" % trueTable[2, 2]])
+MinTable = PrettyTable(["Min Values", "Dispersion", "Q", "I\u00B2"])
+MinTable.add_row(["Cifar-10", "%.3e" % trueTable[0, 0], "%.3e" % trueTable[0, 1], "%.3f" % trueTable[0, 2]])
+MinTable.add_row(["Cifar-100", "%.3e" % trueTable[0, 1], "%.3e" % trueTable[1, 1], "%.3f" % trueTable[1, 2]])
+MinTable.add_row(["Fashion-MNIST", "%.3e" % trueTable[0, 2], "%.3e" % trueTable[2, 1], "%.3f" % trueTable[2, 2]])
 
-TrueData = TrueTable.get_string()
-with open("Table_0_true.txt", "w") as table0:
-    table0.write(TrueData)
+MinData = MinTable.get_string()
+with open("Table_0_min.txt", "w") as table0:
+    table0.write(MinData)
 
 DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
 DispTable.add_row(["Cifar-10", "", "", "", ""])
