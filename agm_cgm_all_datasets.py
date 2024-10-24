@@ -2,6 +2,7 @@ import numpy as np
 import idx2numpy
 import mpmath as mp
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 12})
 
 from math import erf
 from numpy.random import normal
@@ -13,7 +14,7 @@ np.random.seed(3820672)
 
 # ARRAY STORING VALUES OF EPSILON
 epsset = np.array([0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5])
-dta = 0.1
+dta = 0.00001
 
 # SETTING DIMENSIONS OF DATASETS
 dimCifar = 3072
@@ -91,6 +92,7 @@ C = len(cifarset)
 T1 = 4
 T2 = 7
 
+trueTable = np.zeros((C, 2*C))
 mseDispTable = np.zeros((C, 2*T1))
 mseQTable = np.zeros((C, 2*T1))
 mseI2Table = np.zeros((C, 2*T1))
@@ -124,6 +126,16 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
     for val in range(E):
 
+        minDispTableA = np.zeros(R)
+        maxDispTableA = np.zeros(R)
+        minDispTableC = np.zeros(R)
+        maxDispTableC = np.zeros(R)
+        minQTableA = np.zeros(R)
+        maxQTableA = np.zeros(R)
+        minQTableC = np.zeros(R)
+        maxQTableC = np.zeros(R)
+        I2TableA = np.zeros(R)
+        I2TableC = np.zeros(R)
         mseDispETableA = np.zeros(R)
         mseDispETableC = np.zeros(R)
         mseDispTTableA = np.zeros(R)
@@ -296,6 +308,10 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
                 mseTList[j] = np.power(np.mean(extraTerm), 2)
                 mseQTList[j] = np.power(np.mean(wExtraTerm), 2)
 
+            tDMin = np.min(trueDisp)
+            tDMax = np.max(trueDisp)
+            wTDMin = np.min(I2TrueDenom)
+            wTDMax = np.max(I2TrueDenom)
             wTDSum = np.mean(I2TrueDenom)
             noisyQSum = np.mean(noisyQ)
             mseE = np.mean(mseEList)
@@ -307,6 +323,11 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
                 # TABLES ASSUME UNIFORM DATA
                 if fi == 0 and val == 0:
+                    minDispTableA[rep] = tDMin
+                    maxDispTableA[rep] = tDMax
+                    minQTableA[rep] = wTDMin
+                    maxQTableA[rep] = wTDMax
+
                     mseDispETableA[rep] = mseE
                     mseDispTTableA[rep] = mseT
                     mseQETableA[rep] = mseQE
@@ -318,6 +339,10 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             else:
                 if fi == 0 and val == 0:
+                    minDispTableC[rep] = tDMin
+                    maxDispTableC[rep] = tDMax
+                    minQTableC[rep] = wTDMin
+                    maxQTableC[rep] = wTDMax
                     mseDispETableC[rep] = mseE
                     mseDispTTableC[rep] = mseT
                     mseQETableC[rep] = mseQE
@@ -349,10 +374,11 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             # EXPERIMENT 1: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
-            mseC = xiCentral**2
+            mseC = (xiCentral/(sampleSize*dim))**2
 
             if ACindex == 0:
                 if fi == 0 and val == 0:
+                    I2TableA[rep] = abs(trueI2)
                     mseI2ETableA[rep] = mseI2E
                     mseI2TTableA[rep] = mseI2T
                     mseCTableA[rep] = mseC
@@ -361,6 +387,7 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             else:
                 if fi == 0 and val == 0:
+                    I2TableC[rep] = abs(trueI2)
                     mseI2ETableC[rep] = mseI2E
                     mseI2TTableC[rep] = mseI2T
                     mseCTableC[rep] = mseC
@@ -424,6 +451,13 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             # EXPERIMENT 1: COMPARISON OF AGM/CGM, EMSE/TMSE AND CMSE
             if fi == 0 and val == 0:
+                trueTable[dataIndex, 0] = min(np.min(minDispTableA), np.min(minDispTableC))
+                trueTable[dataIndex, 1] = max(np.max(maxDispTableA), np.max(maxDispTableC))
+                trueTable[dataIndex, 2] = min(np.min(minQTableA), np.min(minQTableC))
+                trueTable[dataIndex, 3] = max(np.max(maxQTableA), np.max(maxQTableC))
+                trueTable[dataIndex, 4] = min(np.min(I2TableA), np.min(I2TableC))
+                trueTable[dataIndex, 5] = max(np.max(I2TableA), np.max(I2TableC))
+
                 mseDispTable[dataIndex, 0] = np.mean(mseDispETableA)
                 mseDispTable[dataIndex, 1] = np.mean(mseDispETableC)
                 mseDispTable[dataIndex, 2] = np.mean(mseDispTTableA)
@@ -518,19 +552,34 @@ runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 
+TrueTable = PrettyTable(["True Values", "Dispersion", "Q", "I\u00B2"])
+TrueTable.add_row(["Cifar-10", "", "", ""])
+TrueTable.add_row(["Min", "%.3e" % trueTable[0, 0], "%.3f" % trueTable[0, 2], "%d" % trueTable[0, 4]])
+TrueTable.add_row(["Max", "%.3e" % trueTable[0, 1], "%.3f" % trueTable[0, 3], "%d" % trueTable[0, 5]])
+TrueTable.add_row(["Cifar-100", "", "", ""])
+TrueTable.add_row(["Min", "%.3e" % trueTable[1, 0], "%.3f" % trueTable[1, 2], "%d" % trueTable[1, 4]])
+TrueTable.add_row(["Max", "%.3e" % trueTable[1, 1], "%.3f" % trueTable[1, 3], "%d" % trueTable[1, 5]])
+TrueTable.add_row(["Fashion-MNIST", "", "", ""])
+TrueTable.add_row(["Min", "%.3e" % trueTable[2, 0], "%.3f" % trueTable[2, 2], "%d" % trueTable[2, 4]])
+TrueTable.add_row(["Max", "%.3e" % trueTable[2, 1], "%.3f" % trueTable[2, 3], "%d" % trueTable[2, 5]])
+
+TrueData = TrueTable.get_string()
+with open("Table_0_true.txt", "w") as table0:
+    table0.write(TrueData)
+
 DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
 DispTable.add_row(["Cifar-10", "", "", "", ""])
 DispTable.add_row(["EMSE", "%.4e" % mseDispTable[0, 0], "%.4e" % mseDispTable[0, 1], "%.4e" % stdDispTable[0, 0], "%.4e" % stdDispTable[0, 1]])
 DispTable.add_row(["TMSE", "%.4e" % mseDispTable[0, 2], "%.4e" % mseDispTable[0, 3], "%.4e" % stdDispTable[0, 2], "%.4e" % stdDispTable[0, 3]])
-DispTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+DispTable.add_row(["CMSE", "%.4e" % mseCentralTable[0, 0], "%.4e" % mseCentralTable[0, 1], "%.4e" % stdCentralTable[0, 0], "%.4e" % stdCentralTable[0, 1]])
 DispTable.add_row(["Cifar-100", "", "", "", ""])
 DispTable.add_row(["EMSE", "%.4e" % mseDispTable[1, 0], "%.4e" % mseDispTable[1, 1], "%.4e" % stdDispTable[1, 0], "%.4e" % stdDispTable[1, 1]])
 DispTable.add_row(["TMSE", "%.4e" % mseDispTable[1, 2], "%.4e" % mseDispTable[1, 3], "%.4e" % stdDispTable[1, 2], "%.4e" % stdDispTable[1, 3]])
-DispTable.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+DispTable.add_row(["CMSE", "%.4e" % mseCentralTable[1, 0], "%.4e" % mseCentralTable[1, 1], "%.4e" % stdCentralTable[1, 0], "%.4e" % stdCentralTable[1, 1]])
 DispTable.add_row(["Fashion-MNIST", "", "", "", ""])
 DispTable.add_row(["EMSE", "%.4e" % mseDispTable[2, 0], "%.4e" % mseDispTable[2, 1], "%.4e" % stdDispTable[2, 0], "%.4e" % stdDispTable[2, 1]])
 DispTable.add_row(["TMSE", "%.4e" % mseDispTable[2, 2], "%.4e" % mseDispTable[2, 3], "%.4e" % stdDispTable[2, 2], "%.4e" % stdDispTable[2, 3]])
-DispTable.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+DispTable.add_row(["CMSE", "%.4e" % mseCentralTable[2, 0], "%.4e" % mseCentralTable[2, 1], "%.4e" % stdCentralTable[2, 0], "%.4e" % stdCentralTable[2, 1]])
 
 DispData = DispTable.get_string()
 with open("Table_1_disp.txt", "w") as table1:
@@ -540,15 +589,15 @@ QTable = PrettyTable(["Q", "AGM", "CGM", "SD AGM", "SD CGM"])
 QTable.add_row(["Cifar-10", "", "", "", ""])
 QTable.add_row(["EMSE", "%.3e" % mseQTable[0, 0], "%.3e" % mseQTable[0, 1], "%.3e" % stdQTable[0, 0], "%.3e" % stdQTable[0, 1]])
 QTable.add_row(["TMSE", "%.3e" % mseQTable[0, 2], "%.3e" % mseQTable[0, 3], "%.3e" % stdQTable[0, 2], "%.3e" % stdQTable[0, 3]])
-QTable.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+QTable.add_row(["CMSE", "%.3e" % mseCentralTable[0, 0], "%.3e" % mseCentralTable[0, 1], "%.3e" % stdCentralTable[0, 0], "%.3e" % stdCentralTable[0, 1]])
 QTable.add_row(["Cifar-100", "", "", "", ""])
 QTable.add_row(["EMSE", "%.3e" % mseQTable[1, 0], "%.3e" % mseQTable[1, 1], "%.3e" % stdQTable[1, 0], "%.3e" % stdQTable[1, 1]])
 QTable.add_row(["TMSE", "%.3e" % mseQTable[1, 2], "%.3e" % mseQTable[1, 3], "%.3e" % stdQTable[1, 2], "%.3e" % stdQTable[1, 3]])
-QTable.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+QTable.add_row(["CMSE", "%.2e" % mseCentralTable[1, 0], "%.3e" % mseCentralTable[1, 1], "%.3e" % stdCentralTable[1, 0], "%.3e" % stdCentralTable[1, 1]])
 QTable.add_row(["Fashion-MNIST", "", "", "", ""])
 QTable.add_row(["EMSE", "%.3e" % mseQTable[2, 0], "%.3e" % mseQTable[2, 1], "%.3e" % stdQTable[2, 0], "%.3e" % stdQTable[2, 1]])
 QTable.add_row(["TMSE", "%.3e" % mseQTable[2, 2], "%.3e" % mseQTable[2, 3], "%.3e" % stdQTable[2, 2], "%.3e" % stdQTable[2, 3]])
-QTable.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+QTable.add_row(["CMSE", "%.2e" % mseCentralTable[2, 0], "%.3e" % mseCentralTable[2, 1], "%.3e" % stdCentralTable[2, 0], "%.3e" % stdCentralTable[2, 1]])
 
 QData = QTable.get_string()
 with open("Table_2_q.txt", "w") as table2:
@@ -558,15 +607,15 @@ I2Table = PrettyTable(["I\u00B2", "AGM", "CGM", "SD AGM", "SD CGM"])
 I2Table.add_row(["Cifar-10", "", "", "", ""])
 I2Table.add_row(["EMSE", "%.3e" % mseI2Table[0, 0], "%.3e" % mseI2Table[0, 1], "%.3e" % stdI2Table[0, 0], "%.3e" % stdI2Table[0, 1]])
 I2Table.add_row(["TMSE", "%.3e" % mseI2Table[0, 2], "%.3e" % mseI2Table[0, 3], "%.3e" % stdI2Table[0, 2], "%.3e" % stdI2Table[0, 3]])
-I2Table.add_row(["CMSE", "%.3f" % mseCentralTable[0, 0], "%d" % mseCentralTable[0, 1], "%.3f" % stdCentralTable[0, 0], "%d" % stdCentralTable[0, 1]])
+I2Table.add_row(["CMSE", "%.3e" % mseCentralTable[0, 0], "%.3e" % mseCentralTable[0, 1], "%.3e" % stdCentralTable[0, 0], "%.3e" % stdCentralTable[0, 1]])
 I2Table.add_row(["Cifar-100", "", "", "", ""])
 I2Table.add_row(["EMSE", "%.3e" % mseI2Table[1, 0], "%.3e" % mseI2Table[1, 1], "%.3e" % stdI2Table[1, 0], "%.3e" % stdI2Table[1, 1]])
 I2Table.add_row(["TMSE", "%.3e" % mseI2Table[1, 2], "%.3e" % mseI2Table[1, 3], "%.3e" % stdI2Table[1, 2], "%.3e" % stdI2Table[1, 3]])
-I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[1, 0], "%d" % mseCentralTable[1, 1], "%.2f" % stdCentralTable[1, 0], "%d" % stdCentralTable[1, 1]])
+I2Table.add_row(["CMSE", "%.3e" % mseCentralTable[1, 0], "%.3e" % mseCentralTable[1, 1], "%.3e" % stdCentralTable[1, 0], "%.3e" % stdCentralTable[1, 1]])
 I2Table.add_row(["Fashion-MNIST", "", "", "", ""])
 I2Table.add_row(["EMSE", "%.3e" % mseI2Table[2, 0], "%.3e" % mseI2Table[2, 1], "%.3e" % stdI2Table[2, 0], "%.3e" % stdI2Table[2, 1]])
 I2Table.add_row(["TMSE", "%.3e" % mseI2Table[2, 2], "%.3e" % mseI2Table[2, 3], "%.3e" % stdI2Table[2, 2], "%.3e" % stdI2Table[2, 3]])
-I2Table.add_row(["CMSE", "%.2f" % mseCentralTable[2, 0], "%d" % mseCentralTable[2, 1], "%.2f" % stdCentralTable[2, 0], "%d" % stdCentralTable[2, 1]])
+I2Table.add_row(["CMSE", "%.3e" % mseCentralTable[2, 0], "%.3e" % mseCentralTable[2, 1], "%.3e" % stdCentralTable[2, 0], "%.3e" % stdCentralTable[2, 1]])
 
 I2Data = I2Table.get_string()
 with open("Table_3_i2.txt", "w") as table3:
@@ -579,7 +628,7 @@ ACTable.add_row(["TMSE", "%.5f" % mseDispTable[0, 5], "%.5f" % mseQTable[0, 5], 
 ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2]])
 ACTable.add_row(["Cifar-100", "", "", ""])
 ACTable.add_row(["EMSE", "%.5f" % mseDispTable[1, 4], "%.5f" % mseQTable[1, 4], "%.5f" % mseI2Table[1, 4]])
-ACTable.add_row(["TMSE", "%.5f" %  mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
+ACTable.add_row(["TMSE", "%.5f" % mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
 ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2]])
 ACTable.add_row(["Fashion-MNIST", "", "", ""])
 ACTable.add_row(["EMSE", "%.5f" % mseDispTable[2, 4], "%.5f" % mseQTable[2, 4], "%.5f" % mseI2Table[2, 4]])
@@ -648,6 +697,7 @@ uparray = np.zeros(E, dtype = bool)
 loarray = np.ones(E, dtype = bool)
 
 fig, ax1 = plt.subplots()
+fig.tight_layout()
 plotline1a, caplines1a, barlinecols1a = ax1.errorbar(epsset, mseDisp[0, 0], yerr = np.minimum(stdDisp[0, 0], np.sqrt(mseDisp[0, 0]), np.divide(mseDisp[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline1b, caplines1b, barlinecols1b = ax1.errorbar(epsset, mseDisp[0, 1], yerr = np.minimum(stdDisp[0, 1], np.sqrt(mseDisp[0, 1]), np.divide(mseDisp[0, 1], 2)),
@@ -676,6 +726,7 @@ ax1.figure.savefig("Graph_" + "%s" % cifarset[0] + "_a.png")
 ax1.clear()
 
 fig, ax2 = plt.subplots()
+fig.tight_layout()
 plotline2a, caplines2a, barlinecols2a = ax2.errorbar(epsset, mseDisp[1, 0], yerr = np.minimum(stdDisp[1, 0], np.sqrt(mseDisp[1, 0]), np.divide(mseDisp[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline2b, caplines2b, barlinecols2b = ax2.errorbar(epsset, mseDisp[1, 1], yerr = np.minimum(stdDisp[1, 1], np.sqrt(mseDisp[1, 1]), np.divide(mseDisp[1, 1], 2)),
@@ -704,6 +755,7 @@ ax2.figure.savefig("Graph_" + "%s" % cifarset[1] + "_a.png")
 ax2.clear()
 
 fig, ax3 = plt.subplots()
+fig.tight_layout()
 plotline3a, caplines3a, barlinecols3a = ax3.errorbar(epsset, mseDisp[2, 0], yerr = np.minimum(stdDisp[2, 0], np.sqrt(mseDisp[2, 0]), np.divide(mseDisp[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline3b, caplines3b, barlinecols3b = ax3.errorbar(epsset, mseDisp[2, 1], yerr = np.minimum(stdDisp[2, 1], np.sqrt(mseDisp[2, 1]), np.divide(mseDisp[2, 1], 2)),
@@ -732,6 +784,7 @@ ax3.figure.savefig("Graph_" + "%s" % cifarset[2] + "_a.png")
 ax3.clear()
 
 fig, ax4 = plt.subplots()
+fig.tight_layout()
 plotline4a, caplines4a, barlinecols4a = ax4.errorbar(epsset, mseQ[0, 0], yerr = np.minimum(stdQ[0, 0], np.sqrt(mseQ[0, 0]), np.divide(mseQ[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline4b, caplines4b, barlinecols4b = ax4.errorbar(epsset, mseQ[0, 1], yerr = np.minimum(stdQ[0, 1], np.sqrt(mseQ[0, 1]), np.divide(mseQ[0, 1], 2)),
@@ -760,6 +813,7 @@ ax4.figure.savefig("Graph_" + "%s" % cifarset[0] + "_b.png")
 ax4.clear()
 
 fig, ax5 = plt.subplots()
+fig.tight_layout()
 plotline5a, caplines5a, barlinecols5a = ax5.errorbar(epsset, mseQ[1, 0], yerr = np.minimum(stdQ[1, 0], np.sqrt(mseQ[1, 0]), np.divide(mseQ[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline5b, caplines5b, barlinecols5b = ax5.errorbar(epsset, mseQ[1, 1], yerr = np.minimum(stdQ[1, 1], np.sqrt(mseQ[1, 1]), np.divide(mseQ[1, 1], 2)),
@@ -788,6 +842,7 @@ ax5.figure.savefig("Graph_" + "%s" % cifarset[1] + "_b.png")
 ax5.clear()
 
 fig, ax6 = plt.subplots()
+fig.tight_layout()
 plotline6a, caplines6a, barlinecols6a = ax6.errorbar(epsset, mseQ[2, 0], yerr = np.minimum(stdQ[2, 0], np.sqrt(mseQ[2, 0]), np.divide(mseQ[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline6b, caplines6b, barlinecols6b = ax6.errorbar(epsset, mseQ[2, 1], yerr = np.minimum(stdQ[2, 1], np.sqrt(mseQ[2, 1]), np.divide(mseQ[2, 1], 2)),
@@ -816,6 +871,7 @@ ax6.figure.savefig("Graph_" + "%s" % cifarset[2] + "_b.png")
 ax6.clear()
 
 fig, ax7 = plt.subplots()
+fig.tight_layout()
 plotline7a, caplines7a, barlinecols7a = ax7.errorbar(epsset, mseI2[0, 0], yerr = np.minimum(stdI2[0, 0], np.sqrt(mseI2[0, 0]), np.divide(mseI2[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline7b, caplines7b, barlinecols7b = ax7.errorbar(epsset, mseI2[0, 1], yerr = np.minimum(stdI2[0, 1], np.sqrt(mseI2[0, 1]), np.divide(mseI2[0, 1], 2)),
@@ -844,6 +900,7 @@ ax7.figure.savefig("Graph_" + "%s" % cifarset[0] + "_c.png")
 ax7.clear()
 
 fig, ax8 = plt.subplots()
+fig.tight_layout()
 plotline8a, caplines8a, barlinecols8a = ax8.errorbar(epsset, mseI2[1, 0], yerr = np.minimum(stdI2[1, 0], np.sqrt(mseI2[1, 0]), np.divide(mseI2[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline8b, caplines8b, barlinecols8b = ax8.errorbar(epsset, mseI2[1, 1], yerr = np.minimum(stdI2[1, 1], np.sqrt(mseI2[1, 1]), np.divide(mseI2[1, 1], 2)),
@@ -872,6 +929,7 @@ ax8.figure.savefig("Graph_" + "%s" % cifarset[1] + "_c.png")
 ax8.clear()
 
 fig, ax9 = plt.subplots()
+fig.tight_layout()
 plotline9a, caplines9a, barlinecols9a = ax9.errorbar(epsset, mseI2[2, 0], yerr = np.minimum(stdI2[2, 0], np.sqrt(mseI2[2, 0]), np.divide(mseI2[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline9b, caplines9b, barlinecols9b = ax9.errorbar(epsset, mseI2[2, 1], yerr = np.minimum(stdI2[2, 1], np.sqrt(mseI2[2, 1]), np.divide(mseI2[2, 1], 2)),
