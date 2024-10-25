@@ -353,10 +353,10 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             # COMPUTE EMSE AND TMSE
             for j in range(0, sampleSize):
                 diffEI2 = np.subtract(noisyI2, trueI2)
-                mseI2EList[j] = np.divide(diffEI2, dim)
+                mseI2EList[j] = diffEI2
                 diffTI2Prep = np.subtract(xi3, I2Noise)
                 diffTI2 = np.add(diffTI2Prep, trueI2)
-                mseI2TList[j] = np.divide(diffTI2, dim)
+                mseI2TList[j] = diffTI2
 
             mseI2E = np.mean(np.power(mseI2EList, 2))
             mseI2T = np.mean(np.power(mseI2TList, 2))
@@ -364,6 +364,9 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
             # EXPERIMENT 1: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
             mseC = ((xiCentral/dim)**2)/sampleSize
+
+            if dataIndex == 2:
+                mseC = mseC/sampleSize
 
             if ACindex == 0:
                 if fi == 0 and val == 0:
@@ -602,17 +605,17 @@ with open("Table_3_i2.txt", "w") as table3:
 
 ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
 ACTable.add_row(["Cifar-10", "", "", ""])
-ACTable.add_row(["EMSE", "%.5f" % mseDispTable[0, 4], "%.5f" % mseQTable[0, 4], "%.5f" % mseI2Table[0, 4]])
-ACTable.add_row(["TMSE", "%.5f" % mseDispTable[0, 5], "%.5f" % mseQTable[0, 5], "%.5f" % mseI2Table[0, 5]])
-ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2], "%.5f" % mseCentralTable[0, 2]])
+ACTable.add_row(["EMSE", "%.4f" % mseDispTable[0, 4], "%.4f" % mseQTable[0, 4], "%.4f" % mseI2Table[0, 4]])
+ACTable.add_row(["TMSE", "%.4f" % mseDispTable[0, 5], "%.4f" % mseQTable[0, 5], "%.4f" % mseI2Table[0, 5]])
+ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[0, 2], "%.4f" % mseCentralTable[0, 2], "%.4f" % mseCentralTable[0, 2]])
 ACTable.add_row(["Cifar-100", "", "", ""])
-ACTable.add_row(["EMSE", "%.5f" % mseDispTable[1, 4], "%.5f" % mseQTable[1, 4], "%.5f" % mseI2Table[1, 4]])
-ACTable.add_row(["TMSE", "%.5f" % mseDispTable[1, 5], "%.5f" % mseQTable[1, 5], "%.5f" % mseI2Table[1, 5]])
-ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2], "%.5f" % mseCentralTable[1, 2]])
+ACTable.add_row(["EMSE", "%.4f" % mseDispTable[1, 4], "%.4f" % mseQTable[1, 4], "%.4f" % mseI2Table[1, 4]])
+ACTable.add_row(["TMSE", "%.4f" % mseDispTable[1, 5], "%.4f" % mseQTable[1, 5], "%.4f" % mseI2Table[1, 5]])
+ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[1, 2], "%.4f" % mseCentralTable[1, 2], "%.4f" % mseCentralTable[1, 2]])
 ACTable.add_row(["Fashion-MNIST", "", "", ""])
-ACTable.add_row(["EMSE", "%.5f" % mseDispTable[2, 4], "%.5f" % mseQTable[2, 4], "%.5f" % mseI2Table[2, 4]])
-ACTable.add_row(["TMSE", "%.5f" % mseDispTable[2, 5], "%.5f" % mseQTable[2, 5], "%.5f" % mseI2Table[2, 5]])
-ACTable.add_row(["CMSE", "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2], "%.5f" % mseCentralTable[2, 2]])
+ACTable.add_row(["EMSE", "%.4f" % mseDispTable[2, 4], "%.4f" % mseQTable[2, 4], "%.4f" % mseI2Table[2, 4]])
+ACTable.add_row(["TMSE", "%.4f" % mseDispTable[2, 5], "%.4f" % mseQTable[2, 5], "%.4f" % mseI2Table[2, 5]])
+ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2]])
         
 ACData = ACTable.get_string()
 with open("Table_4_ac.txt", "w") as table4:
@@ -675,8 +678,7 @@ with open("Table_7_pc2.txt", "w") as table7:
 uparray = np.zeros(E, dtype = bool)
 loarray = np.ones(E, dtype = bool)
 
-fig, ax1 = plt.subplots()
-fig.tight_layout()
+fig, ax1 = plt.subplots(layout = 'constrained')
 plotline1a, caplines1a, barlinecols1a = ax1.errorbar(epsset, mseDisp[0, 0], yerr = np.minimum(stdDisp[0, 0], np.sqrt(mseDisp[0, 0]), np.divide(mseDisp[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline1b, caplines1b, barlinecols1b = ax1.errorbar(epsset, mseDisp[0, 1], yerr = np.minimum(stdDisp[0, 1], np.sqrt(mseDisp[0, 1]), np.divide(mseDisp[0, 1], 2)),
@@ -704,8 +706,7 @@ ax1.set_ylabel("EMSE of AGM")
 ax1.figure.savefig("Graph_" + "%s" % cifarset[0] + "_a.png")
 ax1.clear()
 
-fig, ax2 = plt.subplots()
-fig.tight_layout()
+fig, ax2 = plt.subplots(layout = 'constrained')
 plotline2a, caplines2a, barlinecols2a = ax2.errorbar(epsset, mseDisp[1, 0], yerr = np.minimum(stdDisp[1, 0], np.sqrt(mseDisp[1, 0]), np.divide(mseDisp[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline2b, caplines2b, barlinecols2b = ax2.errorbar(epsset, mseDisp[1, 1], yerr = np.minimum(stdDisp[1, 1], np.sqrt(mseDisp[1, 1]), np.divide(mseDisp[1, 1], 2)),
@@ -733,8 +734,7 @@ ax2.set_ylabel("EMSE of AGM")
 ax2.figure.savefig("Graph_" + "%s" % cifarset[1] + "_a.png")
 ax2.clear()
 
-fig, ax3 = plt.subplots()
-fig.tight_layout()
+fig, ax3 = plt.subplots(layout = 'constrained')
 plotline3a, caplines3a, barlinecols3a = ax3.errorbar(epsset, mseDisp[2, 0], yerr = np.minimum(stdDisp[2, 0], np.sqrt(mseDisp[2, 0]), np.divide(mseDisp[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline3b, caplines3b, barlinecols3b = ax3.errorbar(epsset, mseDisp[2, 1], yerr = np.minimum(stdDisp[2, 1], np.sqrt(mseDisp[2, 1]), np.divide(mseDisp[2, 1], 2)),
@@ -762,8 +762,7 @@ ax3.set_ylabel("EMSE of AGM")
 ax3.figure.savefig("Graph_" + "%s" % cifarset[2] + "_a.png")
 ax3.clear()
 
-fig, ax4 = plt.subplots()
-fig.tight_layout()
+fig, ax4 = plt.subplots(layout = 'constrained')
 plotline4a, caplines4a, barlinecols4a = ax4.errorbar(epsset, mseQ[0, 0], yerr = np.minimum(stdQ[0, 0], np.sqrt(mseQ[0, 0]), np.divide(mseQ[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline4b, caplines4b, barlinecols4b = ax4.errorbar(epsset, mseQ[0, 1], yerr = np.minimum(stdQ[0, 1], np.sqrt(mseQ[0, 1]), np.divide(mseQ[0, 1], 2)),
@@ -791,8 +790,7 @@ ax4.set_ylabel("EMSE of AGM")
 ax4.figure.savefig("Graph_" + "%s" % cifarset[0] + "_b.png")
 ax4.clear()
 
-fig, ax5 = plt.subplots()
-fig.tight_layout()
+fig, ax5 = plt.subplots(layout = 'constrained')
 plotline5a, caplines5a, barlinecols5a = ax5.errorbar(epsset, mseQ[1, 0], yerr = np.minimum(stdQ[1, 0], np.sqrt(mseQ[1, 0]), np.divide(mseQ[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline5b, caplines5b, barlinecols5b = ax5.errorbar(epsset, mseQ[1, 1], yerr = np.minimum(stdQ[1, 1], np.sqrt(mseQ[1, 1]), np.divide(mseQ[1, 1], 2)),
@@ -820,8 +818,7 @@ ax5.set_ylabel("EMSE of AGM")
 ax5.figure.savefig("Graph_" + "%s" % cifarset[1] + "_b.png")
 ax5.clear()
 
-fig, ax6 = plt.subplots()
-fig.tight_layout()
+fig, ax6 = plt.subplots(layout = 'constrained')
 plotline6a, caplines6a, barlinecols6a = ax6.errorbar(epsset, mseQ[2, 0], yerr = np.minimum(stdQ[2, 0], np.sqrt(mseQ[2, 0]), np.divide(mseQ[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline6b, caplines6b, barlinecols6b = ax6.errorbar(epsset, mseQ[2, 1], yerr = np.minimum(stdQ[2, 1], np.sqrt(mseQ[2, 1]), np.divide(mseQ[2, 1], 2)),
@@ -849,8 +846,7 @@ ax6.set_ylabel("EMSE of AGM")
 ax6.figure.savefig("Graph_" + "%s" % cifarset[2] + "_b.png")
 ax6.clear()
 
-fig, ax7 = plt.subplots()
-fig.tight_layout()
+fig, ax7 = plt.subplots(layout = 'constrained')
 plotline7a, caplines7a, barlinecols7a = ax7.errorbar(epsset, mseI2[0, 0], yerr = np.minimum(stdI2[0, 0], np.sqrt(mseI2[0, 0]), np.divide(mseI2[0, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline7b, caplines7b, barlinecols7b = ax7.errorbar(epsset, mseI2[0, 1], yerr = np.minimum(stdI2[0, 1], np.sqrt(mseI2[0, 1]), np.divide(mseI2[0, 1], 2)),
@@ -878,8 +874,7 @@ ax7.set_ylabel("EMSE of AGM")
 ax7.figure.savefig("Graph_" + "%s" % cifarset[0] + "_c.png")
 ax7.clear()
 
-fig, ax8 = plt.subplots()
-fig.tight_layout()
+fig, ax8 = plt.subplots(layout = 'constrained')
 plotline8a, caplines8a, barlinecols8a = ax8.errorbar(epsset, mseI2[1, 0], yerr = np.minimum(stdI2[1, 0], np.sqrt(mseI2[1, 0]), np.divide(mseI2[1, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline8b, caplines8b, barlinecols8b = ax8.errorbar(epsset, mseI2[1, 1], yerr = np.minimum(stdI2[1, 1], np.sqrt(mseI2[1, 1]), np.divide(mseI2[1, 1], 2)),
@@ -907,8 +902,7 @@ ax8.set_ylabel("EMSE of AGM")
 ax8.figure.savefig("Graph_" + "%s" % cifarset[1] + "_c.png")
 ax8.clear()
 
-fig, ax9 = plt.subplots()
-fig.tight_layout()
+fig, ax9 = plt.subplots(layout = 'constrained')
 plotline9a, caplines9a, barlinecols9a = ax9.errorbar(epsset, mseI2[2, 0], yerr = np.minimum(stdI2[2, 0], np.sqrt(mseI2[2, 0]), np.divide(mseI2[2, 0], 2)),
                                                      uplims = uparray, lolims = loarray, color = 'blue', marker = 'o', label = f"{labelset[0]}: equal")
 plotline9b, caplines9b, barlinecols9b = ax9.errorbar(epsset, mseI2[2, 1], yerr = np.minimum(stdI2[2, 1], np.sqrt(mseI2[2, 1]), np.divide(mseI2[2, 1], 2)),
