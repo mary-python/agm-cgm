@@ -352,12 +352,12 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             # COMPUTE EMSE AND TMSE
             for j in range(0, sampleSize):
-                mseI2EList[j] = np.subtract(noisyI2, trueI2)
+                mseI2EList[j] = np.power(np.subtract(noisyI2, trueI2), 2)
                 diffTI2 = np.subtract(xi3, I2Noise)
-                mseI2TList[j] = np.add(diffTI2, trueI2)
+                mseI2TList[j] = np.power(np.add(diffTI2, trueI2), 2)
 
-            mseI2E = np.mean(np.power(mseI2EList, 2))
-            mseI2T = np.mean(np.power(mseI2TList, 2))
+            mseI2E = np.mean(np.divide(mseI2EList, dim))
+            mseI2T = np.mean(np.divide(mseI2TList, dim))
 
             # EXPERIMENT 1: WHAT IS THE COST OF A DISTRIBUTED SETTING?
             xiCentral = normal(0, centralSigma**2)
