@@ -540,7 +540,7 @@ runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 MinTable = PrettyTable(["Min Values", "Dispersion", "Q", "I\u00B2"])
 MinTable.add_row(["Cifar-10", "%.3f" % trueTable[0, 0], "%.3f" % trueTable[0, 1], "%d" % trueTable[0, 2]])
 MinTable.add_row(["Cifar-100", "%.3f" % trueTable[0, 1], "%.3f" % trueTable[1, 1], "%d" % trueTable[1, 2]])
-MinTable.add_row(["Fashion-MNIST", "%.3f" % trueTable[0, 2], "%.3f" % trueTable[2, 1], "%d" % trueTable[2, 2]])
+MinTable.add_row(["Fashion-MNIST", "%d" % trueTable[0, 2], "%.3f" % trueTable[2, 1], "%d" % trueTable[2, 2]])
 
 MinData = MinTable.get_string()
 with open("Table_0_min.txt", "w") as table0:
