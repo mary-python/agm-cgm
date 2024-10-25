@@ -564,11 +564,11 @@ QTable.add_row(["CMSE", "%.3e" % mseCentralTable[0, 0], "%.3e" % mseCentralTable
 QTable.add_row(["Cifar-100", "", "", "", ""])
 QTable.add_row(["EMSE", "%.3e" % mseQTable[1, 0], "%.3e" % mseQTable[1, 1], "%.3e" % stdQTable[1, 0], "%.3e" % stdQTable[1, 1]])
 QTable.add_row(["TMSE", "%.3e" % mseQTable[1, 2], "%.3e" % mseQTable[1, 3], "%.3e" % stdQTable[1, 2], "%.3e" % stdQTable[1, 3]])
-QTable.add_row(["CMSE", "%.2e" % mseCentralTable[1, 0], "%.3e" % mseCentralTable[1, 1], "%.3e" % stdCentralTable[1, 0], "%.3e" % stdCentralTable[1, 1]])
+QTable.add_row(["CMSE", "%.3e" % mseCentralTable[1, 0], "%.3e" % mseCentralTable[1, 1], "%.3e" % stdCentralTable[1, 0], "%.3e" % stdCentralTable[1, 1]])
 QTable.add_row(["Fashion-MNIST", "", "", "", ""])
 QTable.add_row(["EMSE", "%.3e" % mseQTable[2, 0], "%.3e" % mseQTable[2, 1], "%.3e" % stdQTable[2, 0], "%.3e" % stdQTable[2, 1]])
 QTable.add_row(["TMSE", "%.3e" % mseQTable[2, 2], "%.3e" % mseQTable[2, 3], "%.3e" % stdQTable[2, 2], "%.3e" % stdQTable[2, 3]])
-QTable.add_row(["CMSE", "%.2e" % mseCentralTable[2, 0], "%.3e" % mseCentralTable[2, 1], "%.3e" % stdCentralTable[2, 0], "%.3e" % stdCentralTable[2, 1]])
+QTable.add_row(["CMSE", "%.3e" % mseCentralTable[2, 0], "%.3e" % mseCentralTable[2, 1], "%.3e" % stdCentralTable[2, 0], "%.3e" % stdCentralTable[2, 1]])
 
 QData = QTable.get_string()
 with open("Table_2_q.txt", "w") as table2:
