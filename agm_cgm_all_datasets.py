@@ -352,11 +352,9 @@ def runLoop(dataIndex, dim, num, newImages, labels, GS):
 
             # COMPUTE EMSE AND TMSE
             for j in range(0, sampleSize):
-                diffEI2 = np.subtract(noisyI2, trueI2)
-                mseI2EList[j] = diffEI2
-                diffTI2Prep = np.subtract(xi3, I2Noise)
-                diffTI2 = np.add(diffTI2Prep, trueI2)
-                mseI2TList[j] = diffTI2
+                mseI2EList[j] = np.subtract(noisyI2, trueI2)
+                diffTI2 = np.subtract(xi3, I2Noise)
+                mseI2TList[j] = np.add(diffTI2, trueI2)
 
             mseI2E = np.mean(np.power(mseI2EList, 2))
             mseI2T = np.mean(np.power(mseI2TList, 2))
@@ -540,15 +538,6 @@ runLoop(0, dimCifar, numCifar, newImagesCifar10, labelsCifar10, GSCifar)
 runLoop(1, dimCifar, numCifar, newImagesCifar100, labelsCifar100, GSCifar)
 runLoop(2, dimFashion, numFashion, newImagesFashion, labelsFashion, GSFashion)
 
-MinTable = PrettyTable(["Min Values", "Dispersion", "Q", "I\u00B2"])
-MinTable.add_row(["Cifar-10", "%.3f" % trueTable[0, 0], "%.3f" % trueTable[0, 1], "%d" % trueTable[0, 2]])
-MinTable.add_row(["Cifar-100", "%.3f" % trueTable[0, 1], "%.3f" % trueTable[1, 1], "%d" % trueTable[1, 2]])
-MinTable.add_row(["Fashion-MNIST", "%d" % trueTable[0, 2], "%.3f" % trueTable[2, 1], "%d" % trueTable[2, 2]])
-
-MinData = MinTable.get_string()
-with open("Table_0_min.txt", "w") as table0:
-    table0.write(MinData)
-
 DispTable = PrettyTable(["Dispersion", "AGM", "CGM", "SD AGM", "SD CGM"])
 DispTable.add_row(["Cifar-10", "", "", "", ""])
 DispTable.add_row(["EMSE", "%.4e" % mseDispTable[0, 0], "%.4e" % mseDispTable[0, 1], "%.4e" % stdDispTable[0, 0], "%.4e" % stdDispTable[0, 1]])
@@ -603,6 +592,15 @@ I2Data = I2Table.get_string()
 with open("Table_3_i2.txt", "w") as table3:
     table3.write(I2Data)
 
+MinTable = PrettyTable(["Min Values", "Dispersion", "Q", "I\u00B2"])
+MinTable.add_row(["Cifar-10", "%.3f" % trueTable[0, 0], "%.3f" % trueTable[0, 1], "%d" % trueTable[0, 2]])
+MinTable.add_row(["Cifar-100", "%.3f" % trueTable[0, 1], "%.3f" % trueTable[1, 1], "%d" % trueTable[1, 2]])
+MinTable.add_row(["Fashion-MNIST", "%d" % trueTable[0, 2], "%.3f" % trueTable[2, 1], "%d" % trueTable[2, 2]])
+
+MinData = MinTable.get_string()
+with open("Table_4_min.txt", "w") as table4:
+    table4.write(MinData)
+
 ACTable = PrettyTable(["AGM/CGM", "Dispersion", "Q", "I\u00B2"])
 ACTable.add_row(["Cifar-10", "", "", ""])
 ACTable.add_row(["EMSE", "%.4f" % mseDispTable[0, 4], "%.4f" % mseQTable[0, 4], "%.4f" % mseI2Table[0, 4]])
@@ -618,8 +616,8 @@ ACTable.add_row(["TMSE", "%.4f" % mseDispTable[2, 5], "%.4f" % mseQTable[2, 5], 
 ACTable.add_row(["CMSE", "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2], "%.4f" % mseCentralTable[2, 2]])
         
 ACData = ACTable.get_string()
-with open("Table_4_ac.txt", "w") as table4:
-    table4.write(ACData)
+with open("Table_5_ac.txt", "w") as table5:
+    table5.write(ACData)
 
 ETTable = PrettyTable(["EMSE/TMSE", "Dispersion", "Q", "I\u00B2"])
 ETTable.add_row(["Cifar-10", "", "", ""])
@@ -633,8 +631,8 @@ ETTable.add_row(["AGM", "%.4f" % mseDispTable[2, 6], "%.4f" % mseQTable[2, 6], "
 ETTable.add_row(["CGM", "%.4f" % mseDispTable[2, 7], "%.4f" % mseQTable[2, 7], "%.4f" % mseI2Table[2, 7]])
         
 ETData = ETTable.get_string()
-with open("Table_5_et.txt", "w") as table5:
-    table5.write(ETData)
+with open("Table_6_et.txt", "w") as table6:
+    table6.write(ETData)
 
 PCTable1 = PrettyTable(["Change in EMSE (%)", "Dispersion", "Q", "I\u00B2"])
 PCTable1.add_row(["Cifar-10", "", "", ""])
@@ -651,8 +649,8 @@ PCTable1.add_row(["5 labels", "%+.2f" % percChangeDisp[2, 1], "%+.2f" % percChan
 PCTable1.add_row(["2 labels", "%+.2f" % percChangeDisp[2, 2], "%+.2f" % percChangeQ[2, 2], "%+.1f" % percChangeI2[2, 2]])
 
 PCData1 = PCTable1.get_string()
-with open("Table_6_pc1.txt", "w") as table6:
-    table6.write(PCData1)
+with open("Table_7_pc1.txt", "w") as table7:
+    table7.write(PCData1)
 
 PCTable2 = PrettyTable(["Change in EMSE (%)", "Dispersion", "Q", "I\u00B2"])
 PCTable2.add_row(["Cifar-10", "", "", ""])
@@ -672,8 +670,8 @@ PCTable2.add_row(["Non-SH: 10v5", "%+.2f" % percChangeDisp[2, 5], "%+.2f" % perc
 PCTable2.add_row(["Non-SH: 5v2", "%+.2f" % percChangeDisp[2, 6], "%+.2f" % percChangeQ[2, 6], "%+.1f" % percChangeI2[2, 6]])
 
 PCData2 = PCTable2.get_string()
-with open("Table_7_pc2.txt", "w") as table7:
-    table7.write(PCData2)
+with open("Table_8_pc2.txt", "w") as table8:
+    table8.write(PCData2)
 
 uparray = np.zeros(E, dtype = bool)
 loarray = np.ones(E, dtype = bool)
