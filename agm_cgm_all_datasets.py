@@ -2,7 +2,7 @@ import numpy as np
 import idx2numpy
 import mpmath as mp
 import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 16})
 
 from math import erf
 from numpy.random import normal
